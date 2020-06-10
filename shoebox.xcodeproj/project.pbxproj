@@ -13,6 +13,7 @@
 		4ACA4ED224905FB500E9E695 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4ACA4ED024905FB500E9E695 /* Main.storyboard */; };
 		4ACA4ED424905FB600E9E695 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ACA4ED324905FB600E9E695 /* Assets.xcassets */; };
 		4ACA4ED724905FB600E9E695 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4ACA4ED524905FB600E9E695 /* LaunchScreen.storyboard */; };
+		4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4EDE2491333700E9E695 /* OEmbed.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		4ACA4ED324905FB600E9E695 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4ACA4ED624905FB600E9E695 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4ACA4ED824905FB600E9E695 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4ACA4EDE2491333700E9E695 /* OEmbed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OEmbed.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +61,7 @@
 				4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */,
 				4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */,
 				4ACA4ECE24905FB500E9E695 /* ViewController.swift */,
+				4ACA4EDE2491333700E9E695 /* OEmbed.swift */,
 				4ACA4ED024905FB500E9E695 /* Main.storyboard */,
 				4ACA4ED324905FB600E9E695 /* Assets.xcassets */,
 				4ACA4ED524905FB600E9E695 /* LaunchScreen.storyboard */,
@@ -141,6 +144,7 @@
 				4ACA4ECF24905FB500E9E695 /* ViewController.swift in Sources */,
 				4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */,
 				4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */,
+				4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

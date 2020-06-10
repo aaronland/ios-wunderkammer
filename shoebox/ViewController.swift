@@ -31,14 +31,83 @@ class ViewController: UIViewController {
     }
     
     @IBAction func scanTag() {
-                
-        let url = URL(string: "https://aaronland.info/orthis/171/320/986/9/images/1713209869_t6Se0G4qFraAqsN3mruNCfVrnPGTBtAm_sq.jpg")
+              
+        processTag()
+    }
     
-        loadImage(url: url!)
+    func processTag() {
+        
+        print("PROCESS")
+        
+        let object_id = "18704235"
+            
+            let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
+                    
+            guard let url = URL(string: str_url) else {
+                print("SAD")
+                return
+            }
+        
+            fetchOEmbed(url: url)
+    }
+    
+    private func fetchOEmbed(url: URL) {
+        
+        print("FETCH DISPATCH")
+        
+        DispatchQueue.global().async { [weak self] in
+            
+            print("FETCH DONE")
+            
+            if let data = try? Data(contentsOf: url) {
+                
+                let oembed_rsp = self?.parseOEmbed(data: data)
+                
+                switch oembed_rsp {
+                case .failure(let error):
+                    print("SAD", error)
+                case .success(let oembed):
+                    self?.displayOEmbed(oembed: oembed)
+                default:
+                    ()
+                }
+                
+            }
+        }
+    }
+    
+    private func parseOEmbed(data: Data) -> Result<OEmbed, Error> {
+        
+        print("PARSE")
+        
+        let decoder = JSONDecoder()
+        var oembed: OEmbed
+        
+        do {
+            oembed = try decoder.decode(OEmbed.self, from: data)
+        } catch(let error) {
+            return .failure(error)
+        }
+        
+        return .success(oembed)
+    }
+    
+    private func displayOEmbed(oembed: OEmbed) {
+        
+        print("DISPLAY")
+        
+        guard let url = URL(string: oembed.url) else {
+            print("SAD URL")
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.loadImage(url: url)
+        }
     }
     
     private func loadImage(url: URL) {
-        
+                
         scanning_indicator.isHidden = false
         scanning_indicator.startAnimating()
         
