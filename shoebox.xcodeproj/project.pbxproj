@@ -26,6 +26,7 @@
 		4ACA4ED624905FB600E9E695 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4ACA4ED824905FB600E9E695 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4ACA4EDE2491333700E9E695 /* OEmbed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OEmbed.swift; sourceTree = "<group>"; };
+		4ACA4EE0249139A700E9E695 /* shoebox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shoebox.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +59,7 @@
 		4ACA4EC924905FB500E9E695 /* shoebox */ = {
 			isa = PBXGroup;
 			children = (
+				4ACA4EE0249139A700E9E695 /* shoebox.entitlements */,
 				4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */,
 				4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */,
 				4ACA4ECE24905FB500E9E695 /* ViewController.swift */,
@@ -288,6 +290,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = shoebox/shoebox.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JVV5KS8E69;
 				INFOPLIST_FILE = shoebox/Info.plist;
@@ -306,6 +309,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = shoebox/shoebox.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JVV5KS8E69;
 				INFOPLIST_FILE = shoebox/Info.plist;
