@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -9,16 +10,80 @@
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="shoebox" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" xcode11CocoaTouchSystemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <subviews>
+                            <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Ikd-eB-2Yx">
+                                <rect key="frame" x="20" y="125" width="374" height="374"/>
+                            </imageView>
+                            <textView hidden="YES" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="WcI-dW-hcu">
+                                <rect key="frame" x="20" y="507" width="374" height="211"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="211" id="Zaf-Ly-2Ca"/>
+                                </constraints>
+                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="8QY-EQ-a7d">
+                                <rect key="frame" x="20" y="71" width="20" height="20"/>
+                            </activityIndicatorView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="skZ-r6-3m6">
+                                <rect key="frame" x="359" y="61" width="35" height="30"/>
+                                <state key="normal" title="Scan"/>
+                                <connections>
+                                    <action selector="scanTag" destination="BYZ-38-t0r" eventType="touchUpInside" id="G3z-cK-Yjt"/>
+                                </connections>
+                            </button>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NFO-2r-xGq">
+                                <rect key="frame" x="359" y="735" width="34" height="30"/>
+                                <state key="normal" title="Save"/>
+                            </button>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="k0i-3b-fNS">
+                                <rect key="frame" x="25" y="735" width="36" height="30"/>
+                                <state key="normal" title="Clear"/>
+                                <connections>
+                                    <action selector="clear" destination="BYZ-38-t0r" eventType="touchUpInside" id="Pm5-h0-fib"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="skZ-r6-3m6" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="17" id="5yl-lD-O9d"/>
+                            <constraint firstItem="skZ-r6-3m6" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="93p-vZ-fpd"/>
+                            <constraint firstItem="Ikd-eB-2Yx" firstAttribute="trailing" secondItem="WcI-dW-hcu" secondAttribute="trailing" id="CGn-gx-m7P"/>
+                            <constraint firstItem="WcI-dW-hcu" firstAttribute="top" secondItem="Ikd-eB-2Yx" secondAttribute="bottom" constant="8" id="Jn1-T0-RNq"/>
+                            <constraint firstItem="Ikd-eB-2Yx" firstAttribute="top" secondItem="8QY-EQ-a7d" secondAttribute="bottom" constant="34" id="MBj-ld-DEb"/>
+                            <constraint firstItem="8QY-EQ-a7d" firstAttribute="bottom" secondItem="skZ-r6-3m6" secondAttribute="bottom" id="NsF-om-EqH"/>
+                            <constraint firstItem="skZ-r6-3m6" firstAttribute="centerX" secondItem="NFO-2r-xGq" secondAttribute="centerX" id="O1w-1i-ciw"/>
+                            <constraint firstItem="skZ-r6-3m6" firstAttribute="trailing" secondItem="Ikd-eB-2Yx" secondAttribute="trailing" id="Ueo-rf-WXz"/>
+                            <constraint firstItem="Ikd-eB-2Yx" firstAttribute="leading" secondItem="WcI-dW-hcu" secondAttribute="leading" id="WgQ-d2-7O1"/>
+                            <constraint firstItem="skZ-r6-3m6" firstAttribute="leading" secondItem="NFO-2r-xGq" secondAttribute="leading" id="Zcu-d7-5lH"/>
+                            <constraint firstItem="k0i-3b-fNS" firstAttribute="baseline" secondItem="NFO-2r-xGq" secondAttribute="baseline" id="cGh-MJ-BRi"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="k0i-3b-fNS" secondAttribute="bottom" constant="97" id="fTM-yt-9d2"/>
+                            <constraint firstItem="k0i-3b-fNS" firstAttribute="top" secondItem="WcI-dW-hcu" secondAttribute="bottom" constant="17" id="jzW-vu-EFT"/>
+                            <constraint firstItem="8QY-EQ-a7d" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="nkk-X0-GPR"/>
+                            <constraint firstItem="k0i-3b-fNS" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="25" id="rr0-9L-pS9"/>
+                            <constraint firstItem="8QY-EQ-a7d" firstAttribute="leading" secondItem="Ikd-eB-2Yx" secondAttribute="leading" id="wnR-ax-99b"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
+                    <connections>
+                        <outlet property="clear_button" destination="k0i-3b-fNS" id="7N7-F7-knc"/>
+                        <outlet property="save_button" destination="NFO-2r-xGq" id="Wl3-67-MvB"/>
+                        <outlet property="scan_button" destination="skZ-r6-3m6" id="YbH-Ce-Jwd"/>
+                        <outlet property="scanned_image" destination="Ikd-eB-2Yx" id="7Zk-Ed-cr8"/>
+                        <outlet property="scanned_meta" destination="WcI-dW-hcu" id="lnu-Lb-zpf"/>
+                        <outlet property="scanning_indicator" destination="8QY-EQ-a7d" id="siY-ba-jfy"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="137.68115942028987" y="126.5625"/>
         </scene>
     </scenes>
 </document>
