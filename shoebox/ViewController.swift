@@ -25,8 +25,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     @IBOutlet weak var clear_button: UIButton!
     
     @IBAction func clear() {
+        
         self.scanned_image.image = nil
         self.scanned_image.isHidden = true
+        
+        self.scanned_meta.text = ""
+        self.scanned_meta.isHidden = true
         
         self.save_button.isHidden = true
         self.clear_button.isHidden = true
@@ -98,10 +102,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                         statusMessage = "Fail to read NDEF from tag"
                     } else {
                         statusMessage = "Found 1 NDEF message"
-                        DispatchQueue.main.async {
-                            self.detectedMessages.append(message!)
-                            self.processMessage(msg: message!)
-                        }
+                        self.processMessage(message: message!)
                     }
                     
                     session.alertMessage = statusMessage
@@ -142,14 +143,35 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.session = nil
     }
     
-    func processMessage(msg: NFCNDEFMessage) {
+    func processMessage(message: NFCNDEFMessage) {
+    
+        let payload = message.records[0]
+        let data = payload.payload
         
-        print("PROCESS", msg)
-        return
+        let str_data = String(decoding: data, as: UTF8.self)
+        let parts = str_data.split(separator: ":")
 
-        let object_id = "18704235"
+        if parts.count != 3 {
+            print("Unknown tag")
+            return
+        }
+        
+        let scheme = parts[0]
+        let host = parts[1]
+        let path = parts[2]
+        
+        if scheme != "chsdm" {
+            print("Unknown scheme")
+            return
+        }
+        
+        if host != "o" {
+            print("Unknown host")
+        }
+                
+        let object_id = String(path)
             
-            let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
+        let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
                     
             guard let url = URL(string: str_url) else {
                 print("SAD")
@@ -160,13 +182,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     private func fetchOEmbed(url: URL) {
-        
-        print("FETCH DISPATCH")
-        
+                
         DispatchQueue.global().async { [weak self] in
-            
-            print("FETCH DONE")
-            
+                        
             if let data = try? Data(contentsOf: url) {
                 
                 let oembed_rsp = self?.parseOEmbed(data: data)
@@ -185,9 +203,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     private func parseOEmbed(data: Data) -> Result<OEmbed, Error> {
-        
-        print("PARSE")
-        
+                
         let decoder = JSONDecoder()
         var oembed: OEmbed
         
@@ -202,11 +218,14 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     private func displayOEmbed(oembed: OEmbed) {
         
-        print("DISPLAY")
-        
         guard let url = URL(string: oembed.url) else {
             print("SAD URL")
             return
+        }
+        
+        DispatchQueue.main.async {
+            self.scanned_meta.text = oembed.title
+            self.scanned_meta.isHidden = false
         }
         
         DispatchQueue.main.async {
