@@ -17,6 +17,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     var session: NFCNDEFReaderSession?
     
     var access_token = ""
+    var current_object = ""
     
     @IBOutlet weak var scan_button: UIButton!
     @IBOutlet weak var scanning_indicator: UIActivityIndicatorView!
@@ -26,6 +27,17 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBOutlet weak var save_button: UIButton!
     @IBOutlet weak var clear_button: UIButton!
+    
+    @IBAction func save() {
+        
+        print("SAVE")
+        
+        func doSave(token: String ){
+            self.addToShoebox(object_id: self.current_object, token: token)
+        }
+        
+        getAccessToken(completion: doSave)
+    }
     
     @IBAction func clear() {
         
@@ -40,6 +52,18 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     @IBAction func scanTag() {
+        
+        let object_id = "18704235"
+        
+        let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
+                    
+            guard let url = URL(string: str_url) else {
+                print("SAD")
+                return
+            }
+        
+            fetchOEmbed(url: url)
+            return
         
         guard NFCNDEFReaderSession.readingAvailable else {
             let alertController = UIAlertController(
@@ -173,7 +197,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
                 
         let object_id = String(path)
-            
+        self.current_object = object_id
+        
         let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
                     
             guard let url = URL(string: str_url) else {
@@ -265,16 +290,20 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
     }
     
-    func getAccessToken(){
+    func getAccessToken(completion: @escaping (String) -> ()){
         print("AUTHORIZE")
         
-        // check for locally stored token
-        // ensure token validity
-        
-        self.getNewAccessToken()
+        if self.access_token != "" {
+            completion(access_token)
+            return
+        }
+
+        // save to keychain here... ?
+ 
+        self.getNewAccessToken(completion: completion)
     }
     
-    private func getNewAccessToken(){
+    private func getNewAccessToken(completion: @escaping (String) -> ()){
         
         let oauth2_auth_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2AuthURL") as? String
         
@@ -288,26 +317,32 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         if oauth2_auth_url == nil || oauth2_auth_url == "" {
             //invalidConfigError(property: "OAuth2AuthURL")
+            print("SAD AUTH URL")
             return
         }
         
         if oauth2_token_url == nil || oauth2_token_url == "" {
             //invalidConfigError(property: "OAuth2TokenURL")
+            print("SAD TOKEN URL")
             return
         }
         
         if oauth2_client_id == nil || oauth2_client_id == "" {
             //invalidConfigError(property: "OAuth2ClientID")
+            print("SAD CLIENT ID")
             return
         }
         
+        /*
         if oauth2_client_secret == nil || oauth2_client_secret == "" {
             //invalidConfigError(property: "OAuth2ClientSecret")
             return
         }
+        */
         
         if oauth2_scope == nil || oauth2_scope == "" {
             //invalidConfigError(property: "OAuth2AuthURL")
+            print("SAD SCOPE")
             return
         }
         
@@ -328,12 +363,19 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 switch result {
                 case .success(let (credential, _, _)):
                     self.access_token = credential.oauthToken
+                    completion(self.access_token)
                 case .failure(let error):
                     // self.showAlert(message:error.localizedDescription)
+                    print("SAD CALLBACK", error)
                     return
                 }
         }
         
+    }
+    
+    private func addToShoebox(object_id: String, token: String ){
+        
+        print("ADD", object_id)
     }
     
     override func viewDidLoad() {

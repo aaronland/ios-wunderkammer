@@ -73,5 +73,15 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>OAuth2AuthUrl</key>
+	<string>$(OAUTH2_AUTH_URL)</string>
+	<key>OAuth2TokenUrl</key>
+	<string>$(OAUTH2_TOKEN_URL)</string>
+	<key>OAuth2ClientID</key>
+	<string>$(OAUTH2_CLIENT_ID)</string>
+	<key>OAuth2ClientSecret</key>
+	<string>$(OAUTH2_CLIENT_SECRET)</string>
+	<key>OAuth2Scope</key>
+	<string>$(OAUTH2_SCOPE)</string>
 </dict>
 </plist>
