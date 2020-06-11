@@ -11,7 +11,7 @@ import CoreNFC
 import OAuthSwift
 
 class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
-
+    
     let reuseIdentifier = "reuseIdentifier"
     var detectedMessages = [NFCNDEFMessage]()
     var session: NFCNDEFReaderSession?
@@ -23,7 +23,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBOutlet weak var scan_button: UIButton!
     @IBOutlet weak var scanning_indicator: UIActivityIndicatorView!
-        
+    
     @IBOutlet weak var scanned_image: UIImageView!
     @IBOutlet weak var scanned_meta: UITextView!
     
@@ -62,14 +62,14 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.current_object = object_id
         
         let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
-                    
-            guard let url = URL(string: str_url) else {
-                print("SAD")
-                return
-            }
         
-            fetchOEmbed(url: url)
+        guard let url = URL(string: str_url) else {
+            print("SAD")
             return
+        }
+        
+        fetchOEmbed(url: url)
+        return
         
         guard NFCNDEFReaderSession.readingAvailable else {
             let alertController = UIAlertController(
@@ -81,7 +81,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             self.present(alertController, animated: true, completion: nil)
             return
         }
-
+        
         session = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
         session?.alertMessage = "Hold your iPhone near the item to learn more about it."
         session?.begin()
@@ -89,14 +89,14 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     // MARK: - NFCNDEFReaderSessionDelegate
-
+    
     /// - Tag: processingTagData
     func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFs messages: [NFCNDEFMessage]) {
         DispatchQueue.main.async {
             self.detectedMessages.append(contentsOf: messages)
         }
     }
-
+    
     /// - Tag: processingNDEFTag
     func readerSession(_ session: NFCNDEFReaderSession, didDetect tags: [NFCNDEFTag]) {
         if tags.count > 1 {
@@ -171,19 +171,19 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 }
             }
         }
-
+        
         // To read new tags, a new session instance is required.
         self.session = nil
     }
     
     func processMessage(message: NFCNDEFMessage) {
-    
+        
         let payload = message.records[0]
         let data = payload.payload
         
         let str_data = String(decoding: data, as: UTF8.self)
         let parts = str_data.split(separator: ":")
-
+        
         if parts.count != 3 {
             print("Unknown tag")
             return
@@ -201,26 +201,26 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         if host != "o" {
             print("Unknown host")
         }
-                
+        
         let object_id = String(path)
         self.current_object = object_id
-
+        
         print("CURRENT", self.current_object)
         
         let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
-                    
-            guard let url = URL(string: str_url) else {
-                print("SAD")
-                return
-            }
         
-            fetchOEmbed(url: url)
+        guard let url = URL(string: str_url) else {
+            print("SAD")
+            return
+        }
+        
+        fetchOEmbed(url: url)
     }
     
     private func fetchOEmbed(url: URL) {
-                
+        
         DispatchQueue.global().async { [weak self] in
-                        
+            
             if let data = try? Data(contentsOf: url) {
                 
                 let oembed_rsp = self?.parseOEmbed(data: data)
@@ -240,7 +240,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     private func parseOEmbed(data: Data) -> Result<OEmbed, Error> {
-                
+        
         let decoder = JSONDecoder()
         var oembed: OEmbed
         
@@ -271,7 +271,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     private func loadImage(url: URL) {
-                
+        
         scanning_indicator.isHidden = false
         scanning_indicator.startAnimating()
         
@@ -280,7 +280,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         scanned_image.isHidden = true
         scanned_image.image = nil
-                
+        
         DispatchQueue.global().async { [weak self] in
             if let data = try? Data(contentsOf: url) {
                 if let image = UIImage(data: data) {
@@ -301,18 +301,18 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     func getAccessToken(completion: @escaping (OAuthSwiftCredential) -> ()){
         print("AUTHORIZE")
-                
+        
         if let creds = self.credentials {
             
             if !creds.isTokenExpired() {
-            print("HAVE EXISTING TOKEN")
-            completion(creds)
-            return
+                print("HAVE EXISTING TOKEN")
+                completion(creds)
+                return
             }
         }
-
-        // save to / retrieve from keychain here... ?
- 
+        
+        // save to / retrieve from keychain here...
+        
         self.getNewAccessToken(completion: completion)
     }
     
@@ -321,15 +321,11 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         print("GET NEW ACCESS TOKEN")
         
         let oauth2_auth_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2AuthURL") as? String
-        
         let oauth2_token_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2TokenURL") as? String
-        
         let oauth2_client_id = Bundle.main.object(forInfoDictionaryKey: "OAuth2ClientID") as? String
-        
         let oauth2_client_secret = Bundle.main.object(forInfoDictionaryKey: "OAuth2ClientSecret") as? String
-        
         let oauth2_scope = Bundle.main.object(forInfoDictionaryKey: "OAuth2Scope") as? String
-                        
+        
         if oauth2_auth_url == nil || oauth2_auth_url == "" {
             //invalidConfigError(property: "OAuth2AuthURL")
             print("SAD AUTH URL")
@@ -348,24 +344,26 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             return
         }
         
-        /*
         if oauth2_client_secret == nil || oauth2_client_secret == "" {
             //invalidConfigError(property: "OAuth2ClientSecret")
-            return
+            
+            print("SAD CLIENT SECRET")
+            
+            // Cooper Hewitt...
+            // return
         }
-        */
         
         if oauth2_scope == nil || oauth2_scope == "" {
             //invalidConfigError(property: "OAuth2AuthURL")
             print("SAD SCOPE")
             return
         }
-                
+        
         let oauth2_state = UUID().uuidString
         
         var response_type = "token"
         var allow_missing_state = false
-
+        
         response_type = "code" // Cooper Hewitt...
         allow_missing_state = true  // Cooper Hewitt...
         
@@ -378,10 +376,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         )
         
         oauth2.allowMissingStateCheck = allow_missing_state
-
-        // make sure we retain the oauth2 instance
+        
+        // make sure we retain the oauth2 instance (I always forget this part...)
         self.oauth2 = oauth2
-                
+        
         // The URL scheme for Wallet (Passbook and Apple Pay together) is shoebox://, but that is officially an 'undocumented API' (source).
         
         oauth2.authorize(
@@ -389,29 +387,35 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             scope: oauth2_scope!,
             state:oauth2_state
         ) { result in
-                // print("RESULT", result)
-                switch result {
-                case .success(let (credential, _, _)):
-                    self.credentials = credential
-                    completion(credential)
-                case .failure(let error):
-                    // https://github.com/OAuthSwift/OAuthSwift/blob/master/Sources/OAuthSwiftError.swift
-                    // https://github.com/OAuthSwift/OAuthSwift/wiki/Interpreting-Error-Codes
-                    print("SAD CALLBACK", error, error.localizedDescription)
-                    return
-                }
+            // print("RESULT", result)
+            switch result {
+            case .success(let (credential, _, _)):
+                self.credentials = credential
+                completion(credential)
+            case .failure(let error):
+                // https://github.com/OAuthSwift/OAuthSwift/blob/master/Sources/OAuthSwiftError.swift
+                // https://github.com/OAuthSwift/OAuthSwift/wiki/Interpreting-Error-Codes
+                print("SAD CALLBACK", error, error.localizedDescription)
+                return
+            }
         }
         
     }
     
     private func addToShoebox(object_id: String, credentials: OAuthSwiftCredential){
         
-        print("ADD", object_id, credentials)
+        let api = CooperHewittAPI(access_token: credentials.oauthToken)
+        
+        let method = "cooperhewitt.shoebox.items.collectItem"
+        var params = [String:String]()
+        params["object_id"] = object_id
+
+        api.ExecuteMethod(method: method, params: params)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         scanning_indicator.isHidden = true
     }
-
+    
 }
