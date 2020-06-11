@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4A38CA9A2491BEE8003CCFE8 /* OAuthSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4A38CA992491BEE8003CCFE8 /* OAuthSwift */; };
 		4AB16938249282C7005303D7 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4AB16937249282C7005303D7 /* Config.xcconfig */; };
+		4AB1693A24929121005303D7 /* OAuth2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB1693924929121005303D7 /* OAuth2.swift */; };
 		4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */; };
 		4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */; };
 		4ACA4ECF24905FB500E9E695 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECE24905FB500E9E695 /* ViewController.swift */; };
@@ -20,6 +21,7 @@
 
 /* Begin PBXFileReference section */
 		4AB16937249282C7005303D7 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		4AB1693924929121005303D7 /* OAuth2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth2.swift; sourceTree = "<group>"; };
 		4ACA4EC724905FB500E9E695 /* shoebox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = shoebox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -68,6 +70,7 @@
 				4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */,
 				4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */,
 				4ACA4ECE24905FB500E9E695 /* ViewController.swift */,
+				4AB1693924929121005303D7 /* OAuth2.swift */,
 				4ACA4EDE2491333700E9E695 /* OEmbed.swift */,
 				4ACA4ED024905FB500E9E695 /* Main.storyboard */,
 				4ACA4ED324905FB600E9E695 /* Assets.xcassets */,
@@ -157,6 +160,7 @@
 			files = (
 				4ACA4ECF24905FB500E9E695 /* ViewController.swift in Sources */,
 				4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */,
+				4AB1693A24929121005303D7 /* OAuth2.swift in Sources */,
 				4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */,
 				4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */,
 			);

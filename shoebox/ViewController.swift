@@ -16,7 +16,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     var detectedMessages = [NFCNDEFMessage]()
     var session: NFCNDEFReaderSession?
     
-    var access_token = ""
+    var oauth2: OAuthSwift?
+    var credentials: OAuthSwiftCredential?
+    
     var current_object = ""
     
     @IBOutlet weak var scan_button: UIButton!
@@ -32,14 +34,17 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         print("SAVE")
         
-        func doSave(token: String ){
-            self.addToShoebox(object_id: self.current_object, token: token)
+        func doSave(credentials: OAuthSwiftCredential){
+            print("DO SAVE", self.current_object)
+            self.addToShoebox(object_id: self.current_object, credentials: credentials)
         }
         
         getAccessToken(completion: doSave)
     }
     
     @IBAction func clear() {
+        
+        self.current_object = ""
         
         self.scanned_image.image = nil
         self.scanned_image.isHidden = true
@@ -54,6 +59,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     @IBAction func scanTag() {
         
         let object_id = "18704235"
+        self.current_object = object_id
         
         let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
                     
@@ -198,6 +204,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
         let object_id = String(path)
         self.current_object = object_id
+
+        print("CURRENT", self.current_object)
         
         let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
                     
@@ -219,6 +227,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 switch oembed_rsp {
                 case .failure(let error):
+                    self?.current_object = ""
                     print("SAD", error)
                 case .success(let oembed):
                     self?.displayOEmbed(oembed: oembed)
@@ -290,23 +299,26 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
     }
     
-    func getAccessToken(completion: @escaping (String) -> ()){
+    func getAccessToken(completion: @escaping (OAuthSwiftCredential) -> ()){
         print("AUTHORIZE")
-        
-        if self.access_token != "" {
-            print("HAVE", self.access_token)
-            completion(access_token)
+                
+        if let creds = self.credentials {
+            
+            if !creds.isTokenExpired() {
+            print("HAVE EXISTING TOKEN")
+            completion(creds)
             return
+            }
         }
 
-        // save to keychain here... ?
+        // save to / retrieve from keychain here... ?
  
         self.getNewAccessToken(completion: completion)
     }
     
-    private func getNewAccessToken(completion: @escaping (String) -> ()){
+    private func getNewAccessToken(completion: @escaping (OAuthSwiftCredential) -> ()){
         
-        print("GET")
+        print("GET NEW ACCESS TOKEN")
         
         let oauth2_auth_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2AuthURL") as? String
         
@@ -317,9 +329,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         let oauth2_client_secret = Bundle.main.object(forInfoDictionaryKey: "OAuth2ClientSecret") as? String
         
         let oauth2_scope = Bundle.main.object(forInfoDictionaryKey: "OAuth2Scope") as? String
-                
-        print("BRRR")
-        
+                        
         if oauth2_auth_url == nil || oauth2_auth_url == "" {
             //invalidConfigError(property: "OAuth2AuthURL")
             print("SAD AUTH URL")
@@ -350,13 +360,14 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             print("SAD SCOPE")
             return
         }
-        
-        print("WOO")
-        
+                
         let oauth2_state = UUID().uuidString
         
         var response_type = "token"
-        response_type = "code" // Cooper Hewit...
+        var allow_missing_state = false
+
+        response_type = "code" // Cooper Hewitt...
+        allow_missing_state = true  // Cooper Hewitt...
         
         let oauth2 = OAuth2Swift(
             consumerKey:    oauth2_client_id!,
@@ -365,31 +376,37 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             accessTokenUrl: oauth2_token_url!,
             responseType:   response_type
         )
-                
-        print("SCOPE", oauth2_scope!)
         
+        oauth2.allowMissingStateCheck = allow_missing_state
+
+        // make sure we retain the oauth2 instance
+        self.oauth2 = oauth2
+                
         // The URL scheme for Wallet (Passbook and Apple Pay together) is shoebox://, but that is officially an 'undocumented API' (source).
         
         oauth2.authorize(
             withCallbackURL: "wunderkammer://oauth2",
             scope: oauth2_scope!,
-            state:oauth2_state) { result in
+            state:oauth2_state
+        ) { result in
+                // print("RESULT", result)
                 switch result {
                 case .success(let (credential, _, _)):
-                    self.access_token = credential.oauthToken
-                    completion(self.access_token)
+                    self.credentials = credential
+                    completion(credential)
                 case .failure(let error):
-                    // self.showAlert(message:error.localizedDescription)
-                    print("SAD CALLBACK", error)
+                    // https://github.com/OAuthSwift/OAuthSwift/blob/master/Sources/OAuthSwiftError.swift
+                    // https://github.com/OAuthSwift/OAuthSwift/wiki/Interpreting-Error-Codes
+                    print("SAD CALLBACK", error, error.localizedDescription)
                     return
                 }
         }
         
     }
     
-    private func addToShoebox(object_id: String, token: String ){
+    private func addToShoebox(object_id: String, credentials: OAuthSwiftCredential){
         
-        print("ADD", object_id)
+        print("ADD", object_id, credentials)
     }
     
     override func viewDidLoad() {
