@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A38CA9A2491BEE8003CCFE8 /* OAuthSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4A38CA992491BEE8003CCFE8 /* OAuthSwift */; };
 		4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */; };
 		4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */; };
 		4ACA4ECF24905FB500E9E695 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECE24905FB500E9E695 /* ViewController.swift */; };
@@ -34,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A38CA9A2491BEE8003CCFE8 /* OAuthSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +90,9 @@
 			dependencies = (
 			);
 			name = shoebox;
+			packageProductDependencies = (
+				4A38CA992491BEE8003CCFE8 /* OAuthSwift */,
+			);
 			productName = shoebox;
 			productReference = 4ACA4EC724905FB500E9E695 /* shoebox.app */;
 			productType = "com.apple.product-type.application";
@@ -116,6 +121,9 @@
 				Base,
 			);
 			mainGroup = 4ACA4EBE24905FB500E9E695;
+			packageReferences = (
+				4A38CA982491BEE8003CCFE8 /* XCRemoteSwiftPackageReference "OAuthSwift" */,
+			);
 			productRefGroup = 4ACA4EC824905FB500E9E695 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -346,6 +354,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4A38CA982491BEE8003CCFE8 /* XCRemoteSwiftPackageReference "OAuthSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/OAuthSwift/OAuthSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4A38CA992491BEE8003CCFE8 /* OAuthSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4A38CA982491BEE8003CCFE8 /* XCRemoteSwiftPackageReference "OAuthSwift" */;
+			productName = OAuthSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4ACA4EBF24905FB500E9E695 /* Project object */;
 }

@@ -8,12 +8,15 @@
 
 import UIKit
 import CoreNFC
+import OAuthSwift
 
 class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
 
     let reuseIdentifier = "reuseIdentifier"
     var detectedMessages = [NFCNDEFMessage]()
     var session: NFCNDEFReaderSession?
+    
+    var access_token = ""
     
     @IBOutlet weak var scan_button: UIButton!
     @IBOutlet weak var scanning_indicator: UIActivityIndicatorView!
@@ -260,6 +263,77 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 }
             }
         }
+    }
+    
+    func getAccessToken(){
+        print("AUTHORIZE")
+        
+        // check for locally stored token
+        // ensure token validity
+        
+        self.getNewAccessToken()
+    }
+    
+    private func getNewAccessToken(){
+        
+        let oauth2_auth_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2AuthURL") as? String
+        
+        let oauth2_token_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2TokenURL") as? String
+        
+        let oauth2_client_id = Bundle.main.object(forInfoDictionaryKey: "OAuth2ClientID") as? String
+        
+        let oauth2_client_secret = Bundle.main.object(forInfoDictionaryKey: "OAuth2ClientSecret") as? String
+        
+        let oauth2_scope = Bundle.main.object(forInfoDictionaryKey: "OAuth2Scope") as? String
+        
+        if oauth2_auth_url == nil || oauth2_auth_url == "" {
+            //invalidConfigError(property: "OAuth2AuthURL")
+            return
+        }
+        
+        if oauth2_token_url == nil || oauth2_token_url == "" {
+            //invalidConfigError(property: "OAuth2TokenURL")
+            return
+        }
+        
+        if oauth2_client_id == nil || oauth2_client_id == "" {
+            //invalidConfigError(property: "OAuth2ClientID")
+            return
+        }
+        
+        if oauth2_client_secret == nil || oauth2_client_secret == "" {
+            //invalidConfigError(property: "OAuth2ClientSecret")
+            return
+        }
+        
+        if oauth2_scope == nil || oauth2_scope == "" {
+            //invalidConfigError(property: "OAuth2AuthURL")
+            return
+        }
+        
+        let oauth2_state = UUID().uuidString
+        
+        let oauth2 = OAuth2Swift(
+            consumerKey:    oauth2_client_id!,
+            consumerSecret: oauth2_client_secret!,
+            authorizeUrl:   oauth2_auth_url!,
+            accessTokenUrl: oauth2_token_url!,
+            responseType:   "token"
+        )
+                
+        oauth2.authorize(
+            withCallbackURL: "shoebox://oauth2",
+            scope: oauth2_scope!,
+            state:oauth2_state) { result in
+                switch result {
+                case .success(let (credential, _, _)):
+                    self.access_token = credential.oauthToken
+                case .failure(let error):
+                    // self.showAlert(message:error.localizedDescription)
+                    return
+                }
+        }
+        
     }
     
     override func viewDidLoad() {
