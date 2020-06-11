@@ -58,6 +58,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBAction func scanTag() {
         
+        #if targetEnvironment(simulator)
+        
         let object_id = "18704235"
         self.current_object = object_id
         
@@ -70,6 +72,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         fetchOEmbed(url: url)
         return
+        
+        #else
         
         guard NFCNDEFReaderSession.readingAvailable else {
             let alertController = UIAlertController(
@@ -86,6 +90,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         session?.alertMessage = "Hold your iPhone near the item to learn more about it."
         session?.begin()
         ()
+        
+        #endif
     }
     
     // MARK: - NFCNDEFReaderSessionDelegate
