@@ -294,6 +294,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         print("AUTHORIZE")
         
         if self.access_token != "" {
+            print("HAVE", self.access_token)
             completion(access_token)
             return
         }
@@ -305,6 +306,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     private func getNewAccessToken(completion: @escaping (String) -> ()){
         
+        print("GET")
+        
         let oauth2_auth_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2AuthURL") as? String
         
         let oauth2_token_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2TokenURL") as? String
@@ -314,6 +317,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         let oauth2_client_secret = Bundle.main.object(forInfoDictionaryKey: "OAuth2ClientSecret") as? String
         
         let oauth2_scope = Bundle.main.object(forInfoDictionaryKey: "OAuth2Scope") as? String
+                
+        print("BRRR")
         
         if oauth2_auth_url == nil || oauth2_auth_url == "" {
             //invalidConfigError(property: "OAuth2AuthURL")
@@ -346,18 +351,27 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             return
         }
         
+        print("WOO")
+        
         let oauth2_state = UUID().uuidString
+        
+        var response_type = "token"
+        response_type = "code" // Cooper Hewit...
         
         let oauth2 = OAuth2Swift(
             consumerKey:    oauth2_client_id!,
             consumerSecret: oauth2_client_secret!,
             authorizeUrl:   oauth2_auth_url!,
             accessTokenUrl: oauth2_token_url!,
-            responseType:   "token"
+            responseType:   response_type
         )
                 
+        print("SCOPE", oauth2_scope!)
+        
+        // The URL scheme for Wallet (Passbook and Apple Pay together) is shoebox://, but that is officially an 'undocumented API' (source).
+        
         oauth2.authorize(
-            withCallbackURL: "shoebox://oauth2",
+            withCallbackURL: "wunderkammer://oauth2",
             scope: oauth2_scope!,
             state:oauth2_state) { result in
                 switch result {

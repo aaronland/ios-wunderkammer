@@ -23,7 +23,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>shoebox</string>
+				<string>wunderkammer</string>
 			</array>
 		</dict>
 	</array>
@@ -73,9 +73,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>OAuth2AuthUrl</key>
+	<key>OAuth2AuthURL</key>
 	<string>$(OAUTH2_AUTH_URL)</string>
-	<key>OAuth2TokenUrl</key>
+	<key>OAuth2TokenURL</key>
 	<string>$(OAUTH2_TOKEN_URL)</string>
 	<key>OAuth2ClientID</key>
 	<string>$(OAUTH2_CLIENT_ID)</string>

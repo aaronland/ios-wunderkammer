@@ -300,6 +300,7 @@
 		};
 		4ACA4EDC24905FB600E9E695 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4AB16937249282C7005303D7 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = shoebox/shoebox.entitlements;
@@ -319,6 +320,7 @@
 		};
 		4ACA4EDD24905FB600E9E695 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4AB16937249282C7005303D7 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = shoebox/shoebox.entitlements;
