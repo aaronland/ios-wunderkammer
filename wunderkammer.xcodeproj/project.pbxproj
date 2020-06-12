@@ -24,7 +24,7 @@
 		4AB16937249282C7005303D7 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		4AB1693924929121005303D7 /* OAuth2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth2.swift; sourceTree = "<group>"; };
 		4AB1693B249294CC005303D7 /* CooperHewitt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CooperHewitt.swift; sourceTree = "<group>"; };
-		4ACA4EC724905FB500E9E695 /* shoebox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = shoebox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4ACA4EC724905FB500E9E695 /* wunderkammer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = wunderkammer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		4ACA4ECE24905FB500E9E695 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -33,7 +33,7 @@
 		4ACA4ED624905FB600E9E695 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4ACA4ED824905FB600E9E695 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4ACA4EDE2491333700E9E695 /* OEmbed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OEmbed.swift; sourceTree = "<group>"; };
-		4ACA4EE0249139A700E9E695 /* shoebox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shoebox.entitlements; sourceTree = "<group>"; };
+		4ACA4EE0249139A700E9E695 /* wunderkammer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = wunderkammer.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,7 +52,7 @@
 			isa = PBXGroup;
 			children = (
 				4AB16937249282C7005303D7 /* Config.xcconfig */,
-				4ACA4EC924905FB500E9E695 /* shoebox */,
+				4ACA4EC924905FB500E9E695 /* wunderkammer */,
 				4ACA4EC824905FB500E9E695 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,15 +60,15 @@
 		4ACA4EC824905FB500E9E695 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4ACA4EC724905FB500E9E695 /* shoebox.app */,
+				4ACA4EC724905FB500E9E695 /* wunderkammer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4ACA4EC924905FB500E9E695 /* shoebox */ = {
+		4ACA4EC924905FB500E9E695 /* wunderkammer */ = {
 			isa = PBXGroup;
 			children = (
-				4ACA4EE0249139A700E9E695 /* shoebox.entitlements */,
+				4ACA4EE0249139A700E9E695 /* wunderkammer.entitlements */,
 				4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */,
 				4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */,
 				4ACA4ECE24905FB500E9E695 /* ViewController.swift */,
@@ -80,15 +80,15 @@
 				4ACA4ED524905FB600E9E695 /* LaunchScreen.storyboard */,
 				4ACA4ED824905FB600E9E695 /* Info.plist */,
 			);
-			path = shoebox;
+			path = wunderkammer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4ACA4EC624905FB500E9E695 /* shoebox */ = {
+		4ACA4EC624905FB500E9E695 /* wunderkammer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4ACA4EDB24905FB600E9E695 /* Build configuration list for PBXNativeTarget "shoebox" */;
+			buildConfigurationList = 4ACA4EDB24905FB600E9E695 /* Build configuration list for PBXNativeTarget "wunderkammer" */;
 			buildPhases = (
 				4ACA4EC324905FB500E9E695 /* Sources */,
 				4ACA4EC424905FB500E9E695 /* Frameworks */,
@@ -98,12 +98,12 @@
 			);
 			dependencies = (
 			);
-			name = shoebox;
+			name = wunderkammer;
 			packageProductDependencies = (
 				4A38CA992491BEE8003CCFE8 /* OAuthSwift */,
 			);
 			productName = shoebox;
-			productReference = 4ACA4EC724905FB500E9E695 /* shoebox.app */;
+			productReference = 4ACA4EC724905FB500E9E695 /* wunderkammer.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -121,7 +121,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 4ACA4EC224905FB500E9E695 /* Build configuration list for PBXProject "shoebox" */;
+			buildConfigurationList = 4ACA4EC224905FB500E9E695 /* Build configuration list for PBXProject "wunderkammer" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -137,7 +137,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4ACA4EC624905FB500E9E695 /* shoebox */,
+				4ACA4EC624905FB500E9E695 /* wunderkammer */,
 			);
 		};
 /* End PBXProject section */
@@ -349,7 +349,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4ACA4EC224905FB500E9E695 /* Build configuration list for PBXProject "shoebox" */ = {
+		4ACA4EC224905FB500E9E695 /* Build configuration list for PBXProject "wunderkammer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4ACA4ED924905FB600E9E695 /* Debug */,
@@ -358,7 +358,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4ACA4EDB24905FB600E9E695 /* Build configuration list for PBXNativeTarget "shoebox" */ = {
+		4ACA4EDB24905FB600E9E695 /* Build configuration list for PBXNativeTarget "wunderkammer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4ACA4EDC24905FB600E9E695 /* Debug */,
