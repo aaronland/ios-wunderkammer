@@ -1,3 +1,7 @@
+// waiting on SPM support in:
+// https://github.com/jrendel/SwiftKeychainWrapper
+// (20200612/straup)
+
 //
 //  KeychainWrapper.swift
 //  KeychainWrapper
