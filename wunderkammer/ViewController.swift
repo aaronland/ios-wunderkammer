@@ -9,6 +9,7 @@
 import UIKit
 import CoreNFC
 import OAuthSwift
+import OAuth2Wrapper
 
 class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
@@ -16,10 +17,14 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     var detectedMessages = [NFCNDEFMessage]()
     var session: NFCNDEFReaderSession?
     
-    var oauth2: OAuthSwift?
-    var credentials: OAuthSwiftCredential?
+    let oauth2_id = "wunderkammer://collection.cooperhewitt.org/access_token"
+    let oauth2_callback_url = "wunderkammer://oauth2"
+    
+    var oauth2_wrapper: OAuth2Wrapper?
     
     var current_object = ""
+    
+    @IBOutlet var debug_log: UITextView!
     
     @IBOutlet weak var scan_button: UIButton!
     @IBOutlet weak var scanning_indicator: UIActivityIndicatorView!
@@ -30,16 +35,41 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     @IBOutlet weak var save_button: UIButton!
     @IBOutlet weak var clear_button: UIButton!
     
+    override func viewDidLoad() {
+        
+        super.viewDidLoad()
+        
+        let wrapper = OAuth2Wrapper(id: self.oauth2_id, callback_url: self.oauth2_callback_url)
+        wrapper.response_type = "code"
+        wrapper.allow_missing_state = true
+        wrapper.require_client_secret = false
+        wrapper.allow_null_expires = true
+        
+        // wrapper.logger.logLevel = .debug
+        
+        self.oauth2_wrapper = wrapper
+        
+        scanning_indicator.isHidden = true
+        debug_log.text = "debug"
+        debug_log.isScrollEnabled = true
+    }
+    
     @IBAction func save() {
         
         print("SAVE")
         
-        func doSave(credentials: OAuthSwiftCredential){
-            print("DO SAVE", self.current_object)
-            self.addToShoebox(object_id: self.current_object, credentials: credentials)
+        func doSave(rsp: Result<OAuthSwiftCredential, Error>){
+            
+            switch rsp {
+            case .failure(let error):
+                print("SAD", error)
+            case .success(let credentials):
+                print("DO SAVE", self.current_object)
+                self.addToShoebox(object_id: self.current_object, credentials: credentials)
+            }
         }
         
-        getAccessToken(completion: doSave)
+        self.oauth2_wrapper!.GetAccessToken(completion: doSave)
     }
     
     @IBAction func clear() {
@@ -268,6 +298,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         DispatchQueue.main.async {
             self.scanned_meta.text = oembed.title
+            self.scanned_meta.updateTextFont()
+            
             self.scanned_meta.isHidden = false
         }
         
@@ -305,142 +337,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
     }
     
-    func getAccessToken(completion: @escaping (OAuthSwiftCredential) -> ()){
-        print("AUTHORIZE")
-        
-        let keychain_label = "wunderkammer://org.cooperhewitt.collection/access_token"
-        
-        if let creds = self.credentials {
-            
-            if !creds.isTokenExpired() {
-                print("HAVE EXISTING TOKEN")
-                completion(creds)
-                return
-            }
-        }
-        
-        if let data = KeychainWrapper.standard.data(forKey: keychain_label) {
-            
-            let decoder = JSONDecoder()
-            var creds: OAuthSwiftCredential
-            
-            do {
-                creds = try decoder.decode(OAuthSwiftCredential.self, from: data)
-            } catch(let error) {
-                print("SAD DECODE", error)
-                return
-            }
-            
-            if !creds.isTokenExpired() {
-                print("HAVE EXISTING TOKEN")
-                completion(creds)
-                return
-            }
-        }
-        
-        func getStore(credentials: OAuthSwiftCredential) {
-            
-            let encoder = JSONEncoder()
-            
-            do {
-                let data = try encoder.encode(credentials)
-                KeychainWrapper.standard.set(data, forKey: keychain_label)
-            } catch (let error) {
-                    print("SAD ENCODING", error)
-            }
-            
-            completion(credentials)
-        }
-        
-        self.getNewAccessToken(completion: getStore)
-    }
-    
-    private func getNewAccessToken(completion: @escaping (OAuthSwiftCredential) -> ()){
-        
-        print("GET NEW ACCESS TOKEN")
-        
-        let oauth2_auth_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2AuthURL") as? String
-        let oauth2_token_url = Bundle.main.object(forInfoDictionaryKey: "OAuth2TokenURL") as? String
-        let oauth2_client_id = Bundle.main.object(forInfoDictionaryKey: "OAuth2ClientID") as? String
-        let oauth2_client_secret = Bundle.main.object(forInfoDictionaryKey: "OAuth2ClientSecret") as? String
-        let oauth2_scope = Bundle.main.object(forInfoDictionaryKey: "OAuth2Scope") as? String
-        
-        if oauth2_auth_url == nil || oauth2_auth_url == "" {
-            //invalidConfigError(property: "OAuth2AuthURL")
-            print("SAD AUTH URL")
-            return
-        }
-        
-        if oauth2_token_url == nil || oauth2_token_url == "" {
-            //invalidConfigError(property: "OAuth2TokenURL")
-            print("SAD TOKEN URL")
-            return
-        }
-        
-        if oauth2_client_id == nil || oauth2_client_id == "" {
-            //invalidConfigError(property: "OAuth2ClientID")
-            print("SAD CLIENT ID")
-            return
-        }
-        
-        if oauth2_client_secret == nil || oauth2_client_secret == "" {
-            //invalidConfigError(property: "OAuth2ClientSecret")
-            
-            print("SAD CLIENT SECRET")
-            
-            // Cooper Hewitt...
-            // return
-        }
-        
-        if oauth2_scope == nil || oauth2_scope == "" {
-            //invalidConfigError(property: "OAuth2AuthURL")
-            print("SAD SCOPE")
-            return
-        }
-        
-        let oauth2_state = UUID().uuidString
-        
-        var response_type = "token"
-        var allow_missing_state = false
-        
-        response_type = "code" // Cooper Hewitt...
-        allow_missing_state = true  // Cooper Hewitt...
-        
-        let oauth2 = OAuth2Swift(
-            consumerKey:    oauth2_client_id!,
-            consumerSecret: oauth2_client_secret!,
-            authorizeUrl:   oauth2_auth_url!,
-            accessTokenUrl: oauth2_token_url!,
-            responseType:   response_type
-        )
-        
-        oauth2.allowMissingStateCheck = allow_missing_state
-        
-        // make sure we retain the oauth2 instance (I always forget this part...)
-        self.oauth2 = oauth2
-        
-        // The URL scheme for Wallet (Passbook and Apple Pay together) is shoebox://, but that is officially an 'undocumented API' (source).
-        
-        oauth2.authorize(
-            withCallbackURL: "wunderkammer://oauth2",
-            scope: oauth2_scope!,
-            state:oauth2_state
-        ) { result in
-            // print("RESULT", result)
-            switch result {
-            case .success(let (credential, _, _)):
-                self.credentials = credential
-                completion(credential)
-            case .failure(let error):
-                // https://github.com/OAuthSwift/OAuthSwift/blob/master/Sources/OAuthSwiftError.swift
-                // https://github.com/OAuthSwift/OAuthSwift/wiki/Interpreting-Error-Codes
-                print("SAD CALLBACK", error, error.localizedDescription)
-                return
-            }
-        }
-        
-    }
-    
     private func addToShoebox(object_id: String, credentials: OAuthSwiftCredential){
         
         let api = CooperHewittAPI(access_token: credentials.oauthToken)
@@ -448,13 +344,38 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         let method = "cooperhewitt.shoebox.items.collectItem"
         var params = [String:String]()
         params["object_id"] = object_id
-
+        
         api.ExecuteMethod(method: method, params: params)
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        scanning_indicator.isHidden = true
-    }
     
+}
+
+extension UITextView {
+    func updateTextFont() {
+        if (self.text.isEmpty || self.bounds.size.equalTo(CGSize.zero)) {
+            return;
+        }
+        
+        let textViewSize = self.frame.size;
+        let fixedWidth = textViewSize.width;
+        let expectSize = self.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT)))
+        
+        
+        var expectFont = self.font
+        if (expectSize.height > textViewSize.height) {
+            
+            while (self.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height > textViewSize.height) {
+                expectFont = self.font!.withSize(self.font!.pointSize - 1)
+                self.font = expectFont
+            }
+        }
+        else {
+            while (self.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height < textViewSize.height) {
+                expectFont = self.font
+                self.font = self.font!.withSize(self.font!.pointSize + 1)
+            }
+            self.font = expectFont
+        }
+    }
 }

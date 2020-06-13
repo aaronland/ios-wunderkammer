@@ -39,11 +39,29 @@
       },
       {
         "package": "OAuthSwift",
-        "repositoryURL": "https://github.com/OAuthSwift/OAuthSwift",
+        "repositoryURL": "https://github.com/OAuthSwift/OAuthSwift.git",
         "state": {
           "branch": null,
           "revision": "fde77955e6983fbfaabd491709d52b8a82fda4d0",
           "version": "2.1.2"
+        }
+      },
+      {
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log.git",
+        "state": {
+          "branch": null,
+          "revision": "74d7b91ceebc85daf387ebb206003f78813f71aa",
+          "version": "1.2.0"
+        }
+      },
+      {
+        "package": "OAuth2Wrapper",
+        "repositoryURL": "https://github.com/aaronland/swift-oauth2-wrapper",
+        "state": {
+          "branch": null,
+          "revision": "487f54c23eb3e2b5d27a6f9efb772025eefa4885",
+          "version": "0.0.1"
         }
       },
       {
