@@ -12,9 +12,11 @@ import OAuthSwift
 import OAuth2Wrapper
 
 enum ViewControllerErrors : Error {
-        case tagUnknownScheme
+    case tagUnknownURI
+    case tagUnknownScheme
     case tagUnknownHost
     case invalidURL
+    case debugError
 }
 
 class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
@@ -31,7 +33,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     var oauth2_wrapper: OAuth2Wrapper?
     
     var current_object = ""
-        
+    
     @IBOutlet weak var scan_button: UIButton!
     @IBOutlet weak var scanning_indicator: UIActivityIndicatorView!
     
@@ -54,7 +56,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.oauth2_wrapper = wrapper
         
         scanning_indicator.isHidden = true
-
+        
         
         #if targetEnvironment(simulator)
         app.logger.logLevel = .debug
@@ -64,14 +66,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBAction func save() {
         
-        self.showAlert(label: "Hello", message: "World")
-        self.app.logger.debug("Save object \(self.current_object)")
-        
         func doSave(rsp: Result<OAuthSwiftCredential, Error>){
             
             switch rsp {
             case .failure(let error):
+                print("SAD SAVE", error)
                 self.showError(error: error)
+                print("WHAT")
             case .success(let credentials):
                 self.app.logger.debug("Save object \(self.current_object) w/ credentials")
                 self.addToShoebox(object_id: self.current_object, credentials: credentials)
@@ -102,7 +103,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         let object_id = "18704235"
         self.current_object = object_id
-
+        
         self.app.logger.debug("Running in simulator mode, assume object ID \(object_id).")
         
         let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
@@ -118,13 +119,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         #else
         
         guard NFCNDEFReaderSession.readingAvailable else {
-            let alertController = UIAlertController(
-                title: "Scanning Not Supported",
-                message: "This device doesn't support tag scanning.",
-                preferredStyle: .alert
-            )
-            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            self.present(alertController, animated: true, completion: nil)
+            
+            self.showAlert(label: "Scanning Not Supported", message: "This device doesn't support tag scanning.")
             return
         }
         
@@ -132,6 +128,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         session?.alertMessage = "Hold your iPhone near the item to learn more about it."
         session?.begin()
         ()
+        
+        scanning_indicator.isHidden = false
+        scanning_indicator.startAnimating()
         
         #endif
     }
@@ -208,20 +207,16 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             // programmatically using the invalidate method call.
             if (readerError.code != .readerSessionInvalidationErrorFirstNDEFTagRead)
                 && (readerError.code != .readerSessionInvalidationErrorUserCanceled) {
-                let alertController = UIAlertController(
-                    title: "Session Invalidated",
-                    message: error.localizedDescription,
-                    preferredStyle: .alert
-                )
-                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                DispatchQueue.main.async {
-                    self.present(alertController, animated: true, completion: nil)
-                }
+                
+                self.showError(error: error)
             }
         }
         
         // To read new tags, a new session instance is required.
         self.session = nil
+        
+        scanning_indicator.isHidden = true
+        scanning_indicator.stopAnimating()
     }
     
     func processMessage(message: NFCNDEFMessage) {
@@ -233,8 +228,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         let parts = str_data.split(separator: ":")
         
         if parts.count != 3 {
-            
-            print("Unknown tag")
+            self.showError(error: ViewControllerErrors.tagUnknownURI)
             return
         }
         
@@ -268,6 +262,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     private func fetchOEmbed(url: URL) {
+       
+        self.startSpinner()
+
         
         DispatchQueue.global().async { [weak self] in
             
@@ -277,6 +274,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 switch oembed_rsp {
                 case .failure(let error):
+                    self?.stopSpinner()
                     self?.current_object = ""
                     self?.showError(error: error)
                 case .success(let oembed):
@@ -306,14 +304,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     private func displayOEmbed(oembed: OEmbed) {
         
         guard let url = URL(string: oembed.url) else {
-            print("SAD URL")
+            self.showError(error: ViewControllerErrors.invalidURL)
             return
         }
         
         DispatchQueue.main.async {
             self.scanned_meta.text = oembed.title
             self.scanned_meta.updateTextFont()
-            
             self.scanned_meta.isHidden = false
         }
         
@@ -324,9 +321,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     private func loadImage(url: URL) {
         
-        scanning_indicator.isHidden = false
-        scanning_indicator.startAnimating()
-        
         self.save_button.isHidden = true
         self.clear_button.isHidden = true
         
@@ -334,7 +328,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         scanned_image.image = nil
         
         DispatchQueue.global().async { [weak self] in
+            
             if let data = try? Data(contentsOf: url) {
+                
                 if let image = UIImage(data: data) {
                     DispatchQueue.main.async {
                         
@@ -343,14 +339,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                         
                         let resized = image.resizedImage(withBounds: CGSize(width: w!, height: h!))
                         
+                        self?.stopSpinner()
+                        
                         self?.scanned_image.image = resized
                         self?.scanned_image.isHidden = false
                         
                         self?.save_button.isHidden = false
                         self?.clear_button.isHidden = false
-                        
-                        self?.scanning_indicator.isHidden = true
-                        self?.scanning_indicator.stopAnimating()
                     }
                 }
             }
@@ -365,17 +360,39 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         var params = [String:String]()
         params["object_id"] = object_id
         
-        api.ExecuteMethod(method: method, params: params)
+        func completion(rsp: Result<CooperHewittAPIResponse, Error>) {
+            
+            DispatchQueue.main.async {
+                
+                switch rsp {
+                case .failure(let error):
+                    
+                    switch error {
+                    case is CooperHewittAPIError:
+                        let api_error = error as! CooperHewittAPIError
+                        self.showAlert(label: "Failed to save object", message: api_error.Message)
+                    default:
+                        self.showError(error: error)
+                    }
+                    
+                    return
+                    
+                case .success:                    
+                    self.showAlert(label: "Success.", message: "This object has been saved to your shoebox.")
+                }
+            }
+        }
+        
+        api.ExecuteMethod(method: method, params: params, completion:completion)
     }
     
-    func showError(error: Error) {
+    private func showError(error: Error) {
         self.app.logger.error("Error: \(error.localizedDescription)")
         self.showAlert(label:"Error", message: error.localizedDescription)
     }
     
-    func showAlert(label: String, message: String){
+    private func showAlert(label: String, message: String){
         
-        print("WTF")
         self.app.logger.info("\(message)")
         
         let alertController = UIAlertController(
@@ -385,8 +402,15 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         )
         alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         self.present(alertController, animated: true, completion: nil)
-
-            print("OMG")
     }
     
+    private func startSpinner() {
+        scanning_indicator.isHidden = false
+        scanning_indicator.startAnimating()
+    }
+    
+    private func stopSpinner(){
+        scanning_indicator.isHidden = true
+        scanning_indicator.stopAnimating()
+    }
 }
