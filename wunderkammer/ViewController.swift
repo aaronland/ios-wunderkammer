@@ -62,6 +62,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         wrapper.logger.logLevel = .debug
         
         app.logger.debug("Running in simulator environment.")
+
+        #else
+            // app.logger.logLevel = .debug
+            // wrapper.logger.logLevel = .debug
         #endif
     }
     
@@ -117,19 +121,24 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         #else
         
+        self.app.logger.debug("Scan tag")
+        
         guard NFCNDEFReaderSession.readingAvailable else {
             
             self.showAlert(label: "Scanning Not Supported", message: "This device doesn't support tag scanning.")
             return
         }
         
+        self.app.logger.debug("Starting NFC session")
+        
         session = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
         session?.alertMessage = "Hold your iPhone near the item to learn more about it."
         session?.begin()
         ()
         
-        scanning_indicator.isHidden = false
-        scanning_indicator.startAnimating()
+        DispatchQueue.main.async {
+            self.startSpinner()
+        }
         
         #endif
     }
@@ -138,6 +147,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     /// - Tag: processingTagData
     func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFs messages: [NFCNDEFMessage]) {
+        
+        self.app.logger.debug("Did detect message")
+        
         DispatchQueue.main.async {
             self.detectedMessages.append(contentsOf: messages)
         }
@@ -180,6 +192,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                     if nil != error || nil == message {
                         statusMessage = "Fail to read NDEF from tag"
                     } else {
+                        
+                        self.app.logger.debug("Found 1 NDEF message")
                         statusMessage = "Found 1 NDEF message"
                         self.processMessage(message: message!)
                     }
@@ -207,18 +221,24 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             if (readerError.code != .readerSessionInvalidationErrorFirstNDEFTagRead)
                 && (readerError.code != .readerSessionInvalidationErrorUserCanceled) {
                 
+                DispatchQueue.main.async {
                 self.showAlert(label:"There was a problem reading tag", message: error.localizedDescription)
+                }
             }
         }
         
         // To read new tags, a new session instance is required.
         self.session = nil
         
-        scanning_indicator.isHidden = true
-        scanning_indicator.stopAnimating()
+        DispatchQueue.main.async {
+            self.stopSpinner()
+        }
+
     }
     
     func processMessage(message: NFCNDEFMessage) {
+        
+        self.app.logger.debug("Process message")
         
         let payload = message.records[0]
         let data = payload.payload
@@ -425,13 +445,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     private func showError(error: Error) {
-        self.app.logger.error("Error: \(error.localizedDescription)")
         self.showAlert(label:"Error", message: error.localizedDescription)
     }
     
     private func showAlert(label: String, message: String){
         
-        self.app.logger.info("\(message)")
+        self.app.logger.debug("Show alert \(label): \(message)")
         
         let alertController = UIAlertController(
             title: label,
@@ -451,6 +470,5 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         scanning_indicator.isHidden = true
         scanning_indicator.stopAnimating()
     }
-    
     
 }
