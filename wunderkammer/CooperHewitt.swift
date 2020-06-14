@@ -94,11 +94,13 @@ class CooperHewittAPI {
                 
                 let api_error = CooperHewittAPIError(Code: code as Int, Message: message as! String)
                 completion(.failure(api_error))
+                return
             }
             
             let api_response = CooperHewittAPIResponse(Data: data!, URLResponse: response!)
             completion(.success(api_response))
         })
+        
         task.resume()
     }
 }

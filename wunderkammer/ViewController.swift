@@ -57,10 +57,11 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         scanning_indicator.isHidden = true
         
-        
         #if targetEnvironment(simulator)
         app.logger.logLevel = .debug
         wrapper.logger.logLevel = .debug
+        
+        app.logger.debug("Running in simulator environment.")
         #endif
     }
     
@@ -70,9 +71,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             
             switch rsp {
             case .failure(let error):
-                print("SAD SAVE", error)
-                self.showError(error: error)
-                print("WHAT")
+                self.showAlert(label: "Failed to retrieve credentials", message: error.localizedDescription)
             case .success(let credentials):
                 self.app.logger.debug("Save object \(self.current_object) w/ credentials")
                 self.addToShoebox(object_id: self.current_object, credentials: credentials)
@@ -208,7 +207,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             if (readerError.code != .readerSessionInvalidationErrorFirstNDEFTagRead)
                 && (readerError.code != .readerSessionInvalidationErrorUserCanceled) {
                 
-                self.showError(error: error)
+                self.showAlert(label:"There was a problem reading tag", message: error.localizedDescription)
             }
         }
         
@@ -237,12 +236,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         let path = parts[2]
         
         if scheme != "chsdm" {
-            self.showError(error: ViewControllerErrors.tagUnknownScheme)
+            self.showAlert(label:"Failed to read tag", message:ViewControllerErrors.tagUnknownScheme.localizedDescription)
             return
         }
         
         if host != "o" {
-            self.showError(error: ViewControllerErrors.tagUnknownHost)
+            self.showAlert(label:"Failed to read tag", message: ViewControllerErrors.tagUnknownHost.localizedDescription)
             return
         }
         
@@ -262,28 +261,43 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     private func fetchOEmbed(url: URL) {
-       
+        
         self.startSpinner()
-
         
         DispatchQueue.global().async { [weak self] in
             
-            if let data = try? Data(contentsOf: url) {
+            var oembed_data: Data?
+            
+            do {
+                oembed_data = try Data(contentsOf: url)
+            } catch(let error){
                 
-                let oembed_rsp = self?.parseOEmbed(data: data)
-                
-                switch oembed_rsp {
-                case .failure(let error):
+                DispatchQueue.main.async {
                     self?.stopSpinner()
-                    self?.current_object = ""
-                    self?.showError(error: error)
-                case .success(let oembed):
-                    self?.displayOEmbed(oembed: oembed)
-                default:
-                    ()
+                    self?.showAlert(label:"Unable to fetch object information", message: error.localizedDescription)
                 }
                 
+                return
             }
+            
+            let oembed_rsp = self?.parseOEmbed(data: oembed_data!)
+            
+            switch oembed_rsp {
+            case .failure(let error):
+                
+                self?.current_object = ""
+                
+                DispatchQueue.main.async {
+                    self?.stopSpinner()
+                    self?.showAlert(label:"Unable to load object information", message: error.localizedDescription)
+                }
+                
+            case .success(let oembed):
+                self?.displayOEmbed(oembed: oembed)
+            default:
+                ()
+            }
+            
         }
     }
     
@@ -329,28 +343,50 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         DispatchQueue.global().async { [weak self] in
             
-            if let data = try? Data(contentsOf: url) {
+            var image_data: Data?
+            // var image: UIImage?
+            
+            do {
+                image_data = try Data(contentsOf: url)
+            } catch (let error) {
                 
-                if let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        
-                        let w = self?.scanned_image.bounds.width
-                        let h = self?.scanned_image.bounds.height
-                        
-                        let resized = image.resizedImage(withBounds: CGSize(width: w!, height: h!))
-                        
-                        self?.stopSpinner()
-                        
-                        self?.scanned_image.image = resized
-                        self?.scanned_image.isHidden = false
-                        
-                        self?.save_button.isHidden = false
-                        self?.clear_button.isHidden = false
-                    }
+                DispatchQueue.main.async {
+                    self?.stopSpinner()
+                    self?.showAlert(label:"Unable to retrieve object image", message: error.localizedDescription)
+                
                 }
+                
+                return
+            }
+            
+            guard let image = UIImage(data: image_data!) else {
+                
+                DispatchQueue.main.async {
+                    self?.stopSpinner()
+                    self?.showAlert(label:"Unable to load object image", message: "")
+                }
+                
+                return
+            }
+                   
+            DispatchQueue.main.async {
+                
+                let w = self?.scanned_image.bounds.width
+                let h = self?.scanned_image.bounds.height
+                
+                let resized = image.resizedImage(withBounds: CGSize(width: w!, height: h!))
+                
+                self?.stopSpinner()
+                
+                self?.scanned_image.image = resized
+                self?.scanned_image.isHidden = false
+                
+                self?.save_button.isHidden = false
+                self?.clear_button.isHidden = false
             }
         }
     }
+    
     
     private func addToShoebox(object_id: String, credentials: OAuthSwiftCredential){
         
@@ -367,18 +403,20 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 switch rsp {
                 case .failure(let error):
                     
+                    print("SAD")
                     switch error {
                     case is CooperHewittAPIError:
                         let api_error = error as! CooperHewittAPIError
                         self.showAlert(label: "Failed to save object", message: api_error.Message)
                     default:
-                        self.showError(error: error)
+                        self.showAlert(label: "Failed to save object", message: error.localizedDescription)
                     }
                     
                     return
                     
-                case .success:                    
-                    self.showAlert(label: "Success.", message: "This object has been saved to your shoebox.")
+                case .success:
+                    print("HAPPY")
+                    self.showAlert(label: "Object saved", message: "This object has been saved to your shoebox.")
                 }
             }
         }
@@ -413,4 +451,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         scanning_indicator.isHidden = true
         scanning_indicator.stopAnimating()
     }
+    
+    
 }
