@@ -48,23 +48,23 @@
                                 <color key="barTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <items>
                                     <navigationItem id="J8i-Rd-Bz1">
-                                        <barButtonItem key="leftBarButtonItem" style="plain" id="vW1-fc-GEV">
-                                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="J43-nF-j9O">
-                                                <rect key="frame" x="20" y="7" width="57" height="30"/>
-                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                <state key="normal" title="Random"/>
-                                                <connections>
-                                                    <action selector="random" destination="BYZ-38-t0r" eventType="touchUpInside" id="aaH-ZH-3bp"/>
-                                                </connections>
-                                            </button>
-                                        </barButtonItem>
-                                        <barButtonItem key="rightBarButtonItem" style="plain" id="X0q-4r-cgt">
+                                        <barButtonItem key="leftBarButtonItem" style="plain" id="X0q-4r-cgt">
                                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="skZ-r6-3m6">
-                                                <rect key="frame" x="319" y="7" width="35" height="30"/>
+                                                <rect key="frame" x="20" y="7" width="35" height="30"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <state key="normal" title="Scan"/>
                                                 <connections>
                                                     <action selector="scanTag" destination="BYZ-38-t0r" eventType="touchUpInside" id="G3z-cK-Yjt"/>
+                                                </connections>
+                                            </button>
+                                        </barButtonItem>
+                                        <barButtonItem key="rightBarButtonItem" style="plain" id="vW1-fc-GEV">
+                                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="J43-nF-j9O">
+                                                <rect key="frame" x="297" y="7" width="57" height="30"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <state key="normal" title="Random"/>
+                                                <connections>
+                                                    <action selector="random" destination="BYZ-38-t0r" eventType="touchUpInside" id="aaH-ZH-3bp"/>
                                                 </connections>
                                             </button>
                                         </barButtonItem>

@@ -77,25 +77,35 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.oauth2_wrapper = wrapper
         
         nfc_indicator.isHidden = true
-        scanning_indicator.isHidden = true
+        scanning_indicator.isHidden = true // TO DO: RENAME ME TO WAITING INDICATOR OR SOMETHING
         
         #if targetEnvironment(simulator)
         is_simulation  = true
         #elseif os(OSX)
-        is_simulation  = true
+        // is_simulation  = true
         #elseif os(iOS)
         #if targetEnvironment(macCatalyst)
-        is_simulation  = true
+        // is_simulation  = true
         #endif
         #else
+        #endif
+        
+        // TO DO: READ LOG LEVEL FROM Config.xcconfig
         // app.logger.logLevel = .debug
         // wrapper.logger.logLevel = .debug
-        #endif
         
         if is_simulation {
             app.logger.logLevel = .debug
             wrapper.logger.logLevel = .debug
             app.logger.debug("Running in simulator environment.")
+        }
+        
+        if !NFCNDEFReaderSession.readingAvailable {
+         
+            if !is_simulation {
+                scan_button.isEnabled = false
+                scan_button.isHidden = true
+            }
         }
     }
     
@@ -163,6 +173,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                     // TO DO : PARSE THE OBJECT RESPONSE FOR ALL THE STUFF IN THE OEMBED THINGY
                     
                     let object_id = random.object.id
+                    self.current_object = object_id
                     
                     let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
                     
@@ -441,9 +452,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         // To read new tags, a new session instance is required.
         self.session = nil
-        
-        
-        
+ 
     }
     
     private func processMessage(message: NFCNDEFMessage) {
@@ -626,22 +635,31 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     private func addToWunderkammer() -> Result<Void, Error> {
         
         if self.app.wunderkammer == nil {
+            self.app.logger.debug("Missing wunderkammer db")
             return .failure(ViewControllerErrors.wunderkammerMissingDatabase)
         }
         
         if self.current_object == "" {
+            self.app.logger.debug("Missing object")
+
             return .failure(ViewControllerErrors.wunderkammerMissingObject)
         }
         
         if self.current_oembed == nil {
+            self.app.logger.debug("Missing oembed")
+
             return .failure(ViewControllerErrors.wunderkammerMissingOEmbed)
         }
         
         if self.current_image == nil {
+            self.app.logger.debug("Missing image")
+
             return .failure(ViewControllerErrors.wunderkammerMissingImage)
         }
         
         guard let data_url = self.current_image!.dataURL() else {
+            self.app.logger.debug("Missing data URL")
+
             return .failure(ViewControllerErrors.wunderkammerMissingDataURL)
         }
         
