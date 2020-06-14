@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  shoebox
+//  wunderkammer
 //
 //  Created by asc on 6/9/20.
 //  Copyright © 2020 Aaronland. All rights reserved.
@@ -16,6 +16,11 @@ enum ViewControllerErrors : Error {
     case tagUnknownScheme
     case tagUnknownHost
     case invalidURL
+    case wunderkammerMissingDatabase
+    case wunderkammerMissingObject
+    case wunderkammerMissingOEmbed
+    case wunderkammerMissingImage
+    case wunderkammerMissingDataURL
     case debugError
 }
 
@@ -33,6 +38,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     var oauth2_wrapper: OAuth2Wrapper?
     
     var current_object = ""
+    var current_image: UIImage?
+    var current_oembed: OEmbed?
+    
+    var is_simulation = false
     
     @IBOutlet weak var nfc_indicator: UIActivityIndicatorView!
     
@@ -61,33 +70,132 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         scanning_indicator.isHidden = true
         
         #if targetEnvironment(simulator)
-        app.logger.logLevel = .debug
-        wrapper.logger.logLevel = .debug
-        
-        app.logger.debug("Running in simulator environment.")
-
-        #else
-            // app.logger.logLevel = .debug
-            // wrapper.logger.logLevel = .debug
+        is_simulation  = true
+        #elseif os(OSX)
+        is_simulation  = true
+        #elseif os(iOS)
+        #if targetEnvironment(macCatalyst)
+            is_simulation  = true
         #endif
+        #else
+        // app.logger.logLevel = .debug
+        // wrapper.logger.logLevel = .debug
+        #endif
+        
+        if is_simulation {
+            
+            app.logger.logLevel = .debug
+            wrapper.logger.logLevel = .debug
+            
+            app.logger.debug("Running in simulator environment.")
+        }
     }
     
     @IBAction func save() {
         
-        func doSave(rsp: Result<OAuthSwiftCredential, Error>){
+        save_button.isEnabled = false
+        var completed = 0
+        
+        var error_local: Error?
+        var error_remote: Error?
+        
+        func error_message(error: Error) -> String {
             
-            switch rsp {
-            case .failure(let error):
-                self.showAlert(label: "Failed to retrieve credentials", message: error.localizedDescription)
-            case .success(let credentials):
-                self.app.logger.debug("Save object \(self.current_object) w/ credentials")
-                self.addToShoebox(object_id: self.current_object, credentials: credentials)
+            switch error {
+            case is CooperHewittAPIError:
+                let api_error = error as! CooperHewittAPIError
+                return api_error.Message
+            default:
+                return error.localizedDescription
             }
         }
         
-        self.app.logger.debug("Get credentials to save object")
-        self.oauth2_wrapper!.GetAccessToken(completion: doSave)
+        func on_complete() {
+            
+            completed += 1
+            
+            if completed < 2 {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                
+                self.save_button.isEnabled = true
+                
+                if error_local != nil && error_remote != nil {
+                    
+                    let message = String(format:"%@ (local) %@ (remote)", error_message(error: error_local!), error_message(error: error_remote!))
+                    
+                    self.showAlert(label: "There were multiple problem saving this object remotely.", message: message)
+                    
+                } else if error_remote != nil {
+                    
+                    self.showAlert(label: "This object was saved to your device but there was a problem saving this object remotely.", message: error_message(error: error_remote!))
+                    
+                } else if error_local != nil {
+                    
+                    self.showAlert(label: "This object was saved remotely but there was a problem saving this object to your device.", message: error_message(error: error_local!))
+                    
+                } else {
+                    self.showAlert(label: "This object has been saved.", message: "This object has been saved locally and remotely")
+                }
+                
+            }
+        }
+        
+        DispatchQueue.global().async { [weak self] in
+            
+            let rsp = self?.addToWunderkammer()
+            
+            DispatchQueue.main.async {
+                
+                if case .failure(let error) = rsp {
+                    error_local = error
+                }
+                
+                on_complete()
+            }
+        }
+        
+        DispatchQueue.global().async { [weak self] in
+            
+            func doSave(creds_rsp: Result<OAuthSwiftCredential, Error>){
+                
+                var credentials: OAuthSwiftCredential?
+                switch creds_rsp {
+                case .failure(let error):
+                    error_remote = error
+                    on_complete()
+                    return
+                case .success(let creds):
+                    credentials = creds
+                }
+                
+                let api = CooperHewittAPI(access_token: credentials!.oauthToken)
+                
+                let method = "cooperhewitt.shoebox.items.collectItem"
+                var params = [String:String]()
+                params["object_id"] = self?.current_object
+                
+                func completion(rsp: Result<CooperHewittAPIResponse, Error>) {
+                    
+                    if case .failure(let error) = rsp {
+                        error_remote = error
+                    }
+                    
+                    on_complete()
+                }
+                
+                api.ExecuteMethod(method: method, params: params, completion:completion)
+            }
+            
+            DispatchQueue.main.async {
+                self?.app.logger.debug("Get credentials to save object")
+                self?.oauth2_wrapper!.GetAccessToken(completion: doSave)
+            }
+        }
     }
+    
     
     @IBAction func clear() {
         
@@ -105,27 +213,27 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBAction func scanTag() {
         
-        #if targetEnvironment(simulator)
-        
-        let object_id = "18704235"
-        self.current_object = object_id
-        
-        self.app.logger.debug("Running in simulator mode, assume object ID \(object_id).")
-        
-        let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
-        
-        guard let url = URL(string: str_url) else {
-            self.showError(error: ViewControllerErrors.invalidURL)
+        if self.is_simulation {
+            
+            let object_id = "18704235"
+            self.current_object = object_id
+            
+            self.app.logger.debug("Running in simulator mode, assume object ID \(object_id).")
+            
+            let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
+            
+            guard let url = URL(string: str_url) else {
+                self.showError(error: ViewControllerErrors.invalidURL)
+                return
+            }
+            
+            fetchOEmbed(url: url)
             return
+            
         }
         
-        fetchOEmbed(url: url)
-        return
-        
-        #else
-        
         self.app.logger.debug("Scan tag")
-
+        
         
         guard NFCNDEFReaderSession.readingAvailable else {
             
@@ -145,7 +253,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             self.nfc_indicator.startAnimating()
         }
         
-        #endif
     }
     
     // MARK: - NFCNDEFReaderSessionDelegate
@@ -163,10 +270,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     /// - Tag: processingNDEFTag
     func readerSession(_ session: NFCNDEFReaderSession, didDetect tags: [NFCNDEFTag]) {
         
-    DispatchQueue.main.async {
-        self.nfc_indicator.isHidden = true
-        self.nfc_indicator.stopAnimating()
-    }
+        DispatchQueue.main.async {
+            self.nfc_indicator.isHidden = true
+            self.nfc_indicator.stopAnimating()
+        }
         
         if tags.count > 1 {
             // Restart polling in 500ms
@@ -233,7 +340,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 && (readerError.code != .readerSessionInvalidationErrorUserCanceled) {
                 
                 DispatchQueue.main.async {
-                self.showAlert(label:"There was a problem reading tag", message: error.localizedDescription)
+                    self.showAlert(label:"There was a problem reading tag", message: error.localizedDescription)
                 }
             }
         }
@@ -241,11 +348,11 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         // To read new tags, a new session instance is required.
         self.session = nil
         
-
-
+        
+        
     }
     
-    func processMessage(message: NFCNDEFMessage) {
+    private func processMessage(message: NFCNDEFMessage) {
         
         self.app.logger.debug("Process message")
         
@@ -316,7 +423,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             switch oembed_rsp {
             case .failure(let error):
                 
-                self?.current_object = ""
+                self?.resetCurrent()
                 
                 DispatchQueue.main.async {
                     self?.stopSpinner()
@@ -343,6 +450,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             return .failure(error)
         }
         
+        self.current_oembed = oembed
         return .success(oembed)
     }
     
@@ -383,8 +491,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 DispatchQueue.main.async {
                     self?.stopSpinner()
+                    self?.resetCurrent()
                     self?.showAlert(label:"Unable to retrieve object image", message: error.localizedDescription)
-                
+                    
                 }
                 
                 return
@@ -399,7 +508,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 return
             }
-                   
+            
+            self?.current_image = image
+            
             DispatchQueue.main.async {
                 
                 let w = self?.scanned_image.bounds.width
@@ -418,41 +529,43 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
     }
     
-    
-    private func addToShoebox(object_id: String, credentials: OAuthSwiftCredential){
+    private func addToWunderkammer() -> Result<Void, Error> {
         
-        let api = CooperHewittAPI(access_token: credentials.oauthToken)
-        
-        let method = "cooperhewitt.shoebox.items.collectItem"
-        var params = [String:String]()
-        params["object_id"] = object_id
-        
-        func completion(rsp: Result<CooperHewittAPIResponse, Error>) {
-            
-            DispatchQueue.main.async {
-                
-                switch rsp {
-                case .failure(let error):
-                    
-                    print("SAD")
-                    switch error {
-                    case is CooperHewittAPIError:
-                        let api_error = error as! CooperHewittAPIError
-                        self.showAlert(label: "Failed to save object", message: api_error.Message)
-                    default:
-                        self.showAlert(label: "Failed to save object", message: error.localizedDescription)
-                    }
-                    
-                    return
-                    
-                case .success:
-                    print("HAPPY")
-                    self.showAlert(label: "Object saved", message: "This object has been saved to your shoebox.")
-                }
-            }
+        if self.app.wunderkammer == nil {
+            return .failure(ViewControllerErrors.wunderkammerMissingDatabase)
         }
         
-        api.ExecuteMethod(method: method, params: params, completion:completion)
+        if self.current_object == "" {
+            return .failure(ViewControllerErrors.wunderkammerMissingObject)
+        }
+        
+        if self.current_oembed == nil {
+            return .failure(ViewControllerErrors.wunderkammerMissingOEmbed)
+        }
+        
+        if self.current_image == nil {
+            return .failure(ViewControllerErrors.wunderkammerMissingImage)
+        }
+        
+        guard let data_url = self.current_image!.dataURL() else {
+            return .failure(ViewControllerErrors.wunderkammerMissingDataURL)
+        }
+        
+        let obj = WunderkammerObject(
+            ID: self.current_object,
+            URL: self.current_oembed!.object_url,
+            Image: data_url
+        )
+        
+        let add_rsp = self.app.wunderkammer!.AddObject(object: obj)
+        
+        switch add_rsp {
+            
+        case .failure(let error):
+            return .failure(error)
+        case .success():
+            return .success(())
+        }
     }
     
     private func showError(error: Error) {
@@ -480,6 +593,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     private func stopSpinner(){
         scanning_indicator.isHidden = true
         scanning_indicator.stopAnimating()
+    }
+    
+    private func resetCurrent(){
+        
+        self.current_object = ""
+        self.current_image = nil
+        self.current_oembed = nil
     }
     
 }

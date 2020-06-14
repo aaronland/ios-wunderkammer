@@ -9,9 +9,15 @@
 import Foundation
 import FMDB
 
+struct WunderkammerObject {
+    var ID: String
+    var URL: String
+    var Image: String
+}
+
 class Wunderkammer {
     
-    private let objects_schema = ""
+    private let objects_schema = "CREATE TABLE objects(url TEXT PRIMARY KEY, id TEXT, image TEXT, created DATE)"
     private var database: FMDatabase
     
     public init?() {
@@ -20,7 +26,7 @@ class Wunderkammer {
             .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent("wunderkammer.sqlite")
         
-        print(fileURL)
+        // print(fileURL)
         database = FMDatabase(url: fileURL)
         
         guard database.open() else {
@@ -49,12 +55,21 @@ class Wunderkammer {
                 print(error)
                 return nil
             case .success():
-                print("OKAY TABLE")
+                ()
             }
         }
     }
     
-    
+    public func AddObject(object: WunderkammerObject) -> Result<Void, Error> {
+        
+        do {
+            try self.database.executeUpdate("INSERT OR REPLACE INTO objects (url, id, image) values (?, ?, ?)", values: [object.URL, object.ID, object.Image])
+        } catch (let error) {
+            return .failure(error)
+        }
+
+        return .success(())
+    }
     
 }
 
