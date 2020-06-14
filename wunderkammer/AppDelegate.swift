@@ -14,9 +14,17 @@ import Logging
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var logger = Logger(label: "info.aaronland.wunderkammer")
-
+    var wunderkammer: Wunderkammer?
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Override point for customization after application launch.            
+        
+        guard let wk = Wunderkammer() else {
+            logger.error("Failed to create wunderkammer database!")
+            return false
+        }
+        
+        wunderkammer = wk
         return true
     }
 

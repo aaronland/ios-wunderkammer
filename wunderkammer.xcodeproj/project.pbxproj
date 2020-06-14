@@ -12,6 +12,8 @@
 		4AAF05D62496765F006BE255 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 4AAF05D52496765F006BE255 /* Logging */; };
 		4AAF05D824967D71006BE255 /* UIText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF05D724967D71006BE255 /* UIText.swift */; };
 		4AAF05DA24967D96006BE255 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF05D924967D96006BE255 /* UIImage.swift */; };
+		4AAF05DD2496A9FA006BE255 /* FMDB in Frameworks */ = {isa = PBXBuildFile; productRef = 4AAF05DC2496A9FA006BE255 /* FMDB */; };
+		4AAF05DF2496AC28006BE255 /* Wunderkammer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF05DE2496AC28006BE255 /* Wunderkammer.swift */; };
 		4AB1693C249294CC005303D7 /* CooperHewitt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB1693B249294CC005303D7 /* CooperHewitt.swift */; };
 		4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */; };
 		4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */; };
@@ -27,6 +29,7 @@
 		4AAEB6942493DD5300A75F71 /* wunderkammer.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = wunderkammer.entitlements; sourceTree = "<group>"; };
 		4AAF05D724967D71006BE255 /* UIText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIText.swift; sourceTree = "<group>"; };
 		4AAF05D924967D96006BE255 /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
+		4AAF05DE2496AC28006BE255 /* Wunderkammer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wunderkammer.swift; sourceTree = "<group>"; };
 		4AB1693B249294CC005303D7 /* CooperHewitt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CooperHewitt.swift; sourceTree = "<group>"; };
 		4ACA4EC724905FB500E9E695 /* wunderkammer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = wunderkammer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -45,6 +48,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4AAF05D62496765F006BE255 /* Logging in Frameworks */,
+				4AAF05DD2496A9FA006BE255 /* FMDB in Frameworks */,
 				4A533A6F249452820048C0A6 /* OAuth2Wrapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -73,6 +77,7 @@
 			children = (
 				4AAEB6942493DD5300A75F71 /* wunderkammer.entitlements */,
 				4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */,
+				4AAF05DE2496AC28006BE255 /* Wunderkammer.swift */,
 				4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */,
 				4ACA4ECE24905FB500E9E695 /* ViewController.swift */,
 				4AAF05D724967D71006BE255 /* UIText.swift */,
@@ -107,6 +112,7 @@
 			packageProductDependencies = (
 				4A533A6E249452820048C0A6 /* OAuth2Wrapper */,
 				4AAF05D52496765F006BE255 /* Logging */,
+				4AAF05DC2496A9FA006BE255 /* FMDB */,
 			);
 			productName = shoebox;
 			productReference = 4ACA4EC724905FB500E9E695 /* wunderkammer.app */;
@@ -139,6 +145,7 @@
 			packageReferences = (
 				4A533A6D249452820048C0A6 /* XCRemoteSwiftPackageReference "swift-oauth2-wrapper" */,
 				4AAF05D42496765F006BE255 /* XCRemoteSwiftPackageReference "swift-log" */,
+				4AAF05DB2496A9FA006BE255 /* XCRemoteSwiftPackageReference "fmdb" */,
 			);
 			productRefGroup = 4ACA4EC824905FB500E9E695 /* Products */;
 			projectDirPath = "";
@@ -175,6 +182,7 @@
 				4AAF05D824967D71006BE255 /* UIText.swift in Sources */,
 				4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */,
 				4AAF05DA24967D96006BE255 /* UIImage.swift in Sources */,
+				4AAF05DF2496AC28006BE255 /* Wunderkammer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -331,6 +339,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = info.aaronland.shoebox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -353,6 +362,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = info.aaronland.shoebox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -398,6 +408,14 @@
 				minimumVersion = 1.2.0;
 			};
 		};
+		4AAF05DB2496A9FA006BE255 /* XCRemoteSwiftPackageReference "fmdb" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ccgus/fmdb";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.7;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -410,6 +428,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4AAF05D42496765F006BE255 /* XCRemoteSwiftPackageReference "swift-log" */;
 			productName = Logging;
+		};
+		4AAF05DC2496A9FA006BE255 /* FMDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4AAF05DB2496A9FA006BE255 /* XCRemoteSwiftPackageReference "fmdb" */;
+			productName = FMDB;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
