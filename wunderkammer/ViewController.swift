@@ -34,6 +34,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     var current_object = ""
     
+    @IBOutlet weak var nfc_indicator: UIActivityIndicatorView!
+    
     @IBOutlet weak var scan_button: UIButton!
     @IBOutlet weak var scanning_indicator: UIActivityIndicatorView!
     
@@ -55,6 +57,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         self.oauth2_wrapper = wrapper
         
+        nfc_indicator.isHidden = true
         scanning_indicator.isHidden = true
         
         #if targetEnvironment(simulator)
@@ -122,6 +125,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         #else
         
         self.app.logger.debug("Scan tag")
+
         
         guard NFCNDEFReaderSession.readingAvailable else {
             
@@ -137,7 +141,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         ()
         
         DispatchQueue.main.async {
-            self.startSpinner()
+            self.nfc_indicator.isHidden = false
+            self.nfc_indicator.startAnimating()
         }
         
         #endif
@@ -157,6 +162,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     /// - Tag: processingNDEFTag
     func readerSession(_ session: NFCNDEFReaderSession, didDetect tags: [NFCNDEFTag]) {
+        
+    DispatchQueue.main.async {
+        self.nfc_indicator.isHidden = true
+        self.nfc_indicator.stopAnimating()
+    }
+        
         if tags.count > 1 {
             // Restart polling in 500ms
             let retryInterval = DispatchTimeInterval.milliseconds(500)
@@ -230,9 +241,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         // To read new tags, a new session instance is required.
         self.session = nil
         
-        DispatchQueue.main.async {
-            self.stopSpinner()
-        }
+
 
     }
     
@@ -282,7 +291,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     private func fetchOEmbed(url: URL) {
         
-        self.startSpinner()
+        DispatchQueue.main.async {
+            self.startSpinner()
+        }
         
         DispatchQueue.global().async { [weak self] in
             
