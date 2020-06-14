@@ -31,9 +31,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     var oauth2_wrapper: OAuth2Wrapper?
     
     var current_object = ""
-    
-    @IBOutlet var debug_log: UITextView!
-    
+        
     @IBOutlet weak var scan_button: UIButton!
     @IBOutlet weak var scanning_indicator: UIActivityIndicatorView!
     
@@ -56,8 +54,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.oauth2_wrapper = wrapper
         
         scanning_indicator.isHidden = true
-        debug_log.text = "debug"
-        debug_log.isScrollEnabled = true
+
         
         #if targetEnvironment(simulator)
         app.logger.logLevel = .debug
@@ -383,33 +380,4 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
 
     }
     
-}
-
-extension UITextView {
-    func updateTextFont() {
-        if (self.text.isEmpty || self.bounds.size.equalTo(CGSize.zero)) {
-            return;
-        }
-        
-        let textViewSize = self.frame.size;
-        let fixedWidth = textViewSize.width;
-        let expectSize = self.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT)))
-        
-        
-        var expectFont = self.font
-        if (expectSize.height > textViewSize.height) {
-            
-            while (self.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height > textViewSize.height) {
-                expectFont = self.font!.withSize(self.font!.pointSize - 1)
-                self.font = expectFont
-            }
-        }
-        else {
-            while (self.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height < textViewSize.height) {
-                expectFont = self.font
-                self.font = self.font!.withSize(self.font!.pointSize + 1)
-            }
-            self.font = expectFont
-        }
-    }
 }
