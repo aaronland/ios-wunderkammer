@@ -64,6 +64,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBAction func save() {
         
+        self.showAlert(label: "Hello", message: "World")
         self.app.logger.debug("Save object \(self.current_object)")
         
         func doSave(rsp: Result<OAuthSwiftCredential, Error>){
@@ -336,7 +337,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             if let data = try? Data(contentsOf: url) {
                 if let image = UIImage(data: data) {
                     DispatchQueue.main.async {
-                        self?.scanned_image.image = image
+                        
+                        let w = self?.scanned_image.bounds.width
+                        let h = self?.scanned_image.bounds.height
+                        
+                        let resized = image.resizedImage(withBounds: CGSize(width: w!, height: h!))
+                        
+                        self?.scanned_image.image = resized
                         self?.scanned_image.isHidden = false
                         
                         self?.save_button.isHidden = false
@@ -368,6 +375,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     func showAlert(label: String, message: String){
         
+        print("WTF")
         self.app.logger.info("\(message)")
         
         let alertController = UIAlertController(
@@ -378,6 +386,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         self.present(alertController, animated: true, completion: nil)
 
+            print("OMG")
     }
     
 }
