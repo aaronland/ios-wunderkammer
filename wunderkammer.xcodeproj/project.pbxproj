@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		4A533A6C24944EF30048C0A6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4A533A6B24944EF30048C0A6 /* Config.xcconfig */; };
 		4A533A6F249452820048C0A6 /* OAuth2Wrapper in Frameworks */ = {isa = PBXBuildFile; productRef = 4A533A6E249452820048C0A6 /* OAuth2Wrapper */; };
-		4AB1693A24929121005303D7 /* OAuth2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB1693924929121005303D7 /* OAuth2.swift */; };
+		4AAF05D62496765F006BE255 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 4AAF05D52496765F006BE255 /* Logging */; };
 		4AB1693C249294CC005303D7 /* CooperHewitt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB1693B249294CC005303D7 /* CooperHewitt.swift */; };
 		4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */; };
 		4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */; };
@@ -23,7 +23,6 @@
 /* Begin PBXFileReference section */
 		4A533A6B24944EF30048C0A6 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		4AAEB6942493DD5300A75F71 /* wunderkammer.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = wunderkammer.entitlements; sourceTree = "<group>"; };
-		4AB1693924929121005303D7 /* OAuth2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth2.swift; sourceTree = "<group>"; };
 		4AB1693B249294CC005303D7 /* CooperHewitt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CooperHewitt.swift; sourceTree = "<group>"; };
 		4ACA4EC724905FB500E9E695 /* wunderkammer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = wunderkammer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -41,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4AAF05D62496765F006BE255 /* Logging in Frameworks */,
 				4A533A6F249452820048C0A6 /* OAuth2Wrapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -72,7 +72,6 @@
 				4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */,
 				4ACA4ECE24905FB500E9E695 /* ViewController.swift */,
 				4AB1693B249294CC005303D7 /* CooperHewitt.swift */,
-				4AB1693924929121005303D7 /* OAuth2.swift */,
 				4ACA4EDE2491333700E9E695 /* OEmbed.swift */,
 				4ACA4ED024905FB500E9E695 /* Main.storyboard */,
 				4ACA4ED324905FB600E9E695 /* Assets.xcassets */,
@@ -101,6 +100,7 @@
 			name = wunderkammer;
 			packageProductDependencies = (
 				4A533A6E249452820048C0A6 /* OAuth2Wrapper */,
+				4AAF05D52496765F006BE255 /* Logging */,
 			);
 			productName = shoebox;
 			productReference = 4ACA4EC724905FB500E9E695 /* wunderkammer.app */;
@@ -132,6 +132,7 @@
 			mainGroup = 4ACA4EBE24905FB500E9E695;
 			packageReferences = (
 				4A533A6D249452820048C0A6 /* XCRemoteSwiftPackageReference "swift-oauth2-wrapper" */,
+				4AAF05D42496765F006BE255 /* XCRemoteSwiftPackageReference "swift-log" */,
 			);
 			productRefGroup = 4ACA4EC824905FB500E9E695 /* Products */;
 			projectDirPath = "";
@@ -163,7 +164,6 @@
 			files = (
 				4ACA4ECF24905FB500E9E695 /* ViewController.swift in Sources */,
 				4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */,
-				4AB1693A24929121005303D7 /* OAuth2.swift in Sources */,
 				4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */,
 				4AB1693C249294CC005303D7 /* CooperHewitt.swift in Sources */,
 				4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */,
@@ -382,6 +382,14 @@
 				minimumVersion = 0.0.1;
 			};
 		};
+		4AAF05D42496765F006BE255 /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -389,6 +397,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4A533A6D249452820048C0A6 /* XCRemoteSwiftPackageReference "swift-oauth2-wrapper" */;
 			productName = OAuth2Wrapper;
+		};
+		4AAF05D52496765F006BE255 /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4AAF05D42496765F006BE255 /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

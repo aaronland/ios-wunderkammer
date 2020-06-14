@@ -11,7 +11,15 @@ import CoreNFC
 import OAuthSwift
 import OAuth2Wrapper
 
+enum ViewControllerErrors : Error {
+        case tagUnknownScheme
+    case tagUnknownHost
+    case invalidURL
+}
+
 class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
+    
+    let app = UIApplication.shared.delegate as! AppDelegate
     
     let reuseIdentifier = "reuseIdentifier"
     var detectedMessages = [NFCNDEFMessage]()
@@ -45,30 +53,34 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         wrapper.require_client_secret = false
         wrapper.allow_null_expires = true
         
-        // wrapper.logger.logLevel = .debug
-        
         self.oauth2_wrapper = wrapper
         
         scanning_indicator.isHidden = true
         debug_log.text = "debug"
         debug_log.isScrollEnabled = true
+        
+        #if targetEnvironment(simulator)
+        app.logger.logLevel = .debug
+        wrapper.logger.logLevel = .debug
+        #endif
     }
     
     @IBAction func save() {
         
-        print("SAVE")
+        self.app.logger.debug("Save object \(self.current_object)")
         
         func doSave(rsp: Result<OAuthSwiftCredential, Error>){
             
             switch rsp {
             case .failure(let error):
-                print("SAD", error)
+                self.showError(error: error)
             case .success(let credentials):
-                print("DO SAVE", self.current_object)
+                self.app.logger.debug("Save object \(self.current_object) w/ credentials")
                 self.addToShoebox(object_id: self.current_object, credentials: credentials)
             }
         }
         
+        self.app.logger.debug("Get credentials to save object")
         self.oauth2_wrapper!.GetAccessToken(completion: doSave)
     }
     
@@ -92,11 +104,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         let object_id = "18704235"
         self.current_object = object_id
+
+        self.app.logger.debug("Running in simulator mode, assume object ID \(object_id).")
         
         let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
         
         guard let url = URL(string: str_url) else {
-            print("SAD")
+            self.showError(error: ViewControllerErrors.invalidURL)
             return
         }
         
@@ -221,6 +235,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         let parts = str_data.split(separator: ":")
         
         if parts.count != 3 {
+            
             print("Unknown tag")
             return
         }
@@ -230,23 +245,24 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         let path = parts[2]
         
         if scheme != "chsdm" {
-            print("Unknown scheme")
+            self.showError(error: ViewControllerErrors.tagUnknownScheme)
             return
         }
         
         if host != "o" {
-            print("Unknown host")
+            self.showError(error: ViewControllerErrors.tagUnknownHost)
+            return
         }
         
         let object_id = String(path)
         self.current_object = object_id
         
-        print("CURRENT", self.current_object)
+        self.app.logger.debug("Scanned object \(object_id)")
         
         let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
         
         guard let url = URL(string: str_url) else {
-            print("SAD")
+            self.showError(error: ViewControllerErrors.invalidURL)
             return
         }
         
@@ -264,7 +280,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 switch oembed_rsp {
                 case .failure(let error):
                     self?.current_object = ""
-                    print("SAD", error)
+                    self?.showError(error: error)
                 case .success(let oembed):
                     self?.displayOEmbed(oembed: oembed)
                 default:
@@ -348,6 +364,24 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         api.ExecuteMethod(method: method, params: params)
     }
     
+    func showError(error: Error) {
+        self.app.logger.error("Error: \(error.localizedDescription)")
+        self.showAlert(label:"Error", message: error.localizedDescription)
+    }
+    
+    func showAlert(label: String, message: String){
+        
+        self.app.logger.info("\(message)")
+        
+        let alertController = UIAlertController(
+            title: label,
+            message: message,
+            preferredStyle: .alert
+        )
+        alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        self.present(alertController, animated: true, completion: nil)
+
+    }
     
 }
 
