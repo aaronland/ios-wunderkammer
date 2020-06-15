@@ -56,6 +56,15 @@
         }
       },
       {
+        "package": "CooperHewittAPI",
+        "repositoryURL": "https://github.com/aaronland/swift-cooperhewitt-api",
+        "state": {
+          "branch": null,
+          "revision": "9b8f66f0c78ba88148538f55bda9fc3a4d7c6a8d",
+          "version": "0.0.2"
+        }
+      },
+      {
         "package": "swift-log",
         "repositoryURL": "https://github.com/apple/swift-log",
         "state": {

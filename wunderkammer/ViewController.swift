@@ -10,6 +10,7 @@ import UIKit
 import CoreNFC
 import OAuthSwift
 import OAuth2Wrapper
+import CooperHewittAPI
 
 struct CooperHewittRandomObject: Codable {
     var object: CooperHewittObject

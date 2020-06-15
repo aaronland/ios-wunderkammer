@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A4D15692497D8F100622E86 /* CooperHewittAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 4A4D15682497D8F100622E86 /* CooperHewittAPI */; };
 		4A533A6C24944EF30048C0A6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4A533A6B24944EF30048C0A6 /* Config.xcconfig */; };
 		4A533A6F249452820048C0A6 /* OAuth2Wrapper in Frameworks */ = {isa = PBXBuildFile; productRef = 4A533A6E249452820048C0A6 /* OAuth2Wrapper */; };
 		4AAF05D62496765F006BE255 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 4AAF05D52496765F006BE255 /* Logging */; };
@@ -14,7 +15,6 @@
 		4AAF05DA24967D96006BE255 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF05D924967D96006BE255 /* UIImage.swift */; };
 		4AAF05DD2496A9FA006BE255 /* FMDB in Frameworks */ = {isa = PBXBuildFile; productRef = 4AAF05DC2496A9FA006BE255 /* FMDB */; };
 		4AAF05DF2496AC28006BE255 /* Wunderkammer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF05DE2496AC28006BE255 /* Wunderkammer.swift */; };
-		4AB1693C249294CC005303D7 /* CooperHewitt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB1693B249294CC005303D7 /* CooperHewitt.swift */; };
 		4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */; };
 		4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */; };
 		4ACA4ECF24905FB500E9E695 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4ECE24905FB500E9E695 /* ViewController.swift */; };
@@ -30,7 +30,6 @@
 		4AAF05D724967D71006BE255 /* UIText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIText.swift; sourceTree = "<group>"; };
 		4AAF05D924967D96006BE255 /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		4AAF05DE2496AC28006BE255 /* Wunderkammer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wunderkammer.swift; sourceTree = "<group>"; };
-		4AB1693B249294CC005303D7 /* CooperHewitt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CooperHewitt.swift; sourceTree = "<group>"; };
 		4ACA4EC724905FB500E9E695 /* wunderkammer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = wunderkammer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ACA4ECA24905FB500E9E695 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -49,6 +48,7 @@
 			files = (
 				4AAF05D62496765F006BE255 /* Logging in Frameworks */,
 				4AAF05DD2496A9FA006BE255 /* FMDB in Frameworks */,
+				4A4D15692497D8F100622E86 /* CooperHewittAPI in Frameworks */,
 				4A533A6F249452820048C0A6 /* OAuth2Wrapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -82,7 +82,6 @@
 				4ACA4ECE24905FB500E9E695 /* ViewController.swift */,
 				4AAF05D724967D71006BE255 /* UIText.swift */,
 				4AAF05D924967D96006BE255 /* UIImage.swift */,
-				4AB1693B249294CC005303D7 /* CooperHewitt.swift */,
 				4ACA4EDE2491333700E9E695 /* OEmbed.swift */,
 				4ACA4ED024905FB500E9E695 /* Main.storyboard */,
 				4ACA4ED324905FB600E9E695 /* Assets.xcassets */,
@@ -113,6 +112,7 @@
 				4A533A6E249452820048C0A6 /* OAuth2Wrapper */,
 				4AAF05D52496765F006BE255 /* Logging */,
 				4AAF05DC2496A9FA006BE255 /* FMDB */,
+				4A4D15682497D8F100622E86 /* CooperHewittAPI */,
 			);
 			productName = shoebox;
 			productReference = 4ACA4EC724905FB500E9E695 /* wunderkammer.app */;
@@ -146,6 +146,7 @@
 				4A533A6D249452820048C0A6 /* XCRemoteSwiftPackageReference "swift-oauth2-wrapper" */,
 				4AAF05D42496765F006BE255 /* XCRemoteSwiftPackageReference "swift-log" */,
 				4AAF05DB2496A9FA006BE255 /* XCRemoteSwiftPackageReference "fmdb" */,
+				4A4D15672497D8F100622E86 /* XCRemoteSwiftPackageReference "swift-cooperhewitt-api" */,
 			);
 			productRefGroup = 4ACA4EC824905FB500E9E695 /* Products */;
 			projectDirPath = "";
@@ -178,7 +179,6 @@
 				4ACA4ECF24905FB500E9E695 /* ViewController.swift in Sources */,
 				4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */,
 				4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */,
-				4AB1693C249294CC005303D7 /* CooperHewitt.swift in Sources */,
 				4AAF05D824967D71006BE255 /* UIText.swift in Sources */,
 				4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */,
 				4AAF05DA24967D96006BE255 /* UIImage.swift in Sources */,
@@ -392,6 +392,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4A4D15672497D8F100622E86 /* XCRemoteSwiftPackageReference "swift-cooperhewitt-api" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aaronland/swift-cooperhewitt-api";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.2;
+			};
+		};
 		4A533A6D249452820048C0A6 /* XCRemoteSwiftPackageReference "swift-oauth2-wrapper" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/aaronland/swift-oauth2-wrapper";
@@ -419,6 +427,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4A4D15682497D8F100622E86 /* CooperHewittAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4A4D15672497D8F100622E86 /* XCRemoteSwiftPackageReference "swift-cooperhewitt-api" */;
+			productName = CooperHewittAPI;
+		};
 		4A533A6E249452820048C0A6 /* OAuth2Wrapper */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4A533A6D249452820048C0A6 /* XCRemoteSwiftPackageReference "swift-oauth2-wrapper" */;
