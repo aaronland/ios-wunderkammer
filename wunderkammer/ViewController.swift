@@ -436,6 +436,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     /// - Tag: endScanning
     func readerSession(_ session: NFCNDEFReaderSession, didInvalidateWithError error: Error) {
+        
+        DispatchQueue.main.async {
+            self.nfc_indicator.isHidden = true
+            self.nfc_indicator.stopAnimating()
+        }
+        
         // Check the invalidation reason from the returned error.
         if let readerError = error as? NFCReaderError {
             // Show an alert when the invalidation reason is not because of a
