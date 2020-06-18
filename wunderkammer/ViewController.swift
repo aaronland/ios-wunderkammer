@@ -36,6 +36,7 @@ enum ViewControllerErrors : Error {
 class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     let app = UIApplication.shared.delegate as! AppDelegate
+    var opQueue = OperationQueue()
     
     let reuseIdentifier = "reuseIdentifier"
     var detectedMessages = [NFCNDEFMessage]()
@@ -68,18 +69,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        
-        let wrapper = OAuth2Wrapper(id: self.oauth2_id, callback_url: self.oauth2_callback_url)
-        wrapper.response_type = "code"
-        wrapper.allow_missing_state = true
-        wrapper.require_client_secret = false
-        wrapper.allow_null_expires = true
-        
-        self.oauth2_wrapper = wrapper
-        
-        nfc_indicator.isHidden = true
-        scanning_indicator.isHidden = true // TO DO: RENAME ME TO WAITING INDICATOR OR SOMETHING
-        
+      
         #if targetEnvironment(simulator)
         is_simulation  = true
         #elseif os(OSX)
@@ -90,23 +80,46 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         #endif
         #else
         #endif
+      
+        // why is this necessary? why don't the little show/hide buttons in
+        // Main.storyboard controls work? (20200618/thisisaaronland)
         
-        // TO DO: READ LOG LEVEL FROM Config.xcconfig
-        // app.logger.logLevel = .debug
-        // wrapper.logger.logLevel = .debug
-        
-        if is_simulation {
-            app.logger.logLevel = .debug
-            wrapper.logger.logLevel = .debug
-            app.logger.debug("Running in simulator environment.")
-        }
+        nfc_indicator.isHidden = true
+        scanning_indicator.isHidden = true // TO DO: RENAME ME TO WAITING INDICATOR OR SOMETHING
         
         if !NFCNDEFReaderSession.readingAvailable {
-         
+            
             if !is_simulation {
                 scan_button.isEnabled = false
                 scan_button.isHidden = true
             }
+        }
+        
+        let result = NewOAuth2WrapperConfigFromBundle(bundle: Bundle.main, prefix: "CooperHewitt")
+        
+        switch result {
+        case .failure(let error):
+            self.showAlert(label:"There was a problem configuring the application.", message: error.localizedDescription)
+            return
+        case .success(var config):
+            
+            config.ResponseType = "code"
+            config.AllowNullExpires = true
+            config.AllowMissingState = true
+            
+            print("CONFIG", config)
+            let wrapper = OAuth2Wrapper(config: config)
+            print("WRAPPER", wrapper)
+            
+            wrapper.logger.logLevel = .debug
+            
+            if is_simulation {
+                app.logger.logLevel = .debug
+                wrapper.logger.logLevel = .debug
+                app.logger.debug("Running in simulator environment.")
+            }
+            
+            self.oauth2_wrapper = wrapper
         }
     }
     
@@ -170,7 +183,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                         }
                         return
                     }
-                                        
+                    
                     // TO DO : PARSE THE OBJECT RESPONSE FOR ALL THE STUFF IN THE OEMBED THINGY
                     
                     let object_id = random.object.id
@@ -459,7 +472,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         // To read new tags, a new session instance is required.
         self.session = nil
- 
+        
     }
     
     private func processMessage(message: NFCNDEFMessage) {
@@ -648,25 +661,25 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         if self.current_object == "" {
             self.app.logger.debug("Missing object")
-
+            
             return .failure(ViewControllerErrors.wunderkammerMissingObject)
         }
         
         if self.current_oembed == nil {
             self.app.logger.debug("Missing oembed")
-
+            
             return .failure(ViewControllerErrors.wunderkammerMissingOEmbed)
         }
         
         if self.current_image == nil {
             self.app.logger.debug("Missing image")
-
+            
             return .failure(ViewControllerErrors.wunderkammerMissingImage)
         }
         
         guard let data_url = self.current_image!.dataURL() else {
             self.app.logger.debug("Missing data URL")
-
+            
             return .failure(ViewControllerErrors.wunderkammerMissingDataURL)
         }
         
@@ -701,7 +714,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             preferredStyle: .alert
         )
         alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        self.present(alertController, animated: true, completion: nil)
+
+        self.opQueue.addOperation {
+        OperationQueue.main.addOperation({
+            self.present(alertController, animated: true, completion: nil)
+        })
+        }
     }
     
     private func startSpinner() {
