@@ -42,9 +42,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     var detectedMessages = [NFCNDEFMessage]()
     var session: NFCNDEFReaderSession?
     
-    let oauth2_id = "wunderkammer://collection.cooperhewitt.org/access_token"
-    let oauth2_callback_url = "wunderkammer://oauth2"
-    
     var oauth2_wrapper: OAuth2Wrapper?
     
     var current_object = ""
