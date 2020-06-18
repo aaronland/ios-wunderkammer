@@ -69,7 +69,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     override func viewDidLoad() {
         
         super.viewDidLoad()
-      
+        
         #if targetEnvironment(simulator)
         is_simulation  = true
         #elseif os(OSX)
@@ -80,7 +80,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         #endif
         #else
         #endif
-      
+        
         // why is this necessary? why don't the little show/hide buttons in
         // Main.storyboard controls work? (20200618/thisisaaronland)
         
@@ -99,6 +99,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         switch result {
         case .failure(let error):
+            
+            scan_button.isEnabled = false
+            random_button.isEnabled = false
+            
             self.showAlert(label:"There was a problem configuring the application.", message: error.localizedDescription)
             return
         case .success(var config):
@@ -107,9 +111,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             config.AllowNullExpires = true
             config.AllowMissingState = true
             
-            print("CONFIG", config)
             let wrapper = OAuth2Wrapper(config: config)
-            print("WRAPPER", wrapper)
             
             wrapper.logger.logLevel = .debug
             
@@ -714,11 +716,11 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             preferredStyle: .alert
         )
         alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-
+        
         self.opQueue.addOperation {
-        OperationQueue.main.addOperation({
-            self.present(alertController, animated: true, completion: nil)
-        })
+            OperationQueue.main.addOperation({
+                self.present(alertController, animated: true, completion: nil)
+            })
         }
     }
     

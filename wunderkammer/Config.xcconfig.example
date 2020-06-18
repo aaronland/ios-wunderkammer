@@ -1,0 +1,26 @@
+//
+//  Config.xcconfig
+//  wunderkammer
+//
+//  Created by asc on 6/12/20.
+//  Copyright © 2020 Aaronland. All rights reserved.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+SLASH = /
+
+COOPERHEWITT_AUTH_URL = https:$(SLASH)/collection.cooperhewitt.org/api/oauth2/authenticate/
+
+COOPERHEWITT_TOKEN_URL = https:$(SLASH)/collection.cooperhewitt.org/api/oauth2/access_token/
+
+COOPERHEWITT_CALLBACK_URL = wunderkammer:$(SLASH)/oauth2
+
+COOPERHEWITT_CLIENT_ID = 
+
+COOPERHEWITT_CLIENT_SECRET =
+
+COOPERHEWITT_SCOPE = write
+
+COOPERHEWITT_KEYCHAIN_LABEL = wunderkammer://collection.cooperhewitt.org/access_token
