@@ -539,9 +539,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         DispatchQueue.global().async { [weak self] in
             
+            DispatchQueue.main.async {
+                self?.random_button.isEnabled = true
+            }
+            
             var oembed_data: Data?
             
-            print("HELLO")
             do {
                 oembed_data = try Data(contentsOf: url)
                 //let oembed_str = String(decoding: oembed_data!, as: UTF8.self)
@@ -561,7 +564,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             switch oembed_rsp {
             case .failure(let error):
                 
-                print("SAD", error)
                 self?.resetCurrent()
                 
                 DispatchQueue.main.async {
@@ -571,7 +573,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
             case .success(let oembed):
                 
-                print("OEMBED", oembed)
                 self?.displayOEmbed(oembed: oembed)
             default:
                 ()

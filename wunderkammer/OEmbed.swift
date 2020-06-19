@@ -27,5 +27,5 @@ struct OEmbed: Codable {
     var url: String
     var height: Int
     var width: Int
-    var thumbnail_url: String
+    var thumbnail_url: String?
 }
