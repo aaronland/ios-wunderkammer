@@ -127,6 +127,19 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.random_button.isEnabled = false
         self.startSpinner()
         
+        let str_url = "https://millsfield.sfomuseum.org/oembed?url=https://millsfield.sfomuseum.org/random"
+        
+        guard let url = URL(string: str_url) else {
+            DispatchQueue.main.async {
+                self.showAlert(label:"There was problem generating the URL for a random image", message: ViewControllerErrors.invalidURL.localizedDescription)
+            }
+            
+            return
+        }
+        
+        fetchOEmbed(url: url)
+        return
+        
         func getRandom(creds_rsp: Result<OAuthSwiftCredential, Error>){
             
             var credentials: OAuthSwiftCredential?
@@ -528,8 +541,11 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             
             var oembed_data: Data?
             
+            print("HELLO")
             do {
                 oembed_data = try Data(contentsOf: url)
+                //let oembed_str = String(decoding: oembed_data!, as: UTF8.self)
+                //print("DATA", oembed_str)
             } catch(let error){
                 
                 DispatchQueue.main.async {
@@ -545,6 +561,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             switch oembed_rsp {
             case .failure(let error):
                 
+                print("SAD", error)
                 self?.resetCurrent()
                 
                 DispatchQueue.main.async {
@@ -553,6 +570,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 }
                 
             case .success(let oembed):
+                
+                print("OEMBED", oembed)
                 self?.displayOEmbed(oembed: oembed)
             default:
                 ()
@@ -684,7 +703,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         let obj = WunderkammerObject(
             ID: self.current_object,
-            URL: self.current_oembed!.object_url,
+            URL: self.current_oembed!.object_url!,
             Image: data_url
         )
         
