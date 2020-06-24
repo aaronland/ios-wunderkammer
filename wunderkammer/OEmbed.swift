@@ -45,8 +45,8 @@ public class OEmbed {
     
     do {
         oembed_data = try Data(contentsOf: url)
-        let oembed_str = String(decoding: oembed_data!, as: UTF8.self)
-        print("DATA", oembed_str)
+        // let oembed_str = String(decoding: oembed_data!, as: UTF8.self)
+        // print("DATA", oembed_str)
     } catch(let error){
         
         return .failure(error)

@@ -12,14 +12,6 @@ import OAuthSwift
 import OAuth2Wrapper
 import CooperHewittAPI
 
-struct CooperHewittRandomObject: Codable {
-    var object: CooperHewittObject
-}
-
-struct CooperHewittObject: Codable  {
-    var id: String
-}
-
 enum ViewControllerErrors : Error {
     case tagUnknownURI
     case tagUnknownScheme
@@ -41,14 +33,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     let reuseIdentifier = "reuseIdentifier"
     var detectedMessages = [NFCNDEFMessage]()
     var session: NFCNDEFReaderSession?
-    
-    var oauth2_wrapper: OAuth2Wrapper?
-    
+        
     var current_collection: Collection?
-    
-    var current_object: String?
-    var current_image: UIImage?
     var current_oembed: CollectionOEmbed?
+    var current_image: UIImage?
     
     var collections = [Collection]()
     
@@ -125,7 +113,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 app.logger.debug("Running in simulator environment.")
             }
             
-            self.oauth2_wrapper = wrapper
+            let cooperhewitt_collection = CooperHewittCollection(oauth2_wrapper: wrapper)
+            print(cooperhewitt_collection)
         }
     }
     
@@ -241,7 +230,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             }
         }
         
-        DispatchQueue.global().async { [weak self] in
+        DispatchQueue.global().async {
             
             let result = collection.SaveObject(object:obj)
             
@@ -260,7 +249,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBAction func clear() {
         
-        self.current_object = ""
+        self.resetCurrent()
         
         self.scanned_image.image = nil
         self.scanned_image.isHidden = true
@@ -273,25 +262,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     @IBAction func scanTag() {
-        
-        if self.is_simulation {
-            
-            let object_id = "18704235"
-            self.current_object = object_id
-            
-            self.app.logger.debug("Running in simulator mode, assume object ID \(object_id).")
-            
-            let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
-            
-            guard let url = URL(string: str_url) else {
-                self.showError(error: ViewControllerErrors.invalidURL)
-                return
-            }
-            
-            fetchOEmbed(url: url)
-            return
-            
-        }
         
         self.app.logger.debug("Scan tag")
         
@@ -418,6 +388,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     private func processMessage(message: NFCNDEFMessage) {
         
+        // TBD... WHERE ARE PREFIXES -> COLLECTIONS REGISTERED...
+        
         self.app.logger.debug("Process message")
         
         let payload = message.records[0]
@@ -446,7 +418,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
         let object_id = String(path)
-        self.current_object = object_id
         
         self.app.logger.debug("Scanned object \(object_id)")
         
@@ -611,7 +582,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     private func resetCurrent(){
         
-        self.current_object = ""
+        self.current_collection = nil
         self.current_image = nil
         self.current_oembed = nil
     }

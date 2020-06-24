@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreNFC
 import FMDB
 
 public enum WunderkammerErrors: Error {
@@ -63,6 +64,10 @@ public class Wunderkammer: Collection  {
     }
     
     public func GetRandom() -> Result<URL, Error> {
+        return .failure(WunderkammerErrors.notImplemented)
+    }
+    
+    public func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error> {
         return .failure(WunderkammerErrors.notImplemented)
     }
     

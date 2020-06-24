@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreNFC
 
 public enum SFOMuseumErrors: Error {
     case notImplemented
@@ -89,5 +90,9 @@ public class SFOMuseumCollection: Collection {
     
     public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
         return .success(CollectionObjectSaveResponse.noop)
+    }
+    
+    public func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error> {
+        return .failure(SFOMuseumErrors.notImplemented)
     }
 }

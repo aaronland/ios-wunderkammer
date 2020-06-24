@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreNFC
 
 public struct CollectionObject {
     var ID: String
@@ -31,4 +32,5 @@ public protocol Collection {
     func GetRandom() -> Result<URL, Error>
     func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error>
     func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error>
+    func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error>
 }
