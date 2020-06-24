@@ -33,7 +33,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     let reuseIdentifier = "reuseIdentifier"
     var detectedMessages = [NFCNDEFMessage]()
     var session: NFCNDEFReaderSession?
-        
+    
     var current_collection: Collection?
     var current_oembed: CollectionOEmbed?
     var current_image: UIImage?
@@ -84,41 +84,58 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             }
         }
         
-        let sfomuseum_collection = SFOMuseumCollection()
-        self.collections.append(sfomuseum_collection)
+        let enable_sfomuseum = Bundle.main.object(forInfoDictionaryKey: "EnableSFOMuseum") as? String
         
-        let result = NewOAuth2WrapperConfigFromBundle(bundle: Bundle.main, prefix: "CooperHewitt")
+        if enable_sfomuseum != nil && enable_sfomuseum == "YES" {
+            let sfomuseum_collection = SFOMuseumCollection()
+            self.collections.append(sfomuseum_collection)
+        }
         
-        switch result {
-        case .failure(let error):
+        let enable_cooperhewitt = Bundle.main.object(forInfoDictionaryKey: "EnableCooperHewitt") as? String
+        
+        if enable_cooperhewitt != nil && enable_cooperhewitt == "YES" {
             
-            scan_button.isEnabled = false
-            random_button.isEnabled = false
+            let result = NewOAuth2WrapperConfigFromBundle(bundle: Bundle.main, prefix: "CooperHewitt")
             
-            self.showAlert(label:"There was a problem configuring the application.", message: error.localizedDescription)
-            return
-        case .success(var config):
-            
-            config.ResponseType = "code"
-            config.AllowNullExpires = true
-            config.AllowMissingState = true
-            
-            let wrapper = OAuth2Wrapper(config: config)
-            
-            wrapper.logger.logLevel = .debug
-            
-            if is_simulation {
-                app.logger.logLevel = .debug
+            switch result {
+            case .failure(let error):
+                
+                scan_button.isEnabled = false
+                random_button.isEnabled = false
+                
+                self.showAlert(label:"There was a problem configuring the application.", message: error.localizedDescription)
+                return
+            case .success(var config):
+                
+                config.ResponseType = "code"
+                config.AllowNullExpires = true
+                config.AllowMissingState = true
+                
+                let wrapper = OAuth2Wrapper(config: config)
+                
                 wrapper.logger.logLevel = .debug
-                app.logger.debug("Running in simulator environment.")
+                
+                if is_simulation {
+                    app.logger.logLevel = .debug
+                    wrapper.logger.logLevel = .debug
+                    app.logger.debug("Running in simulator environment.")
+                }
+                
+                let cooperhewitt_collection = CooperHewittCollection(oauth2_wrapper: wrapper)
+                print(cooperhewitt_collection)
             }
             
-            let cooperhewitt_collection = CooperHewittCollection(oauth2_wrapper: wrapper)
-            print(cooperhewitt_collection)
+        }
+        
+        if self.collections.count == 0 {            
+            self.showAlert(label:"There was a problem configuring the application.", message: "No collections have been enabled")
+            return
         }
     }
     
     @IBAction func random() {
+        
+        self.resetCurrent()
         
         self.random_button.isEnabled = false
         self.startSpinner()
@@ -129,13 +146,17 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         switch result {
             
         case .failure(let error):
+            
+            self.random_button.isEnabled = true
+            self.stopSpinner()
+            
             self.showAlert(label:"There was problem generating the URL for a random image", message: error.localizedDescription)
         case .success(let url):
             fetchOEmbed(url: url)
         default:
             ()
         }
-
+        
     }
     
     @IBAction func save() {
@@ -165,7 +186,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             URL: current_oembed.ObjectURL(),
             Image: data_url
         )
-            
+        
         save_button.isEnabled = false
         var completed = 0
         
@@ -243,7 +264,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 on_complete()
             }
         }
-    
+        
     }
     
     
@@ -449,7 +470,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             DispatchQueue.main.async {
                 self?.random_button.isEnabled = true
             }
-        
+            
             let result = current_collection.GetOEmbed(url: url)
             
             switch result {
