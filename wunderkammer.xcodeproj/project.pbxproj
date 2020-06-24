@@ -10,6 +10,9 @@
 		4A4D15692497D8F100622E86 /* CooperHewittAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 4A4D15682497D8F100622E86 /* CooperHewittAPI */; };
 		4A533A6C24944EF30048C0A6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4A533A6B24944EF30048C0A6 /* Config.xcconfig */; };
 		4A533A6F249452820048C0A6 /* OAuth2Wrapper in Frameworks */ = {isa = PBXBuildFile; productRef = 4A533A6E249452820048C0A6 /* OAuth2Wrapper */; };
+		4A8D8CD124A3C093005AC432 /* SFOMuseum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD024A3C093005AC432 /* SFOMuseum.swift */; };
+		4A8D8CD324A3C140005AC432 /* CooperHewitt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD224A3C140005AC432 /* CooperHewitt.swift */; };
+		4A8D8CD524A3C31E005AC432 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD424A3C31E005AC432 /* Collection.swift */; };
 		4AAF05D62496765F006BE255 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 4AAF05D52496765F006BE255 /* Logging */; };
 		4AAF05D824967D71006BE255 /* UIText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF05D724967D71006BE255 /* UIText.swift */; };
 		4AAF05DA24967D96006BE255 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF05D924967D96006BE255 /* UIImage.swift */; };
@@ -26,6 +29,9 @@
 
 /* Begin PBXFileReference section */
 		4A533A6B24944EF30048C0A6 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		4A8D8CD024A3C093005AC432 /* SFOMuseum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFOMuseum.swift; sourceTree = "<group>"; };
+		4A8D8CD224A3C140005AC432 /* CooperHewitt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CooperHewitt.swift; sourceTree = "<group>"; };
+		4A8D8CD424A3C31E005AC432 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		4AAEB6942493DD5300A75F71 /* wunderkammer.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = wunderkammer.entitlements; sourceTree = "<group>"; };
 		4AAF05D724967D71006BE255 /* UIText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIText.swift; sourceTree = "<group>"; };
 		4AAF05D924967D96006BE255 /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
@@ -80,6 +86,9 @@
 				4AAF05DE2496AC28006BE255 /* Wunderkammer.swift */,
 				4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */,
 				4ACA4ECE24905FB500E9E695 /* ViewController.swift */,
+				4A8D8CD024A3C093005AC432 /* SFOMuseum.swift */,
+				4A8D8CD224A3C140005AC432 /* CooperHewitt.swift */,
+				4A8D8CD424A3C31E005AC432 /* Collection.swift */,
 				4AAF05D724967D71006BE255 /* UIText.swift */,
 				4AAF05D924967D96006BE255 /* UIImage.swift */,
 				4ACA4EDE2491333700E9E695 /* OEmbed.swift */,
@@ -177,11 +186,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				4ACA4ECF24905FB500E9E695 /* ViewController.swift in Sources */,
+				4A8D8CD524A3C31E005AC432 /* Collection.swift in Sources */,
 				4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */,
 				4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */,
 				4AAF05D824967D71006BE255 /* UIText.swift in Sources */,
 				4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */,
 				4AAF05DA24967D96006BE255 /* UIImage.swift in Sources */,
+				4A8D8CD124A3C093005AC432 /* SFOMuseum.swift in Sources */,
+				4A8D8CD324A3C140005AC432 /* CooperHewitt.swift in Sources */,
 				4AAF05DF2496AC28006BE255 /* Wunderkammer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -330,13 +342,13 @@
 				CODE_SIGN_ENTITLEMENTS = wunderkammer/wunderkammer.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 68966928SB;
+				DEVELOPMENT_TEAM = JVV5KS8E69;
 				INFOPLIST_FILE = "$(SRCROOT)/wunderkammer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.sfomuseum.wunderkammer;
+				PRODUCT_BUNDLE_IDENTIFIER = info.aaronland.wunderkammer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = YES;
@@ -353,13 +365,13 @@
 				CODE_SIGN_ENTITLEMENTS = wunderkammer/wunderkammer.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 68966928SB;
+				DEVELOPMENT_TEAM = JVV5KS8E69;
 				INFOPLIST_FILE = "$(SRCROOT)/wunderkammer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.sfomuseum.wunderkammer;
+				PRODUCT_BUNDLE_IDENTIFIER = info.aaronland.wunderkammer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = YES;

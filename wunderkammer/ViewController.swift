@@ -44,9 +44,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     var oauth2_wrapper: OAuth2Wrapper?
     
-    var current_object = ""
+    var current_collection: Collection?
+    
+    var current_object: String?
     var current_image: UIImage?
     var current_oembed: OEmbed?
+    
+    var collections = [Collection]()
     
     var is_simulation = false
     
@@ -92,6 +96,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             }
         }
         
+        let sfomuseum_collection = SFOMuseumCollection()
+        self.collections.append(sfomuseum_collection)
+        
+        
         let result = NewOAuth2WrapperConfigFromBundle(bundle: Bundle.main, prefix: "CooperHewitt")
         
         switch result {
@@ -127,103 +135,32 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.random_button.isEnabled = false
         self.startSpinner()
         
-        let str_url = "https://millsfield.sfomuseum.org/oembed?url=https://millsfield.sfomuseum.org/random"
+        self.current_collection = self.collections.randomElement()!
+        let result = self.current_collection?.GetRandom()
         
-        guard let url = URL(string: str_url) else {
-            DispatchQueue.main.async {
-                self.showAlert(label:"There was problem generating the URL for a random image", message: ViewControllerErrors.invalidURL.localizedDescription)
-            }
+        switch result {
             
-            return
+        case .failure(let error):
+            self.showAlert(label:"There was problem generating the URL for a random image", message: error.localizedDescription)
+        case .success(let url):
+            fetchOEmbed(url: url)
+        default:
+            ()
         }
-        
-        fetchOEmbed(url: url)
-        return
-        
-        func getRandom(creds_rsp: Result<OAuthSwiftCredential, Error>){
-            
-            var credentials: OAuthSwiftCredential?
-            switch creds_rsp {
-            case .failure(let error):
-                
-                DispatchQueue.main.async {
-                    self.random_button.isEnabled = true
-                    self.stopSpinner()
-                    self.showAlert(label:"There was a problem authorizing your account", message: error.localizedDescription)
-                }
-                
-                return
-            case .success(let creds):
-                credentials = creds
-            }
-            
-            let api = CooperHewittAPI(access_token: credentials!.oauthToken)
-            
-            let method = "cooperhewitt.objects.getRandom"
-            var params = [String:String]()
-            params["has_image"] = "1"
-            
-            func completion(result: Result<CooperHewittAPIResponse, Error>) {
-                
-                DispatchQueue.main.async {
-                    self.random_button.isEnabled = true
-                    self.stopSpinner()
-                }
-                
-                switch result {
-                case .failure(let error):
-                    DispatchQueue.main.async {
-                        self.showAlert(label:"There was a problem getting a random image", message: error.localizedDescription)
-                    }
-                    
-                    return
-                    
-                case .success(let api_rsp):
-                    
-                    let decoder = JSONDecoder()
-                    var random: CooperHewittRandomObject
-                    
-                    do {
-                        random = try decoder.decode(CooperHewittRandomObject.self, from: api_rsp.Data)
-                    } catch(let error) {
-                        
-                        let str_data = String(decoding: api_rsp.Data, as: UTF8.self)
-                        print(str_data)
-                        
-                        DispatchQueue.main.async {
-                            self.showAlert(label:"There was problem understand the random image", message: error.localizedDescription)
-                        }
-                        return
-                    }
-                    
-                    // TO DO : PARSE THE OBJECT RESPONSE FOR ALL THE STUFF IN THE OEMBED THINGY
-                    
-                    let object_id = random.object.id
-                    self.current_object = object_id
-                    
-                    let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
-                    
-                    guard let url = URL(string: str_url) else {
-                        DispatchQueue.main.async {
-                            self.showAlert(label:"There was problem generating the URL for a random image", message: ViewControllerErrors.invalidURL.localizedDescription)
-                        }
-                        
-                        return
-                    }
-                    
-                    fetchOEmbed(url: url)
-                }
-                
-                
-            }
-            
-            api.ExecuteMethod(method: method, params: params, completion:completion)
-        }
-        
-        self.oauth2_wrapper!.GetAccessToken(completion: getRandom)
+
     }
     
     @IBAction func save() {
+        
+        guard let collection = self.current_collection else {
+            self.showAlert(label:"There was problem saving this object", message: "Unable to determine current collection.")
+            return
+        }
+        
+        guard  let current_object = self.current_object else {
+            self.showAlert(label:"There was problem saving this object", message: "Unable to determine current object.")
+            return
+        }
         
         save_button.isEnabled = false
         var completed = 0
@@ -291,41 +228,18 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         DispatchQueue.global().async { [weak self] in
             
-            func doSave(creds_rsp: Result<OAuthSwiftCredential, Error>){
-                
-                var credentials: OAuthSwiftCredential?
-                switch creds_rsp {
+            let result = collection.SaveObject(id: current_object)
+            
+            switch result {
                 case .failure(let error):
                     error_remote = error
-                    on_complete()
-                    return
-                case .success(let creds):
-                    credentials = creds
+                case .success:
+                    ()
                 }
-                
-                let api = CooperHewittAPI(access_token: credentials!.oauthToken)
-                
-                let method = "cooperhewitt.shoebox.items.collectItem"
-                var params = [String:String]()
-                params["object_id"] = self?.current_object
-                
-                func completion(rsp: Result<CooperHewittAPIResponse, Error>) {
-                    
-                    if case .failure(let error) = rsp {
-                        error_remote = error
-                    }
-                    
-                    on_complete()
-                }
-                
-                api.ExecuteMethod(method: method, params: params, completion:completion)
-            }
             
-            DispatchQueue.main.async {
-                self?.app.logger.debug("Get credentials to save object")
-                self?.oauth2_wrapper!.GetAccessToken(completion: doSave)
-            }
+            on_complete()
         }
+    
     }
     
     
@@ -703,7 +617,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
         let obj = WunderkammerObject(
-            ID: self.current_object,
+            ID: self.current_object!,
             URL: self.current_oembed!.object_url!,
             Image: data_url
         )
