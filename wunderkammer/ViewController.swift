@@ -151,9 +151,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBAction func save() {
         
-        print("SAVE", self.current_collection)
-        print("SAVE", self.current_oembed)
-        
         guard let collection = self.current_collection else {
             self.showAlert(label:"There was problem saving this object", message: "Unable to determine current collection.")
             return
@@ -179,9 +176,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             URL: current_oembed.ObjectURL(),
             Image: data_url
         )
-        
-        print("SAVE", obj)
-        return
             
         save_button.isEnabled = false
         var completed = 0
@@ -507,10 +501,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     private func displayOEmbed(oembed: CollectionOEmbed) {
         
-        let object_url = oembed.ObjectURL()
+        let image_url = oembed.ImageURL()
         let title = oembed.ObjectTitle()
         
-        guard let url = URL(string: object_url) else {
+        guard let url = URL(string: image_url) else {
             self.showError(error: ViewControllerErrors.invalidURL)
             return
         }

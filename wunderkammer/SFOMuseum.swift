@@ -20,23 +20,23 @@ public class SFOMuseumOEmbed: CollectionOEmbed {
     
     public init?(oembed: OEmbedResponse) {
         
-        guard let _ = oembed.object_url else {
+        guard let _ = oembed.author_url else {
             return nil
         }
-        
-        guard let _ = oembed.object_id else {
-            return nil
-        }
-        
+
         self.oembed = oembed
     }
     
     public func ObjectID() -> String {
-        return self.oembed.object_id!
+        
+        let auth_url = self.oembed.author_url!
+        
+        let fname = (auth_url as NSString).lastPathComponent
+        return fname
     }
     
     public func ObjectURL() -> String {
-        return self.oembed.object_url!
+        return self.oembed.author_url!
     }
     
     public func ObjectTitle() -> String {
@@ -87,7 +87,7 @@ public class SFOMuseumCollection: Collection {
         return .success(url)
     }
     
-    public func SaveObject(object: CollectionObject) -> Result<Bool, Error> {
-        return .success(true)
+    public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
+        return .success(CollectionObjectSaveResponse.noop)
     }
 }

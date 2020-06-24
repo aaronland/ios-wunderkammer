@@ -75,74 +75,12 @@ public class CooperHewittCollection: Collection {
         }
     }
     
-    public func SaveObject(object: CollectionObject) -> Result<Bool, Error> {
+    public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
         return .failure(CooperHewittErrors.notImplemented)
         
         /*
          
-         var error_local: Error?
-         var error_remote: Error?
-         
-         func error_message(error: Error) -> String {
-             
-             switch error {
-             case is CooperHewittAPIError:
-                 let api_error = error as! CooperHewittAPIError
-                 return api_error.Message
-             default:
-                 return error.localizedDescription
-             }
-         }
-         
-         func on_complete() {
-             
-             completed += 1
-             
-             if completed < 2 {
-                 return
-             }
-             
-             DispatchQueue.main.async {
-                 
-                 self.save_button.isEnabled = true
-                 
-                 if error_local != nil && error_remote != nil {
-                     
-                     let message = String(format:"%@ (local) %@ (remote)", error_message(error: error_local!), error_message(error: error_remote!))
-                     
-                     self.showAlert(label: "There were multiple problem saving this object remotely.", message: message)
-                     
-                 } else if error_remote != nil {
-                     
-                     self.showAlert(label: "This object was saved to your device but there was a problem saving this object remotely.", message: error_message(error: error_remote!))
-                     
-                 } else if error_local != nil {
-                     
-                     self.showAlert(label: "This object was saved remotely but there was a problem saving this object to your device.", message: error_message(error: error_local!))
-                     
-                 } else {
-                     self.showAlert(label: "This object has been saved.", message: "This object has been saved locally and remotely")
-                 }
-                 
-             }
-         }
-         
-         DispatchQueue.global().async { [weak self] in
-             
-             let rsp = self?.addToWunderkammer()
-             
-             DispatchQueue.main.async {
-                 
-                 if case .failure(let error) = rsp {
-                     error_local = error
-                 }
-                 
-                 on_complete()
-             }
-         }
-         
-         DispatchQueue.global().async { [weak self] in
-             
+        
              func doSave(creds_rsp: Result<OAuthSwiftCredential, Error>){
                  
                  var credentials: OAuthSwiftCredential?
@@ -173,10 +111,7 @@ public class CooperHewittCollection: Collection {
                  api.ExecuteMethod(method: method, params: params, completion:completion)
              }
              
-             DispatchQueue.main.async {
-                 self?.app.logger.debug("Get credentials to save object")
                  self?.oauth2_wrapper!.GetAccessToken(completion: doSave)
-             }
          }
          */
     }

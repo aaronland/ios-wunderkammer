@@ -24,8 +24,9 @@ public struct OEmbedResponse: Codable {
     var type: String
     var provider_name: String
     var title: String
-    var object_url: String?
-    var object_id: String?
+    var object_url: String? // Cooper Hewitt
+    var object_id: String?  // Cooper Hewitt
+    var author_url: String? // SFO Museum
     var url: String
     var height: Int
     var width: Int
@@ -44,8 +45,8 @@ public class OEmbed {
     
     do {
         oembed_data = try Data(contentsOf: url)
-        //let oembed_str = String(decoding: oembed_data!, as: UTF8.self)
-        //print("DATA", oembed_str)
+        let oembed_str = String(decoding: oembed_data!, as: UTF8.self)
+        print("DATA", oembed_str)
     } catch(let error){
         
         return .failure(error)

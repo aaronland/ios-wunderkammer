@@ -14,6 +14,11 @@ public struct CollectionObject {
     var Image: String
 }
 
+public enum CollectionObjectSaveResponse {
+    case success
+    case noop
+}
+
 public protocol CollectionOEmbed {
     func ObjectID() -> String
     func ObjectURL() -> String
@@ -24,6 +29,6 @@ public protocol CollectionOEmbed {
 
 public protocol Collection {
     func GetRandom() -> Result<URL, Error>
-    func SaveObject(object: CollectionObject) -> Result<Bool, Error>
+    func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error>
     func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error>
 }

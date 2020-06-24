@@ -66,7 +66,7 @@ public class Wunderkammer: Collection  {
         return .failure(WunderkammerErrors.notImplemented)
     }
     
-    public func SaveObject(object: CollectionObject) -> Result<Bool, Error> {
+    public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
         
         do {
             try self.database.executeUpdate("INSERT OR REPLACE INTO objects (url, id, image) values (?, ?, ?)", values: [object.URL, object.ID, object.Image])
@@ -74,7 +74,7 @@ public class Wunderkammer: Collection  {
             return .failure(error)
         }
 
-        return .success(true)
+        return .success(CollectionObjectSaveResponse.success)
     }
     
 }
