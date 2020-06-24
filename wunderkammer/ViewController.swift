@@ -48,7 +48,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     var current_object: String?
     var current_image: UIImage?
-    var current_oembed: OEmbed?
+    var current_oembed: CollectionOEmbed?
     
     var collections = [Collection]()
     
@@ -98,7 +98,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         let sfomuseum_collection = SFOMuseumCollection()
         self.collections.append(sfomuseum_collection)
-        
         
         let result = NewOAuth2WrapperConfigFromBundle(bundle: Bundle.main, prefix: "CooperHewitt")
         
@@ -152,16 +151,38 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBAction func save() {
         
+        print("SAVE", self.current_collection)
+        print("SAVE", self.current_oembed)
+        
         guard let collection = self.current_collection else {
             self.showAlert(label:"There was problem saving this object", message: "Unable to determine current collection.")
             return
         }
         
-        guard  let current_object = self.current_object else {
-            self.showAlert(label:"There was problem saving this object", message: "Unable to determine current object.")
+        guard let current_oembed = self.current_oembed else {
+            self.showAlert(label:"There was problem saving this object", message: "Unable to determine current object data.")
             return
         }
         
+        guard let current_image = self.current_image else {
+            self.showAlert(label:"There was problem saving this object", message: "Unable to determine current object image.")
+            return
+        }
+        
+        guard let data_url = current_image.dataURL() else {
+            self.showAlert(label:"There was problem saving this object", message: ViewControllerErrors.wunderkammerMissingDataURL.localizedDescription)
+            return
+        }
+        
+        let obj = CollectionObject(
+            ID: current_oembed.ObjectID(),
+            URL: current_oembed.ObjectURL(),
+            Image: data_url
+        )
+        
+        print("SAVE", obj)
+        return
+            
         save_button.isEnabled = false
         var completed = 0
         
@@ -214,11 +235,11 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         DispatchQueue.global().async { [weak self] in
             
-            let rsp = self?.addToWunderkammer()
+            let result = self?.app.wunderkammer!.SaveObject(object: obj)
             
             DispatchQueue.main.async {
                 
-                if case .failure(let error) = rsp {
+                if case .failure(let error) = result {
                     error_local = error
                 }
                 
@@ -228,16 +249,16 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         DispatchQueue.global().async { [weak self] in
             
-            let result = collection.SaveObject(id: current_object)
+            let result = collection.SaveObject(object:obj)
             
-            switch result {
-                case .failure(let error):
-                    error_remote = error
-                case .success:
-                    ()
+            DispatchQueue.main.async {
+                
+                if case .failure(let error) = result {
+                    error_local = error
                 }
-            
-            on_complete()
+                
+                on_complete()
+            }
         }
     
     }
@@ -447,6 +468,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     private func fetchOEmbed(url: URL) {
         
+        guard let current_collection = self.current_collection else {
+            DispatchQueue.main.async {
+                self.showAlert(label:"Unable to fetch object information", message: "Unable to determine current collection")
+            }
+            return
+        }
+        
         DispatchQueue.main.async {
             self.startSpinner()
         }
@@ -456,26 +484,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             DispatchQueue.main.async {
                 self?.random_button.isEnabled = true
             }
+        
+            let result = current_collection.GetOEmbed(url: url)
             
-            var oembed_data: Data?
-            
-            do {
-                oembed_data = try Data(contentsOf: url)
-                //let oembed_str = String(decoding: oembed_data!, as: UTF8.self)
-                //print("DATA", oembed_str)
-            } catch(let error){
-                
-                DispatchQueue.main.async {
-                    self?.stopSpinner()
-                    self?.showAlert(label:"Unable to fetch object information", message: error.localizedDescription)
-                }
-                
-                return
-            }
-            
-            let oembed_rsp = self?.parseOEmbed(data: oembed_data!)
-            
-            switch oembed_rsp {
+            switch result {
             case .failure(let error):
                 
                 self?.resetCurrent()
@@ -485,40 +497,26 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                     self?.showAlert(label:"Unable to load object information", message: error.localizedDescription)
                 }
                 
-            case .success(let oembed):
-                
-                self?.displayOEmbed(oembed: oembed)
-            default:
-                ()
+            case .success(let oembed_response):
+                self?.current_oembed = oembed_response
+                self?.displayOEmbed(oembed: oembed_response)
             }
             
         }
     }
     
-    private func parseOEmbed(data: Data) -> Result<OEmbed, Error> {
+    private func displayOEmbed(oembed: CollectionOEmbed) {
         
-        let decoder = JSONDecoder()
-        var oembed: OEmbed
+        let object_url = oembed.ObjectURL()
+        let title = oembed.ObjectTitle()
         
-        do {
-            oembed = try decoder.decode(OEmbed.self, from: data)
-        } catch(let error) {
-            return .failure(error)
-        }
-        
-        self.current_oembed = oembed
-        return .success(oembed)
-    }
-    
-    private func displayOEmbed(oembed: OEmbed) {
-        
-        guard let url = URL(string: oembed.url) else {
+        guard let url = URL(string: object_url) else {
             self.showError(error: ViewControllerErrors.invalidURL)
             return
         }
         
         DispatchQueue.main.async {
-            self.scanned_meta.text = oembed.title
+            self.scanned_meta.text = title
             self.scanned_meta.updateTextFont()
             self.scanned_meta.isHidden = false
         }
@@ -582,54 +580,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 self?.save_button.isHidden = false
                 self?.clear_button.isHidden = false
             }
-        }
-    }
-    
-    private func addToWunderkammer() -> Result<Void, Error> {
-        
-        if self.app.wunderkammer == nil {
-            self.app.logger.debug("Missing wunderkammer db")
-            return .failure(ViewControllerErrors.wunderkammerMissingDatabase)
-        }
-        
-        if self.current_object == "" {
-            self.app.logger.debug("Missing object")
-            
-            return .failure(ViewControllerErrors.wunderkammerMissingObject)
-        }
-        
-        if self.current_oembed == nil {
-            self.app.logger.debug("Missing oembed")
-            
-            return .failure(ViewControllerErrors.wunderkammerMissingOEmbed)
-        }
-        
-        if self.current_image == nil {
-            self.app.logger.debug("Missing image")
-            
-            return .failure(ViewControllerErrors.wunderkammerMissingImage)
-        }
-        
-        guard let data_url = self.current_image!.dataURL() else {
-            self.app.logger.debug("Missing data URL")
-            
-            return .failure(ViewControllerErrors.wunderkammerMissingDataURL)
-        }
-        
-        let obj = WunderkammerObject(
-            ID: self.current_object!,
-            URL: self.current_oembed!.object_url!,
-            Image: data_url
-        )
-        
-        let add_rsp = self.app.wunderkammer!.AddObject(object: obj)
-        
-        switch add_rsp {
-            
-        case .failure(let error):
-            return .failure(error)
-        case .success():
-            return .success(())
         }
     }
     

@@ -19,7 +19,7 @@ import Foundation
  {"version":"1.0","type":"photo","width":"800","height":"569","title":"photograph: San Francisco Airport, aerial view","url":"https:\/\/millsfield.sfomuseum.org\/media\/152\/785\/348\/1\/1527853481_Ui4MX67lVGt4uDdlMINgOe08QupC2H0Z_c.jpg","author_name":"SFO Museum","author_url":"https:\/\/millsfield.sfomuseum.org\/objects\/1511943457\/","provider_name":"SFO Museum","provider_url":"https:\/\/millsfield.sfomuseum.org\/","geotag:geojson_url":"https:\/\/millsfield.sfomuseum.org\/data\/1511943457\/","geotag:uri":"151\/194\/345\/7\/1511943457.geojson"}
  */
 
-public struct OEmbed: Codable {
+public struct OEmbedResponse: Codable {
     var version: String
     var type: String
     var provider_name: String
@@ -32,7 +32,13 @@ public struct OEmbed: Codable {
     var thumbnail_url: String?
 }
 
-public func FetchOEmbed(url: URL) -> Result<OEmbed, Error> {
+public class OEmbed {
+    
+    public init() {
+        
+    }
+
+    public func Fetch(url: URL) -> Result<OEmbedResponse, Error> {
     
     var oembed_data: Data?
     
@@ -45,19 +51,21 @@ public func FetchOEmbed(url: URL) -> Result<OEmbed, Error> {
         return .failure(error)
     }
     
-    return parseOEmbed(data: oembed_data!)
+        return self.parseOEmbed(data: oembed_data!)
 }
 
-private func parseOEmbed(data: Data) -> Result<OEmbed, Error> {
+private func parseOEmbed(data: Data) -> Result<OEmbedResponse, Error> {
     
     let decoder = JSONDecoder()
-    var oembed: OEmbed
+    var oembed: OEmbedResponse
     
     do {
-        oembed = try decoder.decode(OEmbed.self, from: data)
+        oembed = try decoder.decode(OEmbedResponse.self, from: data)
     } catch(let error) {
         return .failure(error)
     }
     
     return .success(oembed)
 }
+}
+

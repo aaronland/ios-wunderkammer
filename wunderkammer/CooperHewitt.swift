@@ -10,15 +10,72 @@ import Foundation
 
 public enum CooperHewittErrors: Error {
     case notImplemented
+    case invalidOEmbed
+}
+
+public class CooperHewittOEmbed: CollectionOEmbed {
+    
+    private var oembed: OEmbedResponse
+    
+    public init?(oembed: OEmbedResponse) {
+        
+        guard let _ = oembed.object_url else {
+            return nil
+        }
+        
+        guard let _ = oembed.object_id else {
+            return nil
+        }
+        
+        self.oembed = oembed
+    }
+    
+    public func ObjectID() -> String {
+        return self.oembed.object_id!
+    }
+    
+    public func ObjectURL() -> String {
+        return self.oembed.object_url!
+    }
+    
+    public func ObjectTitle() -> String {
+        return self.oembed.title
+    }
+    
+    public func ImageURL() -> String {
+        return self.oembed.url
+    }
+    
+    public func Raw() -> OEmbedResponse {
+        return self.oembed        
+    }
 }
 
 public class CooperHewittCollection: Collection {
     
-    public init() {
+    public init?() {
         
     }
     
-    public func SaveObject(id: String) -> Result<Bool, Error> {
+    public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
+        
+        let oembed = OEmbed()        
+        let result = oembed.Fetch(url: url)
+        
+        switch result {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let oembed_response):
+            
+            guard let cooperhewitt_oembed = CooperHewittOEmbed(oembed: oembed_response) else {
+                return .failure(CooperHewittErrors.invalidOEmbed)
+            }
+            
+            return .success(cooperhewitt_oembed)
+        }
+    }
+    
+    public func SaveObject(object: CollectionObject) -> Result<Bool, Error> {
         return .failure(CooperHewittErrors.notImplemented)
         
         /*

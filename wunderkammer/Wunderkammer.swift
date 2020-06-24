@@ -9,13 +9,11 @@
 import Foundation
 import FMDB
 
-struct WunderkammerObject {
-    var ID: String
-    var URL: String
-    var Image: String
+public enum WunderkammerErrors: Error {
+    case notImplemented
 }
 
-class Wunderkammer {
+public class Wunderkammer: Collection  {
     
     private let objects_schema = "CREATE TABLE objects(url TEXT PRIMARY KEY, id TEXT, image TEXT, created DATE)"
     private var database: FMDatabase
@@ -60,7 +58,15 @@ class Wunderkammer {
         }
     }
     
-    public func AddObject(object: WunderkammerObject) -> Result<Void, Error> {
+    public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
+        return .failure(WunderkammerErrors.notImplemented)
+    }
+    
+    public func GetRandom() -> Result<URL, Error> {
+        return .failure(WunderkammerErrors.notImplemented)
+    }
+    
+    public func SaveObject(object: CollectionObject) -> Result<Bool, Error> {
         
         do {
             try self.database.executeUpdate("INSERT OR REPLACE INTO objects (url, id, image) values (?, ?, ?)", values: [object.URL, object.ID, object.Image])
@@ -68,7 +74,7 @@ class Wunderkammer {
             return .failure(error)
         }
 
-        return .success(())
+        return .success(true)
     }
     
 }
