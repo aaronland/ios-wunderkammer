@@ -121,8 +121,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                     app.logger.debug("Running in simulator environment.")
                 }
                 
-                let cooperhewitt_collection = CooperHewittCollection(oauth2_wrapper: wrapper)
-                print(cooperhewitt_collection)
+                guard let cooperhewitt_collection = CooperHewittCollection(oauth2_wrapper: wrapper) else {
+                    self.showAlert(label:"There was a problem configuring the application.", message: "Unable to initialize Cooper Hewitt collection.")
+                    return
+                }
+                
+                
+                self.collections.append(cooperhewitt_collection)
             }
             
         }

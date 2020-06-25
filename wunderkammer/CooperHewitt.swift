@@ -10,7 +10,17 @@ import Foundation
 import CoreNFC
 
 import OAuth2Wrapper
-// import CooperHewittAPI
+import OAuthSwift
+
+import CooperHewittAPI
+
+struct CooperHewittRandomObject: Codable {
+    var object: CooperHewittObject
+}
+
+struct CooperHewittObject: Codable  {
+    var id: String
+}
 
 public enum CooperHewittErrors: Error {
     case notImplemented
@@ -86,134 +96,123 @@ public class CooperHewittCollection: Collection {
     }
     
     public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
-        return .failure(CooperHewittErrors.notImplemented)
+        
+        return .success(CollectionObjectSaveResponse.noop)
         
         /*
          
-        
-             func doSave(creds_rsp: Result<OAuthSwiftCredential, Error>){
-                 
-                 var credentials: OAuthSwiftCredential?
-                 switch creds_rsp {
-                 case .failure(let error):
-                     error_remote = error
-                     on_complete()
-                     return
-                 case .success(let creds):
-                     credentials = creds
-                 }
-                 
-                 let api = CooperHewittAPI(access_token: credentials!.oauthToken)
-                 
-                 let method = "cooperhewitt.shoebox.items.collectItem"
-                 var params = [String:String]()
-                 params["object_id"] = self?.current_object
-                 
-                 func completion(rsp: Result<CooperHewittAPIResponse, Error>) {
-                     
-                     if case .failure(let error) = rsp {
-                         error_remote = error
-                     }
-                     
-                     on_complete()
-                 }
-                 
-                 api.ExecuteMethod(method: method, params: params, completion:completion)
-             }
-             
-                 self.oauth2_wrapper.GetAccessToken(completion: doSave)
+         
+         func doSave(creds_rsp: Result<OAuthSwiftCredential, Error>){
+         
+         var credentials: OAuthSwiftCredential?
+         switch creds_rsp {
+         case .failure(let error):
+         error_remote = error
+         on_complete()
+         return
+         case .success(let creds):
+         credentials = creds
+         }
+         
+         let api = CooperHewittAPI(access_token: credentials!.oauthToken)
+         
+         let method = "cooperhewitt.shoebox.items.collectItem"
+         var params = [String:String]()
+         params["object_id"] = self?.current_object
+         
+         func completion(rsp: Result<CooperHewittAPIResponse, Error>) {
+         
+         if case .failure(let error) = rsp {
+         error_remote = error
+         }
+         
+         on_complete()
+         }
+         
+         api.ExecuteMethod(method: method, params: params, completion:completion)
+         }
+         
+         self.oauth2_wrapper.GetAccessToken(completion: doSave)
          }
          */
     }
     
     public func GetRandom() -> Result<URL, Error> {
         
-        return .failure(CooperHewittErrors.notImplemented)
+        // return .failure(CooperHewittErrors.notImplemented)
         
-        /*
-         
-         func getRandom(creds_rsp: Result<OAuthSwiftCredential, Error>){
-             
-             var credentials: OAuthSwiftCredential?
-             switch creds_rsp {
-             case .failure(let error):
-                 
-                 DispatchQueue.main.async {
-                     self.random_button.isEnabled = true
-                     self.stopSpinner()
-                     self.showAlert(label:"There was a problem authorizing your account", message: error.localizedDescription)
-                 }
-                 
-                 return
-             case .success(let creds):
-                 credentials = creds
-             }
-             
-             let api = CooperHewittAPI(access_token: credentials!.oauthToken)
-             
-             let method = "cooperhewitt.objects.getRandom"
-             var params = [String:String]()
-             params["has_image"] = "1"
-             
-             func completion(result: Result<CooperHewittAPIResponse, Error>) {
-                 
-                 DispatchQueue.main.async {
-                     self.random_button.isEnabled = true
-                     self.stopSpinner()
-                 }
-                 
-                 switch result {
-                 case .failure(let error):
-                     DispatchQueue.main.async {
-                         self.showAlert(label:"There was a problem getting a random image", message: error.localizedDescription)
-                     }
-                     
-                     return
-                     
-                 case .success(let api_rsp):
-                     
-                     let decoder = JSONDecoder()
-                     var random: CooperHewittRandomObject
-                     
-                     do {
-                         random = try decoder.decode(CooperHewittRandomObject.self, from: api_rsp.Data)
-                     } catch(let error) {
-                         
-                         let str_data = String(decoding: api_rsp.Data, as: UTF8.self)
-                         print(str_data)
-                         
-                         DispatchQueue.main.async {
-                             self.showAlert(label:"There was problem understand the random image", message: error.localizedDescription)
-                         }
-                         return
-                     }
-                     
-                     // TO DO : PARSE THE OBJECT RESPONSE FOR ALL THE STUFF IN THE OEMBED THINGY
-                     
-                     let object_id = random.object.id
-                     self.current_object = object_id
-                     
-                     let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
-                     
-                     guard let url = URL(string: str_url) else {
-                         DispatchQueue.main.async {
-                             self.showAlert(label:"There was problem generating the URL for a random image", message: ViewControllerErrors.invalidURL.localizedDescription)
-                         }
-                         
-                         return
-                     }
-                     
-                     fetchOEmbed(url: url)
-                 }
-                 
-                 
-             }
-             
-             api.ExecuteMethod(method: method, params: params, completion:completion)
-         }
-         
-         self.oauth2_wrapper.GetAccessToken(completion: getRandom)
-         */
+        var result: Result<URL, Error>!
+        
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        func hiccup(error: Error) -> Void {
+            result = .failure(error)
+            semaphore.signal()
+        }
+        
+        func getRandom(creds_rsp: Result<OAuthSwiftCredential, Error>){
+            
+            var credentials: OAuthSwiftCredential?
+            switch creds_rsp {
+            case .failure(let error):
+                hiccup(error: error)
+                return
+            case .success(let creds):
+                credentials = creds
+            }
+            
+            let api = CooperHewittAPI(access_token: credentials!.oauthToken)
+            
+            let method = "cooperhewitt.objects.getRandom"
+            var params = [String:String]()
+            params["has_image"] = "1"
+            
+            func completion(api_result: Result<CooperHewittAPIResponse, Error>) {
+                
+                switch api_result {
+                case .failure(let error):
+                    hiccup(error: error)
+                    return
+                    
+                case .success(let api_rsp):
+                    
+                    let decoder = JSONDecoder()
+                    var random: CooperHewittRandomObject
+                    
+                    do {
+                        random = try decoder.decode(CooperHewittRandomObject.self, from: api_rsp.Data)
+                    } catch(let error) {
+                        
+                        
+                        let str_data = String(decoding: api_rsp.Data, as: UTF8.self)
+                        print(str_data)
+                        
+                        hiccup(error:error)
+                        return
+                    }
+                    
+                    let object_id = random.object.id
+                    
+                    let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
+                    
+                    guard let url = URL(string: str_url) else {
+                        result = .failure(CooperHewittErrors.invalidURL)
+                        return
+                    }
+                    
+                    result = .success(url)
+                    semaphore.signal()
+                }
+                
+            }
+            
+            api.ExecuteMethod(method: method, params: params, completion:completion)
+        }
+        
+        self.oauth2_wrapper.GetAccessToken(completion: getRandom)
+        
+        _ = semaphore.wait(wallTimeout: .distantFuture)
+        return result
     }
     
     public func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error> {
@@ -241,7 +240,7 @@ public class CooperHewittCollection: Collection {
         }
         
         let object_id = String(path)
-                
+        
         let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
         
         guard let url = URL(string: str_url) else {
