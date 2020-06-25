@@ -159,12 +159,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                     
                     self.showAlert(label:"There was problem generating the URL for a random image", message: error.localizedDescription)
                 }
+                
             case .success(let url):
                 fetchOEmbed(url: url)
             }
         }
         
-        let result = self.current_collection?.GetRandom(completion: completion)
+        self.current_collection?.GetRandomURL(completion: completion)
     }
     
     @IBAction func save() {

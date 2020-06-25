@@ -29,7 +29,7 @@ public protocol CollectionOEmbed {
 }
 
 public protocol Collection {
-    func GetRandom(completion: @escaping (Result<URL, Error>) -> ())
+    func GetRandomURL(completion: @escaping (Result<URL, Error>) -> ())
     func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error>
     func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error>
     func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error>

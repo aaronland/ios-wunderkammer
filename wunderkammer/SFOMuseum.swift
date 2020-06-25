@@ -77,7 +77,7 @@ public class SFOMuseumCollection: Collection {
         }
     }
     
-    public func GetRandom(completion: (Result<URL, Error>) -> ()) {
+    public func GetRandomURL(completion: (Result<URL, Error>) -> ()) {
         
         let str_url = "https://millsfield.sfomuseum.org/oembed?url=https://millsfield.sfomuseum.org/random"
         

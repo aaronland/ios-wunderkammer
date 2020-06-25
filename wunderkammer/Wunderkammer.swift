@@ -64,7 +64,7 @@ public class Wunderkammer: Collection  {
         return .failure(WunderkammerErrors.notImplemented)
     }
     
-    public func GetRandom(completion: (Result<URL, Error>) -> ()) {
+    public func GetRandomURL(completion: (Result<URL, Error>) -> ()) {
         completion(.failure(WunderkammerErrors.notImplemented))
         return
     }

@@ -137,7 +137,7 @@ public class CooperHewittCollection: Collection {
          */
     }
     
-    public func GetRandom(completion: @escaping (Result<URL, Error>) -> ()) {
+    public func GetRandomURL(completion: @escaping (Result<URL, Error>) -> ()) {
 
         func getRandom(creds_rsp: Result<OAuthSwiftCredential, Error>){
                         
