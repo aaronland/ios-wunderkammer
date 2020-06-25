@@ -11,11 +11,17 @@
 
 SLASH = /
 
+OAUTH2_CALLBACK_URL = wunderkammer:$(SLASH)/oauth2
+
+ENABLE_SFOMUSEUM = YES
+
+ENABLE_COOPERHEWITT = YES
+
 COOPERHEWITT_AUTH_URL = https:$(SLASH)/collection.cooperhewitt.org/api/oauth2/authenticate/
 
 COOPERHEWITT_TOKEN_URL = https:$(SLASH)/collection.cooperhewitt.org/api/oauth2/access_token/
 
-COOPERHEWITT_CALLBACK_URL = wunderkammer:$(SLASH)/oauth2
+COOPERHEWITT_CALLBACK_URL = $(OAUTH2_CALLBACK_URL)
 
 COOPERHEWITT_CLIENT_ID = 
 

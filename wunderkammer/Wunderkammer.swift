@@ -16,6 +16,7 @@ public enum WunderkammerErrors: Error {
 
 public class Wunderkammer: Collection  {
     
+    
     private let objects_schema = "CREATE TABLE objects(url TEXT PRIMARY KEY, id TEXT, image TEXT, created DATE)"
     private var database: FMDatabase
     
@@ -63,8 +64,9 @@ public class Wunderkammer: Collection  {
         return .failure(WunderkammerErrors.notImplemented)
     }
     
-    public func GetRandom() -> Result<URL, Error> {
-        return .failure(WunderkammerErrors.notImplemented)
+    public func GetRandom(completion: (Result<URL, Error>) -> ()) {
+        completion(.failure(WunderkammerErrors.notImplemented))
+        return
     }
     
     public func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error> {

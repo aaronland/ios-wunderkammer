@@ -70,7 +70,7 @@ public class CooperHewittOEmbed: CollectionOEmbed {
 }
 
 public class CooperHewittCollection: Collection {
-    
+
     var oauth2_wrapper: OAuth2Wrapper
     
     public init?(oauth2_wrapper: OAuth2Wrapper) {
@@ -137,25 +137,14 @@ public class CooperHewittCollection: Collection {
          */
     }
     
-    public func GetRandom() -> Result<URL, Error> {
-        
-        // return .failure(CooperHewittErrors.notImplemented)
-        
-        var result: Result<URL, Error>!
-        
-        let semaphore = DispatchSemaphore(value: 0)
-        
-        func hiccup(error: Error) -> Void {
-            result = .failure(error)
-            semaphore.signal()
-        }
-        
+    public func GetRandom(completion: @escaping (Result<URL, Error>) -> ()) {
+
         func getRandom(creds_rsp: Result<OAuthSwiftCredential, Error>){
-            
+                        
             var credentials: OAuthSwiftCredential?
             switch creds_rsp {
             case .failure(let error):
-                hiccup(error: error)
+                completion(.failure(error))
                 return
             case .success(let creds):
                 credentials = creds
@@ -167,11 +156,11 @@ public class CooperHewittCollection: Collection {
             var params = [String:String]()
             params["has_image"] = "1"
             
-            func completion(api_result: Result<CooperHewittAPIResponse, Error>) {
-                
+            func api_completion(api_result: Result<CooperHewittAPIResponse, Error>) {
+                                
                 switch api_result {
                 case .failure(let error):
-                    hiccup(error: error)
+                    completion(.failure(error))
                     return
                     
                 case .success(let api_rsp):
@@ -183,11 +172,10 @@ public class CooperHewittCollection: Collection {
                         random = try decoder.decode(CooperHewittRandomObject.self, from: api_rsp.Data)
                     } catch(let error) {
                         
-                        
                         let str_data = String(decoding: api_rsp.Data, as: UTF8.self)
                         print(str_data)
                         
-                        hiccup(error:error)
+                        completion(.failure(error))
                         return
                     }
                     
@@ -196,23 +184,20 @@ public class CooperHewittCollection: Collection {
                     let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
                     
                     guard let url = URL(string: str_url) else {
-                        result = .failure(CooperHewittErrors.invalidURL)
+                        completion(.failure(CooperHewittErrors.invalidURL))
                         return
                     }
                     
-                    result = .success(url)
-                    semaphore.signal()
+                    completion(.success(url))
                 }
                 
             }
             
-            api.ExecuteMethod(method: method, params: params, completion:completion)
+                api.ExecuteMethod(method: method, params: params, completion:api_completion)
         }
         
         self.oauth2_wrapper.GetAccessToken(completion: getRandom)
-        
-        _ = semaphore.wait(wallTimeout: .distantFuture)
-        return result
+        return
     }
     
     public func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error> {

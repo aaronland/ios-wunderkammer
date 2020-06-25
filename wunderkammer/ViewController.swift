@@ -146,22 +146,25 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.startSpinner()
         
         self.current_collection = self.collections.randomElement()!
-        let result = self.current_collection?.GetRandom()
         
-        switch result {
+        func completion(result: Result<URL, Error>) -> () {
             
-        case .failure(let error):
+            switch result {
             
-            self.random_button.isEnabled = true
-            self.stopSpinner()
-            
-            self.showAlert(label:"There was problem generating the URL for a random image", message: error.localizedDescription)
-        case .success(let url):
-            fetchOEmbed(url: url)
-        default:
-            ()
+            case .failure(let error):
+                
+                DispatchQueue.main.async {
+                    self.random_button.isEnabled = true
+                    self.stopSpinner()
+                    
+                    self.showAlert(label:"There was problem generating the URL for a random image", message: error.localizedDescription)
+                }
+            case .success(let url):
+                fetchOEmbed(url: url)
+            }
         }
         
+        let result = self.current_collection?.GetRandom(completion: completion)
     }
     
     @IBAction func save() {

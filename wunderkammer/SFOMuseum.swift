@@ -77,15 +77,17 @@ public class SFOMuseumCollection: Collection {
         }
     }
     
-    public func GetRandom() -> Result<URL, Error> {
+    public func GetRandom(completion: (Result<URL, Error>) -> ()) {
         
         let str_url = "https://millsfield.sfomuseum.org/oembed?url=https://millsfield.sfomuseum.org/random"
         
         guard let url = URL(string: str_url) else {
-            return .failure(SFOMuseumErrors.invalidURL)
+            completion(.failure(SFOMuseumErrors.invalidURL))
+            return
         }
         
-        return .success(url)
+        completion(.success(url))
+        return
     }
     
     public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
