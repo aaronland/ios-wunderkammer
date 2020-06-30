@@ -8,6 +8,8 @@
 
 import Foundation
 import CoreNFC
+import URITemplate
+
 
 public struct CollectionObject {
     var ID: String
@@ -39,4 +41,5 @@ public protocol Collection {
     func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error>
     func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error>
     func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error>
+    func NFCTagTemplate() -> Result<URITemplate, Error>
 }

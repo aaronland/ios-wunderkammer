@@ -13,6 +13,7 @@ import OAuth2Wrapper
 import OAuthSwift
 
 import CooperHewittAPI
+import URITemplate
 
 struct CooperHewittRandomObject: Codable {
     var object: CooperHewittObject
@@ -93,6 +94,11 @@ public class CooperHewittCollection: Collection {
             
             return .success(cooperhewitt_oembed)
         }
+    }
+    
+    public func NFCTagTemplate() -> Result<URITemplate, Error> {
+        let t = URITemplate(template: "chsdm:o:{objectid}")
+        return .success(t)
     }
     
     public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {

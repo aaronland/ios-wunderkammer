@@ -43,6 +43,10 @@
 	<string>$(COOPERHEWITT_SCOPE)</string>
 	<key>CooperHewittTokenURL</key>
 	<string>$(COOPERHEWITT_TOKEN_URL)</string>
+	<key>EnableCooperHewitt</key>
+	<string>$(ENABLE_COOPERHEWITT)</string>
+	<key>EnableSFOMuseum</key>
+	<string>$(ENABLE_SFOMUSEUM)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NFCReaderUsageDescription</key>
@@ -87,9 +91,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>EnableCooperHewitt</key>
-	<string>$(ENABLE_COOPERHEWITT)</string>
-	<key>EnableSFOMuseum</key>
-	<string>$(ENABLE_SFOMUSEUM)</string>
 </dict>
 </plist>

@@ -9,6 +9,7 @@
 import Foundation
 import CoreNFC
 import FMDB
+import URITemplate
 
 public enum WunderkammerErrors: Error {
     case notImplemented
@@ -61,6 +62,10 @@ public class Wunderkammer: Collection  {
     }
    
     public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
+        return .failure(WunderkammerErrors.notImplemented)
+    }
+    
+    public func NFCTagTemplate() -> Result<URITemplate, Error> {
         return .failure(WunderkammerErrors.notImplemented)
     }
     

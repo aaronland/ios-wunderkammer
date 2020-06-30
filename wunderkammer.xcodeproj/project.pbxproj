@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4A4D15692497D8F100622E86 /* CooperHewittAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 4A4D15682497D8F100622E86 /* CooperHewittAPI */; };
 		4A533A6C24944EF30048C0A6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4A533A6B24944EF30048C0A6 /* Config.xcconfig */; };
+		4A5424D724ABD22D00911252 /* URITemplate in Frameworks */ = {isa = PBXBuildFile; productRef = 4A5424D624ABD22D00911252 /* URITemplate */; };
 		4A8D8CD124A3C093005AC432 /* SFOMuseum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD024A3C093005AC432 /* SFOMuseum.swift */; };
 		4A8D8CD324A3C140005AC432 /* CooperHewitt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD224A3C140005AC432 /* CooperHewitt.swift */; };
 		4A8D8CD524A3C31E005AC432 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD424A3C31E005AC432 /* Collection.swift */; };
@@ -56,6 +57,7 @@
 				4ADC5A6C24A51082005B6360 /* OAuth2Wrapper in Frameworks */,
 				4AAF05DD2496A9FA006BE255 /* FMDB in Frameworks */,
 				4A4D15692497D8F100622E86 /* CooperHewittAPI in Frameworks */,
+				4A5424D724ABD22D00911252 /* URITemplate in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,6 +124,7 @@
 				4AAF05DC2496A9FA006BE255 /* FMDB */,
 				4A4D15682497D8F100622E86 /* CooperHewittAPI */,
 				4ADC5A6B24A51082005B6360 /* OAuth2Wrapper */,
+				4A5424D624ABD22D00911252 /* URITemplate */,
 			);
 			productName = shoebox;
 			productReference = 4ACA4EC724905FB500E9E695 /* wunderkammer.app */;
@@ -156,6 +159,7 @@
 				4AAF05DB2496A9FA006BE255 /* XCRemoteSwiftPackageReference "fmdb" */,
 				4A4D15672497D8F100622E86 /* XCRemoteSwiftPackageReference "swift-cooperhewitt-api" */,
 				4ADC5A6A24A51082005B6360 /* XCRemoteSwiftPackageReference "swift-oauth2-wrapper" */,
+				4A5424D524ABD22D00911252 /* XCRemoteSwiftPackageReference "URITemplate" */,
 			);
 			productRefGroup = 4ACA4EC824905FB500E9E695 /* Products */;
 			projectDirPath = "";
@@ -342,13 +346,13 @@
 				CODE_SIGN_ENTITLEMENTS = wunderkammer/wunderkammer.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = JVV5KS8E69;
+				DEVELOPMENT_TEAM = 68966928SB;
 				INFOPLIST_FILE = "$(SRCROOT)/wunderkammer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = info.aaronland.wunderkammer;
+				PRODUCT_BUNDLE_IDENTIFIER = org.sfomuseum.wunderkammer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = YES;
@@ -365,13 +369,13 @@
 				CODE_SIGN_ENTITLEMENTS = wunderkammer/wunderkammer.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = JVV5KS8E69;
+				DEVELOPMENT_TEAM = 68966928SB;
 				INFOPLIST_FILE = "$(SRCROOT)/wunderkammer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = info.aaronland.wunderkammer;
+				PRODUCT_BUNDLE_IDENTIFIER = org.sfomuseum.wunderkammer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = YES;
@@ -412,6 +416,14 @@
 				minimumVersion = 0.0.2;
 			};
 		};
+		4A5424D524ABD22D00911252 /* XCRemoteSwiftPackageReference "URITemplate" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kylef/URITemplate.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 		4AAF05D42496765F006BE255 /* XCRemoteSwiftPackageReference "swift-log" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-log";
@@ -443,6 +455,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4A4D15672497D8F100622E86 /* XCRemoteSwiftPackageReference "swift-cooperhewitt-api" */;
 			productName = CooperHewittAPI;
+		};
+		4A5424D624ABD22D00911252 /* URITemplate */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4A5424D524ABD22D00911252 /* XCRemoteSwiftPackageReference "URITemplate" */;
+			productName = URITemplate;
 		};
 		4AAF05D52496765F006BE255 /* Logging */ = {
 			isa = XCSwiftPackageProductDependency;

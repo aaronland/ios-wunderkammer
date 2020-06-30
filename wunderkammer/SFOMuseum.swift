@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreNFC
+import URITemplate
 
 public enum SFOMuseumErrors: Error {
     case notImplemented
@@ -60,6 +61,10 @@ public class SFOMuseumCollection: Collection {
     }
     
     public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
+        return .failure(SFOMuseumErrors.notImplemented)
+    }
+    
+    public func NFCTagTemplate() -> Result<URITemplate, Error> {
         return .failure(SFOMuseumErrors.notImplemented)
     }
     
