@@ -95,6 +95,10 @@ public class CooperHewittCollection: Collection {
         }
     }
     
+    public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
+        return .failure(CooperHewittErrors.notImplemented)
+    }
+    
     public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
         
         return .success(CollectionObjectSaveResponse.noop)

@@ -59,6 +59,10 @@ public class SFOMuseumCollection: Collection {
         
     }
     
+    public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
+        return .failure(SFOMuseumErrors.notImplemented)
+    }
+    
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
         
         let oembed = OEmbed()

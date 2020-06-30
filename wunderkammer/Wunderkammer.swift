@@ -59,6 +59,10 @@ public class Wunderkammer: Collection  {
             }
         }
     }
+   
+    public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
+        return .failure(WunderkammerErrors.notImplemented)
+    }
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
         return .failure(WunderkammerErrors.notImplemented)

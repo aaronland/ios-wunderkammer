@@ -20,6 +20,11 @@ public enum CollectionObjectSaveResponse {
     case noop
 }
 
+public enum CollectionCapabilities {
+    case nfcTags
+    case saveObject
+}
+
 public protocol CollectionOEmbed {
     func ObjectID() -> String
     func ObjectURL() -> String
@@ -33,4 +38,5 @@ public protocol Collection {
     func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error>
     func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error>
     func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error>
+    func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error>
 }
