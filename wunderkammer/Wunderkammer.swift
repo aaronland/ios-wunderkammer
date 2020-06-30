@@ -65,6 +65,8 @@ public class Wunderkammer: Collection  {
         switch capability {
         case CollectionCapabilities.nfcTags:
             return .success(false)
+        case CollectionCapabilities.randomObject:
+            return .success(false)
         case CollectionCapabilities.saveObject:
             return .success(true)
         }

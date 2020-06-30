@@ -111,6 +111,8 @@ public class CooperHewittCollection: Collection {
         switch capability {
         case CollectionCapabilities.nfcTags:
             return .success(true)
+        case CollectionCapabilities.randomObject:
+            return .success(true)
         case CollectionCapabilities.saveObject:
             return .success(false)
         }

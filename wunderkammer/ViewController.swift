@@ -75,7 +75,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         nfc_indicator.isHidden = true
         scanning_indicator.isHidden = true // TO DO: RENAME ME TO WAITING INDICATOR OR SOMETHING
+      
+        scan_button.isEnabled = false
+        scan_button.isHidden = true
         
+        random_button.isEnabled = false
+        random_button.isHidden = true
         
         let enable_sfomuseum = Bundle.main.object(forInfoDictionaryKey: "EnableSFOMuseum") as? String
         
@@ -92,9 +97,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             
             switch result {
             case .failure(let error):
-                
-                scan_button.isEnabled = false
-                random_button.isEnabled = false
                 
                 self.showAlert(label:"There was a problem configuring the application.", message: error.localizedDescription)
                 return
@@ -135,26 +137,48 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         // (20200630/thisisaaronland)
         
         var nfc_enabled = false
+        var random_enabled = false
         
         for c in self.collections {
             
+            if !nfc_enabled {
             let result = c.HasCapability(capability: CollectionCapabilities.nfcTags)
             
             if case .success(let capability) = result {
                 
                 if capability {
                     nfc_enabled = true
-                    break
+                }
+            }
+            }
+            
+            if !random_enabled {
+                
+                let result = c.HasCapability(capability: CollectionCapabilities.randomObject)
+                
+                if case .success(let capability) = result {
+                    
+                    if capability {
+                        random_enabled = true
+                    }
                 }
             }
         }
         
-        if !NFCNDEFReaderSession.readingAvailable || !nfc_enabled {
+        if NFCNDEFReaderSession.readingAvailable && nfc_enabled {
+            scan_button.isEnabled = true
+            scan_button.isHidden = false
+        }
+        
+        if random_enabled {
+            random_button.isEnabled = true
+            random_button.isHidden = false
+        }
+        
+        if !nfc_enabled && !random_enabled {
             
-            if !is_simulation {
-                scan_button.isEnabled = false
-                scan_button.isHidden = true
-            }
+            self.showAlert(label:"There was a problem configuring the application.", message: "No collections implement NFC tag scanning or random objects.")
+            return
         }
     }
     
@@ -281,7 +305,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
         DispatchQueue.global().async {
-            
+                
             let result = collection.SaveObject(object:obj)
             
             DispatchQueue.main.async {
