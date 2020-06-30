@@ -154,7 +154,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             if case .success(let capability) = nfc_result {
                 
                 if capability {
-                    nfc_enabled = true
                     collections_nfc.append(idx)
                 }
             }
@@ -164,12 +163,19 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             if case .success(let capability) = random_result {
                 
                 if capability {
-                    random_enabled = true
                     collections_random.append(idx)
                 }
             }
             
             idx += 1
+        }
+        
+        if collections_nfc.count > 0 {
+            nfc_enabled = true
+        }
+        
+        if collections_random.count > 0 {
+            random_enabled = true
         }
         
         if NFCNDEFReaderSession.readingAvailable && nfc_enabled {
@@ -195,7 +201,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.random_button.isEnabled = false
         self.startSpinner()
         
-        let idx = self.collections_nfc.randomElement()!
+        let idx = self.collections_random.randomElement()!
         self.current_collection = self.collections[idx]
         
         func completion(result: Result<URL, Error>) -> () {
