@@ -101,8 +101,19 @@ public class CooperHewittCollection: Collection {
         return .success(t)
     }
     
+    public func ObjectURLTemplate() -> Result<URITemplate, Error> {
+        let t = URITemplate(template: "https://collection.cooperhewitt.org/objects/{objectid}")
+        return .success(t)
+    }
+    
     public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
-        return .failure(CooperHewittErrors.notImplemented)
+        
+        switch capability {
+        case CollectionCapabilities.nfcTags:
+            return .success(true)
+        case CollectionCapabilities.saveObject:
+            return .success(false)
+        }
     }
     
     public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {

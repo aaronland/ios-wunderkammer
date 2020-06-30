@@ -61,11 +61,22 @@ public class SFOMuseumCollection: Collection {
     }
     
     public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
-        return .failure(SFOMuseumErrors.notImplemented)
+        
+        switch capability {
+        case CollectionCapabilities.nfcTags:
+            return .success(false)
+        case CollectionCapabilities.saveObject:
+            return .success(false)
+        }
     }
     
     public func NFCTagTemplate() -> Result<URITemplate, Error> {
-        return .failure(SFOMuseumErrors.notImplemented)
+        return .failure(CollectionErrors.notImplemented)
+    }
+    
+    public func ObjectURLTemplate() -> Result<URITemplate, Error> {
+        let t = URITemplate(template: "https://millsfield.sfomuseum.org/objects/{objectid}")
+        return .success(t)
     }
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {

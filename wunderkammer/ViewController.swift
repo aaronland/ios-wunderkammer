@@ -76,13 +76,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         nfc_indicator.isHidden = true
         scanning_indicator.isHidden = true // TO DO: RENAME ME TO WAITING INDICATOR OR SOMETHING
         
-        if !NFCNDEFReaderSession.readingAvailable {
-            
-            if !is_simulation {
-                scan_button.isEnabled = false
-                scan_button.isHidden = true
-            }
-        }
         
         let enable_sfomuseum = Bundle.main.object(forInfoDictionaryKey: "EnableSFOMuseum") as? String
         
@@ -136,6 +129,33 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             self.showAlert(label:"There was a problem configuring the application.", message: "No collections have been enabled")
             return
         }
+        
+        // Ensure that at least one of the collections even supports NFC tags
+        // Something something something geofencing something something something
+        // (20200630/thisisaaronland)
+        
+        var nfc_enabled = false
+        
+        for c in self.collections {
+            
+            let result = c.HasCapability(capability: CollectionCapabilities.nfcTags)
+            
+            if case .success(let capability) = result {
+                
+                if capability {
+                    nfc_enabled = true
+                    break
+                }
+            }
+        }
+        
+        if !NFCNDEFReaderSession.readingAvailable || !nfc_enabled {
+            
+            if !is_simulation {
+                scan_button.isEnabled = false
+                scan_button.isHidden = true
+            }
+        }
     }
     
     @IBAction func random() {
@@ -150,7 +170,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         func completion(result: Result<URL, Error>) -> () {
             
             switch result {
-            
+                
             case .failure(let error):
                 
                 DispatchQueue.main.async {
@@ -275,7 +295,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
     }
-    
     
     @IBAction func clear() {
         
@@ -418,40 +437,79 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     private func processMessage(message: NFCNDEFMessage) {
         
-        // TBD... WHERE ARE PREFIXES -> COLLECTIONS REGISTERED...
-        
         self.app.logger.debug("Process message")
         
         let payload = message.records[0]
         let data = payload.payload
         
         let str_data = String(decoding: data, as: UTF8.self)
-        let parts = str_data.split(separator: ":")
         
-        if parts.count != 3 {
-            self.showError(error: ViewControllerErrors.tagUnknownURI)
+        self.app.logger.debug("Scanned tag \(str_data)")
+        
+        var urls = [String]()
+        
+        for c in self.collections {
+            
+            var object_id: String?
+            
+            let template_rsp = c.NFCTagTemplate()
+            
+            switch template_rsp {
+            case .failure(let error):
+                
+                switch error {
+                case CollectionErrors.notImplemented:
+                    continue
+                default:
+                    self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
+                    return
+                }
+                
+            case .success(let template):
+                
+                guard let variables = template.extract(str_data) else {
+                    continue
+                }
+                
+                object_id = variables["objectid"]
+                self.app.logger.debug("Scanned object \(object_id)")
+            } 
+            
+            let url_rsp = c.ObjectURLTemplate()
+            
+            switch url_rsp {
+                
+            case .failure(let error):
+                self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
+                return
+            case .success(let template):
+                
+                let str_url = template.expand(["objectid": object_id])
+                
+                if str_url == "" {
+                    continue
+                }
+                
+                urls.append(str_url)
+                self.app.logger.debug("Object ID \(object_id) resolves as \(str_url)")
+            }
+        }
+        
+        if urls.count == 0 {
+            self.showAlert(label:"Failed to read tag", message:"Unrecognized tag")
             return
         }
         
-        let scheme = parts[0]
-        let host = parts[1]
-        let path = parts[2]
+        // TO DO: dialog to prompt user to choose
         
-        if scheme != "chsdm" {
-            self.showAlert(label:"Failed to read tag", message:ViewControllerErrors.tagUnknownScheme.localizedDescription)
+        if urls.count > 1 {
+            self.showAlert(label:"Failed to read tag", message:"Unable to determine tag source (multiple choices)")
             return
         }
         
-        if host != "o" {
-            self.showAlert(label:"Failed to read tag", message: ViewControllerErrors.tagUnknownHost.localizedDescription)
-            return
-        }
+        // TO DO: set current collection
         
-        let object_id = String(path)
-        
-        self.app.logger.debug("Scanned object \(object_id)")
-        
-        let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
+        let str_url = urls[0]
         
         guard let url = URL(string: str_url) else {
             self.showError(error: ViewControllerErrors.invalidURL)

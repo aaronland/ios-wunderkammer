@@ -16,8 +16,7 @@ public enum WunderkammerErrors: Error {
 }
 
 public class Wunderkammer: Collection  {
-    
-    
+
     private let objects_schema = "CREATE TABLE objects(url TEXT PRIMARY KEY, id TEXT, image TEXT, created DATE)"
     private var database: FMDatabase
     
@@ -62,11 +61,21 @@ public class Wunderkammer: Collection  {
     }
    
     public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
-        return .failure(WunderkammerErrors.notImplemented)
+        
+        switch capability {
+        case CollectionCapabilities.nfcTags:
+            return .success(false)
+        case CollectionCapabilities.saveObject:
+            return .success(true)
+        }
     }
     
     public func NFCTagTemplate() -> Result<URITemplate, Error> {
-        return .failure(WunderkammerErrors.notImplemented)
+        return .failure(CollectionErrors.notImplemented)
+    }
+    
+    public func ObjectURLTemplate() -> Result<URITemplate, Error> {
+        return .failure(CollectionErrors.notImplemented)
     }
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {

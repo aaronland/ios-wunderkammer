@@ -27,6 +27,11 @@ public enum CollectionCapabilities {
     case saveObject
 }
 
+public enum CollectionErrors: Error {
+    case notImplemented
+    case unknownCapability
+}
+
 public protocol CollectionOEmbed {
     func ObjectID() -> String
     func ObjectURL() -> String
@@ -42,4 +47,5 @@ public protocol Collection {
     func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error>
     func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error>
     func NFCTagTemplate() -> Result<URITemplate, Error>
+    func ObjectURLTemplate() -> Result<URITemplate, Error>
 }
