@@ -40,6 +40,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     var collections = [Collection]()
     
+    // these are used for looping and shuffling and are meant to
+    // be offsets/pointers in to the collections array
+    
+    var collections_nfc = [Int]()
+    var collections_random = [Int]()
+    
     var is_simulation = false
     
     @IBOutlet weak var nfc_indicator: UIActivityIndicatorView!
@@ -75,7 +81,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         nfc_indicator.isHidden = true
         scanning_indicator.isHidden = true // TO DO: RENAME ME TO WAITING INDICATOR OR SOMETHING
-      
+        
         scan_button.isEnabled = false
         scan_button.isHidden = true
         
@@ -139,30 +145,31 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         var nfc_enabled = false
         var random_enabled = false
         
+        var idx = 0
+        
         for c in self.collections {
             
-            if !nfc_enabled {
-            let result = c.HasCapability(capability: CollectionCapabilities.nfcTags)
+            let nfc_result = c.HasCapability(capability: CollectionCapabilities.nfcTags)
             
-            if case .success(let capability) = result {
+            if case .success(let capability) = nfc_result {
                 
                 if capability {
                     nfc_enabled = true
+                    collections_nfc.append(idx)
                 }
-            }
             }
             
-            if !random_enabled {
+            let random_result = c.HasCapability(capability: CollectionCapabilities.randomObject)
+            
+            if case .success(let capability) = random_result {
                 
-                let result = c.HasCapability(capability: CollectionCapabilities.randomObject)
-                
-                if case .success(let capability) = result {
-                    
-                    if capability {
-                        random_enabled = true
-                    }
+                if capability {
+                    random_enabled = true
+                    collections_random.append(idx)
                 }
             }
+            
+            idx += 1
         }
         
         if NFCNDEFReaderSession.readingAvailable && nfc_enabled {
@@ -175,8 +182,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             random_button.isHidden = false
         }
         
-        if !nfc_enabled && !random_enabled {
-            
+        if !nfc_enabled && !random_enabled {            
             self.showAlert(label:"There was a problem configuring the application.", message: "No collections implement NFC tag scanning or random objects.")
             return
         }
@@ -189,7 +195,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.random_button.isEnabled = false
         self.startSpinner()
         
-        self.current_collection = self.collections.randomElement()!
+        let idx = self.collections_nfc.randomElement()!
+        self.current_collection = self.collections[idx]
         
         func completion(result: Result<URL, Error>) -> () {
             
@@ -305,7 +312,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
         DispatchQueue.global().async {
-                
+            
             let result = collection.SaveObject(object:obj)
             
             DispatchQueue.main.async {
@@ -472,7 +479,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         var urls = [String]()
         
-        for c in self.collections {
+        for idx in self.collections_nfc {
+            
+            let c = self.collections[idx]
             
             var object_id: String?
             
