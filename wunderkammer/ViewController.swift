@@ -61,6 +61,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBOutlet weak var random_button: UIButton!
     
+    @IBOutlet var share_button: UIButton!
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -87,6 +89,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         random_button.isEnabled = false
         random_button.isHidden = true
+  
+        share_button.isEnabled = false
+        share_button.isHidden = true
         
         let enable_sfomuseum = Bundle.main.object(forInfoDictionaryKey: "EnableSFOMuseum") as? String
         
@@ -192,6 +197,21 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             self.showAlert(label:"There was a problem configuring the application.", message: "No collections implement NFC tag scanning or random objects.")
             return
         }
+    }
+    
+    @IBAction func share() {
+        
+        guard let oembed = self.current_oembed else {
+            return
+        }
+        
+        let url = URL(string: oembed.ObjectURL())
+        
+        let activityViewController =
+            UIActivityViewController(activityItems: [url, self.current_image],
+                                     applicationActivities: nil)
+
+        present(activityViewController, animated: true)
     }
     
     @IBAction func random() {
@@ -345,6 +365,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         self.save_button.isHidden = true
         self.clear_button.isHidden = true
+        
+        self.share_button.isHidden = true
     }
     
     @IBAction func scanTag() {
@@ -677,6 +699,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 self?.save_button.isHidden = false
                 self?.clear_button.isHidden = false
+                
+                self?.share_button.isHidden = false
+                self?.share_button.isEnabled = true
             }
         }
     }
