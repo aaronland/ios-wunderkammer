@@ -58,10 +58,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     
     @IBOutlet weak var save_button: UIButton!
     @IBOutlet weak var clear_button: UIButton!
-    
     @IBOutlet weak var random_button: UIButton!
-    
-    @IBOutlet var share_button: UIButton!
+    @IBOutlet weak var share_button: UIButton!
     
     override func viewDidLoad() {
         
@@ -205,7 +203,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             return
         }
         
-        let url = URL(string: oembed.ObjectURL())
+        guard let url = URL(string: oembed.ObjectURL()) else {
+            return
+        }
         
         let activityViewController =
             UIActivityViewController(activityItems: [url],
