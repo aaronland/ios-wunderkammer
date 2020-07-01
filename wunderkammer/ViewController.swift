@@ -682,7 +682,20 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     @objc private func imageTapped() {
-        print("image tapped")
+        
+        guard let oembed = self.current_oembed else {
+            return
+        }
+        
+        let str_url = oembed.ObjectURL()
+        
+        guard let url = URL(string: str_url) else {
+            return
+        }
+        
+        // open in another view controller?
+        
+        UIApplication.shared.open(url)
     }
     
     private func showError(error: Error) {
