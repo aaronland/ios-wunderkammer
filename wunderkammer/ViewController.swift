@@ -664,7 +664,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 let h = self?.scanned_image.bounds.height
                 
                 let resized = image.resizedImage(withBounds: CGSize(width: w!, height: h!))
+  
+                let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self?.imageTapped))
                 
+                self?.scanned_image.isUserInteractionEnabled = true
+                self?.scanned_image.addGestureRecognizer(tapGestureRecognizer)
+                    
                 self?.stopSpinner()
                 
                 self?.scanned_image.image = resized
@@ -674,6 +679,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 self?.clear_button.isHidden = false
             }
         }
+    }
+    
+    @objc private func imageTapped() {
+        print("image tapped")
     }
     
     private func showError(error: Error) {
