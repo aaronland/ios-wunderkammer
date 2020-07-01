@@ -31,7 +31,7 @@
                                 <color key="barTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <items>
                                     <navigationItem id="J8i-Rd-Bz1">
-                                        <barButtonItem key="leftBarButtonItem" image="antenna.radiowaves.left.and.right" catalog="system" landscapeImage="antenna.radiowaves.left.and.right" largeContentSizeImage="antenna.radiowaves.left.and.right" style="plain" id="X0q-4r-cgt">
+                                        <barButtonItem key="leftBarButtonItem" image="antenna.radiowaves.left.and.right" catalog="system" landscapeImage="antenna.radiowaves.left.and.right" largeContentSizeImage="antenna.radiowaves.left.and.right" style="done" id="X0q-4r-cgt">
                                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="skZ-r6-3m6">
                                                 <rect key="frame" x="20" y="11" width="25.5" height="22"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -43,8 +43,8 @@
                                                 </connections>
                                             </button>
                                         </barButtonItem>
-                                        <barButtonItem key="rightBarButtonItem" image="tray.full" catalog="system" style="plain" id="Yxj-6l-17V">
-                                            <button key="customView" hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="pzZ-AW-h9w">
+                                        <barButtonItem key="rightBarButtonItem" image="tray.full" catalog="system" style="done" id="Yxj-6l-17V">
+                                            <button key="customView" hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" hasAttributedTitle="YES" id="pzZ-AW-h9w">
                                                 <rect key="frame" x="364" y="11" width="30" height="22"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <state key="normal" image="tray.full" catalog="system">
