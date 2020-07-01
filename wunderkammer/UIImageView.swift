@@ -10,6 +10,9 @@ import UIKit
 
 // https://stackoverflow.com/questions/30014241/uiimageview-pinch-zoom-swift
 
+// to consider:
+// https://github.com/huynguyencong/ImageScrollView
+
 extension UIImageView {
   func enableZoom() {
     let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(startZooming(_:)))
