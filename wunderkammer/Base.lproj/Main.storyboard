@@ -86,11 +86,24 @@
                                         </button>
                                     </barButtonItem>
                                     <barButtonItem systemItem="flexibleSpace" id="Rt1-Tg-wCo"/>
+                                    <barButtonItem image="goforward" catalog="system" landscapeImage="goforward" largeContentSizeImage="goforward" style="plain" id="vW1-fc-GEV">
+                                        <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="J43-nF-j9O">
+                                            <rect key="frame" x="194.5" y="9" width="25" height="26"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <state key="normal" image="goforward" catalog="system">
+                                                <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="random" destination="BYZ-38-t0r" eventType="touchUpInside" id="aaH-ZH-3bp"/>
+                                            </connections>
+                                        </button>
+                                    </barButtonItem>
+                                    <barButtonItem systemItem="flexibleSpace" id="d75-Kh-w81"/>
                                     <barButtonItem style="plain" id="VWG-GZ-1EJ">
                                         <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="XAP-dW-hID">
-                                            <rect key="frame" x="155" y="9" width="77" height="26"/>
+                                            <rect key="frame" x="303" y="9" width="23" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <state key="normal" title="Button" image="square.and.arrow.up" catalog="system">
+                                            <state key="normal" image="square.and.arrow.up" catalog="system">
                                                 <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
                                             </state>
                                             <connections>
@@ -98,28 +111,16 @@
                                             </connections>
                                         </button>
                                     </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="SqX-e8-njK"/>
                                     <barButtonItem style="plain" id="S2B-PM-n5W">
                                         <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="NFO-2r-xGq">
-                                            <rect key="frame" x="232" y="9" width="26" height="26"/>
+                                            <rect key="frame" x="368" y="9" width="26" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <state key="normal" image="square.and.arrow.down" catalog="system">
                                                 <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
                                             </state>
                                             <connections>
                                                 <action selector="save" destination="BYZ-38-t0r" eventType="touchUpInside" id="kXv-It-GdD"/>
-                                            </connections>
-                                        </button>
-                                    </barButtonItem>
-                                    <barButtonItem systemItem="flexibleSpace" id="d75-Kh-w81"/>
-                                    <barButtonItem image="goforward" catalog="system" landscapeImage="goforward" largeContentSizeImage="goforward" style="plain" id="vW1-fc-GEV">
-                                        <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="J43-nF-j9O">
-                                            <rect key="frame" x="369" y="9" width="25" height="26"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <state key="normal" image="goforward" catalog="system">
-                                                <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
-                                            </state>
-                                            <connections>
-                                                <action selector="random" destination="BYZ-38-t0r" eventType="touchUpInside" id="aaH-ZH-3bp"/>
                                             </connections>
                                         </button>
                                     </barButtonItem>

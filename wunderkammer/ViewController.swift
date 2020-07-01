@@ -537,7 +537,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 }
                 
                 object_id = variables["objectid"]
-                self.app.logger.debug("Scanned object \(object_id)")
+                self.app.logger.debug("Scanned object \(String(describing: object_id))")
             } 
             
             let url_rsp = c.ObjectURLTemplate()
@@ -549,14 +549,14 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 return
             case .success(let template):
                 
-                let str_url = template.expand(["objectid": object_id])
+                let str_url = template.expand(["objectid": object_id as Any])
                 
                 if str_url == "" {
                     continue
                 }
                 
                 urls.append(str_url)
-                self.app.logger.debug("Object ID \(object_id) resolves as \(str_url)")
+                self.app.logger.debug("Object ID \(String(describing: object_id)) resolves as \(str_url)")
             }
         }
         
@@ -598,10 +598,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
         DispatchQueue.global().async { [weak self] in
-            
-            DispatchQueue.main.async {
-                self?.random_button.isEnabled = true
-            }
             
             let result = current_collection.GetOEmbed(url: url)
             
@@ -663,8 +659,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             } catch (let error) {
                 
                 DispatchQueue.main.async {
+                    
                     self?.stopSpinner()
                     self?.resetCurrent()
+                    self?.random_button.isEnabled = true
                     self?.showAlert(label:"Unable to retrieve object image", message: error.localizedDescription)
                     
                 }
@@ -676,6 +674,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 DispatchQueue.main.async {
                     self?.stopSpinner()
+                    self?.resetCurrent()
+                    self?.random_button.isEnabled = true
                     self?.showAlert(label:"Unable to load object image", message: "")
                 }
                 
@@ -704,6 +704,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 self?.save_button.isHidden = false
                 self?.clear_button.isHidden = false
                 self?.share_button.isHidden = false
+                
+                self?.random_button.isEnabled = true
             }
         }
     }
