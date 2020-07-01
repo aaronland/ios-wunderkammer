@@ -29,6 +29,10 @@ public class SFOMuseumOEmbed: CollectionOEmbed {
         self.oembed = oembed
     }
     
+    public func Collection() -> String {
+        return "SFO Museum"
+    }
+    
     public func ObjectID() -> String {
         
         let auth_url = self.oembed.author_url!

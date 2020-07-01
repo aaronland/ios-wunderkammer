@@ -601,6 +601,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         let image_url = oembed.ImageURL()
         let title = oembed.ObjectTitle()
+        let col = oembed.Collection()
         
         guard let url = URL(string: image_url) else {
             self.showError(error: ViewControllerErrors.invalidURL)
@@ -608,7 +609,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
         DispatchQueue.main.async {
-            self.scanned_meta.text = title
+            self.scanned_meta.text = "\(title) (\(col))"
             self.scanned_meta.updateTextFont()
             self.scanned_meta.isHidden = false
         }

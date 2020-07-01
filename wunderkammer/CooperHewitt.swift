@@ -49,6 +49,10 @@ public class CooperHewittOEmbed: CollectionOEmbed {
         self.oembed = oembed
     }
     
+    public func Collection() -> String {
+        return "Smithsonian Cooper Hewitt National Design Museum"
+    }
+    
     public func ObjectID() -> String {
         return self.oembed.object_id!
     }
