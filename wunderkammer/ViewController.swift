@@ -90,8 +90,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         random_button.isEnabled = false
         random_button.isHidden = true
   
-        share_button.isEnabled = false
         share_button.isHidden = true
+        save_button.isHidden = true
         
         let enable_sfomuseum = Bundle.main.object(forInfoDictionaryKey: "EnableSFOMuseum") as? String
         
@@ -218,6 +218,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         self.resetCurrent()
         
+        self.clear_button.isHidden = true
+        self.save_button.isHidden = true
+        self.share_button.isHidden = true
+
         self.random_button.isEnabled = false
         self.startSpinner()
         
@@ -699,9 +703,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 self?.save_button.isHidden = false
                 self?.clear_button.isHidden = false
-                
                 self?.share_button.isHidden = false
-                self?.share_button.isEnabled = true
             }
         }
     }
@@ -759,7 +761,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         self.current_collection = nil
         self.current_image = nil
+        self.scanned_image.image = nil
         self.current_oembed = nil
+        
+        self.scanned_meta.text = ""
     }
     
 }
