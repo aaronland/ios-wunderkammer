@@ -10,6 +10,7 @@
 		4A4D15692497D8F100622E86 /* CooperHewittAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 4A4D15682497D8F100622E86 /* CooperHewittAPI */; };
 		4A533A6C24944EF30048C0A6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4A533A6B24944EF30048C0A6 /* Config.xcconfig */; };
 		4A5424D724ABD22D00911252 /* URITemplate in Frameworks */ = {isa = PBXBuildFile; productRef = 4A5424D624ABD22D00911252 /* URITemplate */; };
+		4A5424DB24AD50F500911252 /* UIImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5424DA24AD50F500911252 /* UIImageView.swift */; };
 		4A8D8CD124A3C093005AC432 /* SFOMuseum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD024A3C093005AC432 /* SFOMuseum.swift */; };
 		4A8D8CD324A3C140005AC432 /* CooperHewitt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD224A3C140005AC432 /* CooperHewitt.swift */; };
 		4A8D8CD524A3C31E005AC432 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD424A3C31E005AC432 /* Collection.swift */; };
@@ -30,6 +31,7 @@
 
 /* Begin PBXFileReference section */
 		4A533A6B24944EF30048C0A6 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		4A5424DA24AD50F500911252 /* UIImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageView.swift; sourceTree = "<group>"; };
 		4A8D8CD024A3C093005AC432 /* SFOMuseum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFOMuseum.swift; sourceTree = "<group>"; };
 		4A8D8CD224A3C140005AC432 /* CooperHewitt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CooperHewitt.swift; sourceTree = "<group>"; };
 		4A8D8CD424A3C31E005AC432 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
@@ -88,6 +90,7 @@
 				4AAF05DE2496AC28006BE255 /* Wunderkammer.swift */,
 				4ACA4ECC24905FB500E9E695 /* SceneDelegate.swift */,
 				4ACA4ECE24905FB500E9E695 /* ViewController.swift */,
+				4A5424DA24AD50F500911252 /* UIImageView.swift */,
 				4A8D8CD024A3C093005AC432 /* SFOMuseum.swift */,
 				4A8D8CD224A3C140005AC432 /* CooperHewitt.swift */,
 				4A8D8CD424A3C31E005AC432 /* Collection.swift */,
@@ -195,6 +198,7 @@
 				4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */,
 				4AAF05D824967D71006BE255 /* UIText.swift in Sources */,
 				4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */,
+				4A5424DB24AD50F500911252 /* UIImageView.swift in Sources */,
 				4AAF05DA24967D96006BE255 /* UIImage.swift in Sources */,
 				4A8D8CD124A3C093005AC432 /* SFOMuseum.swift in Sources */,
 				4A8D8CD324A3C140005AC432 /* CooperHewitt.swift in Sources */,

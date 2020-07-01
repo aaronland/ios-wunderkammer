@@ -695,7 +695,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 self?.scanned_image.isUserInteractionEnabled = true
                 self?.scanned_image.addGestureRecognizer(tapGestureRecognizer)
-                    
+                self?.scanned_image.enableZoom()
+                
                 self?.stopSpinner()
                 
                 self?.scanned_image.image = resized
