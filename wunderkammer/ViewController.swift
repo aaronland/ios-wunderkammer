@@ -208,7 +208,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         let url = URL(string: oembed.ObjectURL())
         
         let activityViewController =
-            UIActivityViewController(activityItems: [url, self.current_image],
+            UIActivityViewController(activityItems: [url],
                                      applicationActivities: nil)
 
         present(activityViewController, animated: true)
