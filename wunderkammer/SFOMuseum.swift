@@ -120,7 +120,4 @@ public class SFOMuseumCollection: Collection {
         return .success(CollectionObjectSaveResponse.noop)
     }
     
-    public func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error> {
-        return .failure(SFOMuseumErrors.notImplemented)
-    }
 }

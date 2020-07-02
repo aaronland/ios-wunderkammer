@@ -226,39 +226,5 @@ public class CooperHewittCollection: Collection {
         self.oauth2_wrapper.GetAccessToken(completion: getRandom)
         return
     }
-    
-    public func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error> {
-        
-        let payload = message.records[0]
-        let data = payload.payload
-        
-        let str_data = String(decoding: data, as: UTF8.self)
-        let parts = str_data.split(separator: ":")
-        
-        if parts.count != 3 {
-            return .failure(CooperHewittErrors.tagUnknownURI)
-        }
-        
-        let scheme = parts[0]
-        let host = parts[1]
-        let path = parts[2]
-        
-        if scheme != "chsdm" {
-            return .failure(CooperHewittErrors.tagUnknownScheme)
-        }
-        
-        if host != "o" {
-            return .failure(CooperHewittErrors.tagUnknownHost)
-        }
-        
-        let object_id = String(path)
-        
-        let str_url = String(format: "https://collection.cooperhewitt.org/oembed/photo/?url=https://collection.cooperhewitt.org/objects/%@", object_id)
-        
-        guard let url = URL(string: str_url) else {
-            return .failure(CooperHewittErrors.invalidURL)
-        }
-        
-        return .success(url)
-    }
+
 }

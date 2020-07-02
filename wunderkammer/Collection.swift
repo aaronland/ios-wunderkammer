@@ -46,7 +46,6 @@ public protocol Collection {
     func GetRandomURL(completion: @escaping (Result<URL, Error>) -> ())
     func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error>
     func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error>
-    func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error>
     func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error>
     func NFCTagTemplate() -> Result<URITemplate, Error>
     func ObjectURLTemplate() -> Result<URITemplate, Error>

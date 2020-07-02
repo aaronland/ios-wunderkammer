@@ -89,10 +89,6 @@ public class Wunderkammer: Collection  {
         return
     }
     
-    public func ParseNFCTag(message: NFCNDEFMessage) -> Result<URL, Error> {
-        return .failure(WunderkammerErrors.notImplemented)
-    }
-    
     public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
         
         do {
