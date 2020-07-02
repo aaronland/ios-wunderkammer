@@ -110,6 +110,11 @@ public class CooperHewittCollection: Collection {
         return .success(t)
     }
     
+    public func OEmbedURLTemplate() -> Result<URITemplate, Error> {
+        let t = URITemplate(template: "https://collection.cooperhewitt.org/oembed/photo/?url={url}")
+        return .success(t)
+    }
+    
     public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
         
         switch capability {

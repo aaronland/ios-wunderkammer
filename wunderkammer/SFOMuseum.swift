@@ -85,6 +85,11 @@ public class SFOMuseumCollection: Collection {
         return .success(t)
     }
     
+    public func OEmbedURLTemplate() -> Result<URITemplate, Error> {
+        let t = URITemplate(template: "https://millsfield.sfomuseum.org/oembed/?url={url}")
+        return .success(t)
+    }
+    
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
         
         let oembed = OEmbed()

@@ -196,6 +196,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             self.showAlert(label:"There was a problem configuring the application.", message: "No collections implement NFC tag scanning or random objects.")
             return
         }
+        
+        // read this from config file
+        // self.app.logger.logLevel = .debug
     }
     
     @IBAction func share() {
@@ -504,7 +507,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         // To read new tags, a new session instance is required.
         self.session = nil
-        
     }
     
     private func processMessage(message: NFCNDEFMessage) {
@@ -518,7 +520,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         self.app.logger.debug("Scanned tag \(str_data)")
         
-        var urls = [String]()
+        var possible_urls = [String]()
+        var possible_collections = [Collection]()
         
         for idx in self.collections_nfc {
             
@@ -545,8 +548,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                     continue
                 }
                 
-                object_id = variables["objectid"]
-                self.app.logger.debug("Scanned object \(String(describing: object_id))")
+                guard let id = variables["objectid"] else {
+                    continue
+                }
+                
+                object_id = id
+                self.app.logger.debug("Scanned object \(id)")
             } 
             
             let url_rsp = c.ObjectURLTemplate()
@@ -558,34 +565,54 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 return
             case .success(let template):
                 
-                let str_url = template.expand(["objectid": object_id as Any])
+                let str_url = template.expand(["objectid": object_id!])
                 
                 if str_url == "" {
                     continue
                 }
                 
-                urls.append(str_url)
-                self.app.logger.debug("Object ID \(String(describing: object_id)) resolves as \(str_url)")
+                possible_urls.append(str_url)
+                possible_collections.append(c)
+                
+                self.app.logger.debug("Object ID \(object_id!) resolves as \(str_url)")
             }
         }
         
-        if urls.count == 0 {
+        if possible_urls.count == 0 {
             self.showAlert(label:"Failed to read tag", message:"Unrecognized tag")
             return
         }
         
         // TO DO: dialog to prompt user to choose
         
-        if urls.count > 1 {
+        if possible_urls.count > 1 {
             self.showAlert(label:"Failed to read tag", message:"Unable to determine tag source (multiple choices)")
             return
         }
+                
+        let object_url = possible_urls[0]
+        self.current_collection = possible_collections[0]
+          
+        var oembed_url = ""
         
-        // TO DO: set current collection
+        let result = self.current_collection!.OEmbedURLTemplate()
         
-        let str_url = urls[0]
+        switch result {
+        case .failure(let error):
+            self.showAlert(label:"Failed to handle tag", message:error.localizedDescription)
+            return
+        case .success(let t):
+            oembed_url = t.expand(["url": object_url])
+        }
+       
+        if oembed_url == "" {
+            self.showAlert(label:"Failed to handle tag", message:"Unable to resolve URL")
+            return
+        }
         
-        guard let url = URL(string: str_url) else {
+        self.app.logger.debug("OEmbed URL resolves as \(oembed_url)")
+        
+        guard let url = URL(string: oembed_url) else {
             self.showError(error: ViewControllerErrors.invalidURL)
             return
         }
@@ -774,10 +801,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         self.current_collection = nil
         self.current_image = nil
-        self.scanned_image.image = nil
         self.current_oembed = nil
         
-        self.scanned_meta.text = ""
+        DispatchQueue.main.async {
+            self.scanned_meta.text = ""
+            self.scanned_image.image = nil
+        }
     }
     
 }

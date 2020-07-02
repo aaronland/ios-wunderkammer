@@ -49,4 +49,5 @@ public protocol Collection {
     func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error>
     func NFCTagTemplate() -> Result<URITemplate, Error>
     func ObjectURLTemplate() -> Result<URITemplate, Error>
+    func OEmbedURLTemplate() -> Result<URITemplate, Error>
 }

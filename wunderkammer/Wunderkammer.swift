@@ -79,6 +79,10 @@ public class Wunderkammer: Collection  {
     public func ObjectURLTemplate() -> Result<URITemplate, Error> {
         return .failure(CollectionErrors.notImplemented)
     }
+ 
+    public func OEmbedURLTemplate() -> Result<URITemplate, Error> {
+        return .failure(CollectionErrors.notImplemented)
+    }
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
         return .failure(WunderkammerErrors.notImplemented)
