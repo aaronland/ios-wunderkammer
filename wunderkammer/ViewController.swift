@@ -87,7 +87,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         random_button.isEnabled = false
         random_button.isHidden = true
-  
+        
         share_button.isHidden = true
         save_button.isHidden = true
         
@@ -210,8 +210,13 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         let activityViewController =
             UIActivityViewController(activityItems: [url],
                                      applicationActivities: nil)
-
+        
         present(activityViewController, animated: true)
+        
+        if let popOver = activityViewController.popoverPresentationController {
+            popOver.sourceView = self.view
+            popOver.sourceRect = self.share_button.frame
+        }
     }
     
     @IBAction func random() {
@@ -221,7 +226,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.clear_button.isHidden = true
         self.save_button.isHidden = true
         self.share_button.isHidden = true
-
+        
         self.random_button.isEnabled = false
         self.startSpinner()
         
@@ -690,7 +695,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 let h = self?.scanned_image.bounds.height
                 
                 let resized = image.resizedImage(withBounds: CGSize(width: w!, height: h!))
-  
+                
                 let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self?.imageTapped))
                 
                 self?.scanned_image.isUserInteractionEnabled = true

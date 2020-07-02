@@ -11,7 +11,7 @@ import OAuthSwift
 import Logging
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UIPopoverPresentationControllerDelegate {
 
     var logger = Logger(label: "info.aaronland.wunderkammer")
     var wunderkammer: Wunderkammer?
