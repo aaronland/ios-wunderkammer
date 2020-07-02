@@ -99,6 +99,19 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             let sfomuseum_collection = SFOMuseumCollection()
             self.collections.append(sfomuseum_collection)
         }
+
+        let enable_smithsonian = Bundle.main.object(forInfoDictionaryKey: "EnableSmithsonian") as? String
+                
+        if enable_smithsonian != nil && enable_smithsonian == "YES" {
+
+            let smithsonian_collection = SmithsonianCollection()
+            
+            if smithsonian_collection == nil {
+                self.showAlert(label:"There was a problem configuring the application.", message: "Unable to initialize Smithsonian collection.")
+            } else {
+                self.collections.append(smithsonian_collection!)
+            }
+        }
         
         let enable_cooperhewitt = Bundle.main.object(forInfoDictionaryKey: "EnableCooperHewitt") as? String
         
@@ -142,7 +155,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             self.showAlert(label:"There was a problem configuring the application.", message: "No collections have been enabled")
             return
         }
-        
+                
         // Ensure that at least one of the collections even supports NFC tags
         // Something something something geofencing something something something
         // (20200630/thisisaaronland)
@@ -200,6 +213,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         // read this from config file
         // self.app.logger.logLevel = .debug
+    
     }
     
     @IBAction func share() {
@@ -760,9 +774,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         guard let url = URL(string: str_url) else {
             return
         }
-        
-        // open in another view controller?
-        
+                
         UIApplication.shared.open(url)
     }
     
@@ -771,6 +783,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     private func showAlert(label: String, message: String){
+        
+        // TO DO: vibrate
+        // https://developer.apple.com/documentation/uikit/uinotificationfeedbackgenerator/2369826-notificationoccurred
         
         self.app.logger.debug("Show alert \(label): \(message)")
         

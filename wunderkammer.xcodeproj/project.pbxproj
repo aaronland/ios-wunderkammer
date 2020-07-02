@@ -28,6 +28,7 @@
 		4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4EDE2491333700E9E695 /* OEmbed.swift */; };
 		4ADC5A6C24A51082005B6360 /* OAuth2Wrapper in Frameworks */ = {isa = PBXBuildFile; productRef = 4ADC5A6B24A51082005B6360 /* OAuth2Wrapper */; };
 		4ADC5A6E24AE3699005B6360 /* UINavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADC5A6D24AE3699005B6360 /* UINavigationBar.swift */; };
+		4ADC5A7024AE3E46005B6360 /* Smithsonian.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADC5A6F24AE3E46005B6360 /* Smithsonian.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +51,7 @@
 		4ACA4ED824905FB600E9E695 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4ACA4EDE2491333700E9E695 /* OEmbed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OEmbed.swift; sourceTree = "<group>"; };
 		4ADC5A6D24AE3699005B6360 /* UINavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UINavigationBar.swift; sourceTree = "<group>"; };
+		4ADC5A6F24AE3E46005B6360 /* Smithsonian.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smithsonian.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +106,7 @@
 				4ACA4ED324905FB600E9E695 /* Assets.xcassets */,
 				4ACA4ED524905FB600E9E695 /* LaunchScreen.storyboard */,
 				4ACA4ED824905FB600E9E695 /* Info.plist */,
+				4ADC5A6F24AE3E46005B6360 /* Smithsonian.swift */,
 				4A533A6B24944EF30048C0A6 /* Config.xcconfig */,
 			);
 			path = wunderkammer;
@@ -197,6 +200,7 @@
 			files = (
 				4ACA4ECF24905FB500E9E695 /* ViewController.swift in Sources */,
 				4A8D8CD524A3C31E005AC432 /* Collection.swift in Sources */,
+				4ADC5A7024AE3E46005B6360 /* Smithsonian.swift in Sources */,
 				4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */,
 				4ADC5A6E24AE3699005B6360 /* UINavigationBar.swift in Sources */,
 				4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */,

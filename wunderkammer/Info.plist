@@ -91,5 +91,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>EnableSmithsonian</key>
+	<string>$(ENABLE_SMITHSONIAN)</string>
 </dict>
 </plist>

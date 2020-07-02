@@ -22,9 +22,12 @@ public class Wunderkammer: Collection  {
     
     public init?() {
         
-        let fileURL = try! FileManager.default
-            .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            .appendingPathComponent("wunderkammer.sqlite")
+        let fm = FileManager.default
+
+        let paths = fm.urls(for: .documentDirectory, in: .userDomainMask)
+        let documents = paths[0]
+        
+        let fileURL = documents.appendingPathComponent("wunderkammer.db")
         
         // print(fileURL)
         database = FMDatabase(url: fileURL)
