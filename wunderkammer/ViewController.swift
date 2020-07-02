@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreNFC
+
 import OAuthSwift
 import OAuth2Wrapper
 import CooperHewittAPI
@@ -220,6 +221,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     @IBAction func random() {
+        
+        let generator = UIImpactFeedbackGenerator(style: .heavy)
+        generator.impactOccurred()
         
         self.resetCurrent()
         
@@ -700,7 +704,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 self?.scanned_image.isUserInteractionEnabled = true
                 self?.scanned_image.addGestureRecognizer(tapGestureRecognizer)
-                self?.scanned_image.enableZoom()
+
+                // self?.scanned_image.enableZoom()
                 
                 self?.stopSpinner()
                 
