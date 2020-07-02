@@ -20,6 +20,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UIPopoverPresentationCont
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.            
         
+        // https://gist.github.com/vinhnx/5b78bc13bfbc5d1070a5
+        
+        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .any, barMetrics: .default)
+        UINavigationBar.appearance().shadowImage = UIImage()
+        
         guard let wk = Wunderkammer() else {
             logger.error("Failed to create wunderkammer database!")
             return false

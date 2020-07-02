@@ -61,6 +61,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     @IBOutlet weak var clear_button: UIButton!
     @IBOutlet weak var random_button: UIButton!
     @IBOutlet weak var share_button: UIButton!
+
     
     override func viewDidLoad() {
         
