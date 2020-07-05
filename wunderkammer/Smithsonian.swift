@@ -108,7 +108,9 @@ public class SmithsonianCollection: Collection {
         // a bunch of smaller per-unit databases (20200702/straup)
         
         for db_uri in db_uris {
-                        
+                 
+            print("DB", db_uri)
+            
             let db = FMDatabase(url: db_uri)
             
             guard db.open() else {
