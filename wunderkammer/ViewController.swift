@@ -703,8 +703,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         DispatchQueue.global().async { [weak self] in
             
             var image_data: Data?
-            // var image: UIImage?
-            
+                        
             do {
                 image_data = try Data(contentsOf: url)
             } catch (let error) {

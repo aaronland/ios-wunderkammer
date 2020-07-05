@@ -53,7 +53,10 @@ public class SmithsonianOEmbed: CollectionOEmbed {
     }
     
     public func ImageURL() -> String {
-        return self.oembed.url
+        // because: https://github.com/Smithsonian/OpenAccess/issues/6
+        var url = self.oembed.url
+        url = url.replacingOccurrences(of: "http://", with: "https://")
+        return url
     }
     
     public func Raw() -> OEmbedResponse {
@@ -64,7 +67,6 @@ public class SmithsonianOEmbed: CollectionOEmbed {
 public class SmithsonianCollection: Collection {
     
     private var databases = [String:FMDatabase]()
-    // private var database: FMDatabase
     
     public init?() {
         
@@ -73,17 +75,8 @@ public class SmithsonianCollection: Collection {
         let paths = fm.urls(for: .documentDirectory, in: .userDomainMask)
         let first = paths[0]
         
-        print("FIRST", first)
-        /*
-         
-         one large (like 1.5GB) database is too big and there should be
-         a bunch of smaller per-unit databases (20200702/straup)
-         
-         */
-        
         let si = first.appendingPathComponent("smithsonian")
       
-        print("SI", si)
         if !fm.fileExists(atPath: si.path){
             print("Missing Smithsonian databases")
             return nil
@@ -95,16 +88,13 @@ public class SmithsonianCollection: Collection {
             
             let contents = try fm.contentsOfDirectory(at: si, includingPropertiesForKeys: nil)
             
-            print("CONTENTS", contents)
-            // db_uris = contents.filter{ $0.pathExtension == ".db" }
+            db_uris = contents.filter{ $0.pathExtension == "db" }
             db_uris = contents
             
         } catch (let error) {
-            print("SAD", error)
+            print("Failed to determine databases", error)
             return nil
         }
-        
-        print(db_uris)
         
         if db_uris.count == 0 {
             print("NO DATABASES")
@@ -114,8 +104,11 @@ public class SmithsonianCollection: Collection {
         // this assumes (n) databases produced by
         // https://github.com/aaronland/go-smithsonian-openaccess-database
         
+        // one large (like 1.5GB) database is too big and there should be
+        // a bunch of smaller per-unit databases (20200702/straup)
+        
         for db_uri in db_uris {
-            
+                        
             let db = FMDatabase(url: db_uri)
             
             guard db.open() else {
@@ -142,6 +135,7 @@ public class SmithsonianCollection: Collection {
                 }
             }
         }
+        
     }
     
     public func GetRandomURL(completion: @escaping (Result<URL, Error>) -> ()) {
@@ -273,17 +267,4 @@ public class SmithsonianCollection: Collection {
     
 }
 
-extension URL {
-    var queryParameters: QueryParameters { return QueryParameters(url: self) }
-}
 
-class QueryParameters {
-    let queryItems: [URLQueryItem]
-    init(url: URL?) {
-        queryItems = URLComponents(string: url?.absoluteString ?? "")?.queryItems ?? []
-        print(queryItems)
-    }
-    subscript(name: String) -> String? {
-        return queryItems.first(where: { $0.name == name })?.value
-    }
-}
