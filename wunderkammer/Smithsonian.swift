@@ -15,6 +15,8 @@ public enum SmithsonianErrors: Error {
     case notImplemented
     case invalidURL
     case invalidOEmbed
+    case missingUnitID
+    case missingUnitDatabase
 }
 
 public class SmithsonianOEmbed: CollectionOEmbed {
@@ -26,12 +28,12 @@ public class SmithsonianOEmbed: CollectionOEmbed {
         guard let _ = oembed.author_url else {
             return nil
         }
-
+        
         self.oembed = oembed
     }
     
     public func Collection() -> String {
-        return "Smithsonian Institute"
+        return "Smithsonian Institution"
     }
     
     public func ObjectID() -> String {
@@ -58,17 +60,19 @@ public class SmithsonianOEmbed: CollectionOEmbed {
         return self.oembed
     }
 }
+
 public class SmithsonianCollection: Collection {
     
-    private var database: FMDatabase
-
+    private var databases = [String:FMDatabase]()
+    // private var database: FMDatabase
+    
     public init?() {
-                
+        
         let fm = FileManager.default
-
+        
         let paths = fm.urls(for: .documentDirectory, in: .userDomainMask)
         let first = paths[0]
- 
+        
         /*
          
          one large (like 1.5GB) database is too big and there should be
@@ -76,59 +80,117 @@ public class SmithsonianCollection: Collection {
          
          */
         
-        let db_uri = first.appendingPathComponent("nasm.db")
- 
-        if !fm.fileExists(atPath: db_uri.path){
-            print("Database does not exist")
+        let si = first.appendingPathComponent("smithsonian")
+        
+        if !fm.fileExists(atPath: si.path){
+            print("Missing Smithsonian databases")
             return nil
         }
- 
-        database = FMDatabase(url: db_uri)
         
-        guard database.open() else {
-            print("Unable to open database")
+        var db_uris = [URL]()
+        
+        do {
+            
+            let contents = try fm.contentsOfDirectory(at: si, includingPropertiesForKeys: nil)
+            
+            db_uris = contents.filter{ $0.pathExtension == ".db" }
+            
+        } catch (let error) {
+            print("SAD", error)
             return nil
+        }
+        
+        if db_uris.count == 0 {
+            print("NO DATABASES")
+            return nil
+        }
+        
+        // this assumes (n) databases produced by
+        // https://github.com/aaronland/go-smithsonian-openaccess-database
+        
+        for db_uri in db_uris {
+            
+            let db = FMDatabase(url: db_uri)
+            
+            guard db.open() else {
+                print("Unable to open database")
+                return nil
+            }
+            
+            let result = getRandomURL(database: db)
+            
+            switch result {
+            case .failure(let error):
+                print(error)
+                return nil
+            case .success(let url):
+                
+                guard let id = url.queryParameters["id"] else {
+                    print("NO ID")
+                    return nil
+                }
+                
+                let parts = id.components(separatedBy: "-")
+                let unit = parts[0]
+                
+                self.databases[unit] = db
+            }
         }
     }
     
     public func GetRandomURL(completion: @escaping (Result<URL, Error>) -> ()) {
         
+        let keys = Array(self.databases.keys)
+        let idx = keys.randomElement()!
+        let database = self.databases[idx]!
+        
+        let result = self.getRandomURL(database: database)
+        completion(result)
+    }
+    
+    private func getRandomURL(database: FMDatabase) -> Result<URL, Error>{
+        
         let q = "SELECT url FROM oembed ORDER BY RANDOM() LIMIT 1"
         
         var str_url: String?
         
-        
         do {
             let rs = try database.executeQuery(q, values: nil)
             rs.next()
-
+            
             guard let u = rs.string(forColumn: "url") else {
-                completion(.failure(SmithsonianErrors.invalidURL))
-                return
+                return .failure(SmithsonianErrors.invalidURL)
             }
             
             str_url = u
             
         } catch (let error) {
-            completion(.failure(error))
-            return
+            return .failure(error)
         }
         
         guard let url = URL(string: str_url!) else {
-            completion(.failure(SmithsonianErrors.invalidURL))
-            return
+            return .failure(SmithsonianErrors.invalidURL)
         }
         
-        completion(.success(url))
-        return
+        return .success(url)
     }
     
     public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
-        
         return .success(CollectionObjectSaveResponse.noop)
     }
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
+        
+        guard let id = url.queryParameters["id"] else {
+            return .failure(SmithsonianErrors.missingUnitID)
+        }
+        
+        let parts = id.components(separatedBy: "-")
+        let unit = parts[0]
+        
+        guard let database = self.databases[unit] else {            
+            return .failure(SmithsonianErrors.missingUnitDatabase)
+        }
         
         let q = "SELECT body FROM oembed WHERE url = ?"
         
@@ -137,7 +199,7 @@ public class SmithsonianCollection: Collection {
         do {
             let rs = try database.executeQuery(q, values: [url.absoluteURL] )
             rs.next()
-
+            
             guard let data = rs.data(forColumn: "body") else {
                 return .failure(SmithsonianErrors.invalidOEmbed)
             }
@@ -188,4 +250,19 @@ public class SmithsonianCollection: Collection {
         return .failure(CollectionErrors.notImplemented)
     }
     
+}
+
+extension URL {
+    var queryParameters: QueryParameters { return QueryParameters(url: self) }
+}
+
+class QueryParameters {
+    let queryItems: [URLQueryItem]
+    init(url: URL?) {
+        queryItems = URLComponents(string: url?.absoluteString ?? "")?.queryItems ?? []
+        print(queryItems)
+    }
+    subscript(name: String) -> String? {
+        return queryItems.first(where: { $0.name == name })?.value
+    }
 }
