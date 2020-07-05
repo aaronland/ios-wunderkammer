@@ -27,6 +27,7 @@
 		4ACA4ED724905FB600E9E695 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4ACA4ED524905FB600E9E695 /* LaunchScreen.storyboard */; };
 		4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACA4EDE2491333700E9E695 /* OEmbed.swift */; };
 		4AD4D07324B2912F00972082 /* URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD4D07224B2912F00972082 /* URL.swift */; };
+		4AD4D07524B2995A00972082 /* OrThis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD4D07424B2995A00972082 /* OrThis.swift */; };
 		4ADC5A6C24A51082005B6360 /* OAuth2Wrapper in Frameworks */ = {isa = PBXBuildFile; productRef = 4ADC5A6B24A51082005B6360 /* OAuth2Wrapper */; };
 		4ADC5A7024AE3E46005B6360 /* Smithsonian.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADC5A6F24AE3E46005B6360 /* Smithsonian.swift */; };
 /* End PBXBuildFile section */
@@ -51,6 +52,7 @@
 		4ACA4ED824905FB600E9E695 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4ACA4EDE2491333700E9E695 /* OEmbed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OEmbed.swift; sourceTree = "<group>"; };
 		4AD4D07224B2912F00972082 /* URL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URL.swift; sourceTree = "<group>"; };
+		4AD4D07424B2995A00972082 /* OrThis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrThis.swift; sourceTree = "<group>"; };
 		4ADC5A6F24AE3E46005B6360 /* Smithsonian.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smithsonian.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -97,6 +99,7 @@
 				4A5424DA24AD50F500911252 /* UIImageView.swift */,
 				4A8D8CD024A3C093005AC432 /* SFOMuseum.swift */,
 				4A8D8CD224A3C140005AC432 /* CooperHewitt.swift */,
+				4AD4D07424B2995A00972082 /* OrThis.swift */,
 				4A8D8CD424A3C31E005AC432 /* Collection.swift */,
 				4AAF05D724967D71006BE255 /* UIText.swift */,
 				4AAF05D924967D96006BE255 /* UIImage.swift */,
@@ -204,6 +207,7 @@
 				4AD4D07324B2912F00972082 /* URL.swift in Sources */,
 				4ACA4ECB24905FB500E9E695 /* AppDelegate.swift in Sources */,
 				4ACA4ECD24905FB500E9E695 /* SceneDelegate.swift in Sources */,
+				4AD4D07524B2995A00972082 /* OrThis.swift in Sources */,
 				4AAF05D824967D71006BE255 /* UIText.swift in Sources */,
 				4ACA4EDF2491333700E9E695 /* OEmbed.swift in Sources */,
 				4A5424DB24AD50F500911252 /* UIImageView.swift in Sources */,
