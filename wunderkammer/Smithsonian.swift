@@ -73,6 +73,7 @@ public class SmithsonianCollection: Collection {
         let paths = fm.urls(for: .documentDirectory, in: .userDomainMask)
         let first = paths[0]
         
+        print("FIRST", first)
         /*
          
          one large (like 1.5GB) database is too big and there should be
@@ -81,7 +82,8 @@ public class SmithsonianCollection: Collection {
          */
         
         let si = first.appendingPathComponent("smithsonian")
-        
+      
+        print("SI", si)
         if !fm.fileExists(atPath: si.path){
             print("Missing Smithsonian databases")
             return nil
@@ -93,12 +95,16 @@ public class SmithsonianCollection: Collection {
             
             let contents = try fm.contentsOfDirectory(at: si, includingPropertiesForKeys: nil)
             
-            db_uris = contents.filter{ $0.pathExtension == ".db" }
+            print("CONTENTS", contents)
+            // db_uris = contents.filter{ $0.pathExtension == ".db" }
+            db_uris = contents
             
         } catch (let error) {
             print("SAD", error)
             return nil
         }
+        
+        print(db_uris)
         
         if db_uris.count == 0 {
             print("NO DATABASES")
@@ -125,15 +131,15 @@ public class SmithsonianCollection: Collection {
                 return nil
             case .success(let url):
                 
-                guard let id = url.queryParameters["id"] else {
-                    print("NO ID")
+                let unit_result = deriveUnitFromURL(url: url)
+                
+                switch unit_result {
+                case .failure(let error):
+                    print(error)
                     return nil
+                case .success(let unit):
+                    self.databases[unit] = db
                 }
-                
-                let parts = id.components(separatedBy: "-")
-                let unit = parts[0]
-                
-                self.databases[unit] = db
             }
         }
     }
@@ -146,6 +152,18 @@ public class SmithsonianCollection: Collection {
         
         let result = self.getRandomURL(database: database)
         completion(result)
+    }
+    
+    private func deriveUnitFromURL(url: URL) -> Result<String, Error> {
+        
+        guard let id = url.queryParameters["id"] else {
+            return .failure(SmithsonianErrors.missingUnitID)
+        }
+        
+        let parts = id.components(separatedBy: "-")
+        let unit = parts[0]
+        
+        return .success(unit)
     }
     
     private func getRandomURL(database: FMDatabase) -> Result<URL, Error>{
@@ -180,15 +198,18 @@ public class SmithsonianCollection: Collection {
     }
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
-        
-        guard let id = url.queryParameters["id"] else {
-            return .failure(SmithsonianErrors.missingUnitID)
+                
+        let unit_result = deriveUnitFromURL(url: url)
+        var unit: String?
+
+        switch unit_result {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let u):
+            unit = u
         }
         
-        let parts = id.components(separatedBy: "-")
-        let unit = parts[0]
-        
-        guard let database = self.databases[unit] else {            
+        guard let database = self.databases[unit!] else {
             return .failure(SmithsonianErrors.missingUnitDatabase)
         }
         

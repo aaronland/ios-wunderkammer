@@ -29,7 +29,7 @@ public class Wunderkammer: Collection  {
         
         let fileURL = documents.appendingPathComponent("wunderkammer.db")
         
-        // print(fileURL)
+        print(fileURL)
         database = FMDatabase(url: fileURL)
         
         guard database.open() else {
