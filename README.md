@@ -2,7 +2,7 @@
 
 ## Important
 
-This is work in progress and documentation will follow. In the meantime you should start by reading the [bring your own pen device](https://www.aaronland.info/weblog/2020/06/16/revisiting/#pen) blog post.
+This is work in progress and documentation will follow. In the meantime you should start by reading the [bring your own pen device](https://www.aaronland.info/weblog/2020/06/16/revisiting/#pen) and the [everyone gets a wunderkammer!](https://www.aaronland.info/weblog/2020/07/07/action/#wunderkammer) blog posts.
 
 ## Config.xcconfig
 
