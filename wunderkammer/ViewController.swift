@@ -61,7 +61,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     @IBOutlet weak var clear_button: UIButton!
     @IBOutlet weak var random_button: UIButton!
     @IBOutlet weak var share_button: UIButton!
-
+    
     
     override func viewDidLoad() {
         
@@ -99,11 +99,11 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             let sfomuseum_collection = SFOMuseumCollection()
             self.collections.append(sfomuseum_collection)
         }
-
+        
         let enable_smithsonian = Bundle.main.object(forInfoDictionaryKey: "EnableSmithsonian") as? String
-                
+        
         if enable_smithsonian != nil && enable_smithsonian == "YES" {
-
+            
             let smithsonian_collection = SmithsonianCollection()
             
             if smithsonian_collection == nil {
@@ -155,7 +155,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             self.showAlert(label:"There was a problem configuring the application.", message: "No collections have been enabled")
             return
         }
-                
+        
         // Ensure that at least one of the collections even supports NFC tags
         // Something something something geofencing something something something
         // (20200630/thisisaaronland)
@@ -213,7 +213,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         // read this from config file
         // self.app.logger.logLevel = .debug
-    
+        
     }
     
     @IBAction func share() {
@@ -258,7 +258,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         func completion(result: Result<URL, Error>) -> () {
             
             switch result {
-                
+            
             case .failure(let error):
                 
                 DispatchQueue.main.async {
@@ -524,16 +524,41 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         self.session = nil
     }
     
-    private func processMessage(message: NFCNDEFMessage) {
+    private func uriFromMessage(message: NFCNDEFMessage) -> Result<String, Error> {
         
-        self.app.logger.debug("Process message")
+        var uri: String?
         
         let payload = message.records[0]
+        
+        let text_payload = payload.wellKnownTypeTextPayload()
+        
+        if text_payload.0 != nil {
+            uri = text_payload.0
+            return .success(uri!)
+        }
+        
         let data = payload.payload
+        uri = String(decoding: data, as: UTF8.self)
         
-        let str_data = String(decoding: data, as: UTF8.self)
+        return .success(uri!)
+    }
+    
+    private func processMessage(message: NFCNDEFMessage) {
         
-        self.app.logger.debug("Scanned tag \(str_data)")
+        var uri: String?
+        
+        let uri_result = uriFromMessage(message: message)
+        
+        switch uri_result {
+        case .failure(let error):
+            
+            self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
+            return
+        case .success(let u):
+            uri = u
+        }
+        
+        self.app.logger.debug("Process message \(uri)")
         
         var possible_urls = [String]()
         var possible_collections = [Collection]()
@@ -559,7 +584,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
             case .success(let template):
                 
-                guard let variables = template.extract(str_data) else {
+                guard let variables = template.extract(uri!) else {
                     continue
                 }
                 
@@ -574,7 +599,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             let url_rsp = c.ObjectURLTemplate()
             
             switch url_rsp {
-                
+            
             case .failure(let error):
                 self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
                 return
@@ -604,10 +629,10 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             self.showAlert(label:"Failed to read tag", message:"Unable to determine tag source (multiple choices)")
             return
         }
-                
+        
         let object_url = possible_urls[0]
         self.current_collection = possible_collections[0]
-          
+        
         var oembed_url = ""
         
         let result = self.current_collection!.OEmbedURLTemplate()
@@ -619,7 +644,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         case .success(let t):
             oembed_url = t.expand(["url": object_url])
         }
-       
+        
         if oembed_url == "" {
             self.showAlert(label:"Failed to handle tag", message:"Unable to resolve URL")
             return
@@ -703,7 +728,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         DispatchQueue.global().async { [weak self] in
             
             var image_data: Data?
-                        
+            
             do {
                 image_data = try Data(contentsOf: url)
             } catch (let error) {
@@ -745,7 +770,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 self?.scanned_image.isUserInteractionEnabled = true
                 self?.scanned_image.addGestureRecognizer(tapGestureRecognizer)
-
+                
                 // self?.scanned_image.enableZoom()
                 
                 self?.stopSpinner()
@@ -773,7 +798,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         guard let url = URL(string: str_url) else {
             return
         }
-                
+        
         UIApplication.shared.open(url)
     }
     

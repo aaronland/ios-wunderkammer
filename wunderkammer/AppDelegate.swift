@@ -14,7 +14,6 @@ import Logging
 class AppDelegate: UIResponder, UIApplicationDelegate, UIPopoverPresentationControllerDelegate {
 
     var logger = Logger(label: "info.aaronland.wunderkammer")
-    
     var wunderkammer: Wunderkammer?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
