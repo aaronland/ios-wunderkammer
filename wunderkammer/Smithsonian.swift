@@ -195,6 +195,8 @@ public class SmithsonianCollection: Collection {
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
                 
+        print("GET", url)
+        
         let unit_result = deriveUnitFromURL(url: url)
         var unit: String?
 
@@ -247,7 +249,7 @@ public class SmithsonianCollection: Collection {
     public func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error> {
         switch capability {
         case CollectionCapabilities.nfcTags:
-            return .success(false)
+            return .success(true)
         case CollectionCapabilities.randomObject:
             return .success(true)
         case CollectionCapabilities.saveObject:
@@ -255,16 +257,22 @@ public class SmithsonianCollection: Collection {
         }
     }
     
+    // EXTRACT si://{collection}/o/{object_id} Optional("si://nmaahc/o/A2018.24.1.1.1ab")
+
     public func NFCTagTemplate() -> Result<URITemplate, Error> {
-        return .failure(CollectionErrors.notImplemented)
+        
+        let t = URITemplate(template: "si://{collection}/o/{object_id}")
+        return .success(t)
     }
     
     public func ObjectURLTemplate() -> Result<URITemplate, Error> {
-        return .failure(CollectionErrors.notImplemented)
+        let t = URITemplate(template: "si://{collection}/o/{object_id}")
+        return .success(t)
     }
     
     public func OEmbedURLTemplate() -> Result<URITemplate, Error> {
-        return .failure(CollectionErrors.notImplemented)
+        let t = URITemplate(template: "si://{url}")
+        return .success(t)
     }
     
 }

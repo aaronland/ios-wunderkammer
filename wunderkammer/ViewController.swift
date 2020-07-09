@@ -558,7 +558,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             uri = u
         }
         
-        self.app.logger.debug("Process message \(uri)")
+        print("URI", uri)
+        
+        self.app.logger.debug("Process message \(String(describing: uri))")
         
         var possible_urls = [String]()
         var possible_collections = [Collection]()
@@ -568,11 +570,16 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             let c = self.collections[idx]
             
             var object_id: String?
+            var collection: String?
             
             let template_rsp = c.NFCTagTemplate()
             
+            print("TEMPLATE", template_rsp)
+            
             switch template_rsp {
             case .failure(let error):
+                
+                print("WOMP WOMP", error)
                 
                 switch error {
                 case CollectionErrors.notImplemented:
@@ -584,15 +591,25 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
             case .success(let template):
                 
+                print("EXTRACT", template, uri)
+                
                 guard let variables = template.extract(uri!) else {
+                    print("NOTHING")
                     continue
                 }
+                
+                print("VARIABLES", variables)
                 
                 guard let id = variables["objectid"] else {
                     continue
                 }
                 
                 object_id = id
+                
+                if variables["collection"] != nil {
+                    collection = variables["collection"]
+                }
+                
                 self.app.logger.debug("Scanned object \(id)")
             } 
             
@@ -601,12 +618,22 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             switch url_rsp {
             
             case .failure(let error):
+                DispatchQueue.main.async {
                 self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
+                }
                 return
             case .success(let template):
                 
-                let str_url = template.expand(["objectid": object_id!])
+                var args = [String:Any]()
+                args["objectid"] = object_id!
                 
+                if collection != nil {
+                    args["collection"] = collection!
+                }
+                
+                let str_url = template.expand(args)
+                
+                print("STR URL", str_url)
                 if str_url == "" {
                     continue
                 }
@@ -626,7 +653,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         // TO DO: dialog to prompt user to choose
         
         if possible_urls.count > 1 {
+            DispatchQueue.main.async {
             self.showAlert(label:"Failed to read tag", message:"Unable to determine tag source (multiple choices)")
+            }
             return
         }
         
@@ -639,12 +668,15 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         switch result {
         case .failure(let error):
+            DispatchQueue.main.async {
             self.showAlert(label:"Failed to handle tag", message:error.localizedDescription)
+            }
             return
         case .success(let t):
             oembed_url = t.expand(["url": object_url])
         }
         
+        print("OEMBED", oembed_url)
         if oembed_url == "" {
             self.showAlert(label:"Failed to handle tag", message:"Unable to resolve URL")
             return
