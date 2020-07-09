@@ -45,6 +45,10 @@ public protocol CollectionOEmbed {
 public protocol Collection {
     func GetRandomURL(completion: @escaping (Result<URL, Error>) -> ())
     func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error>
+    
+    // TBD: return multiple OEmbed things to account for objects with multiple
+    // representations...
+    
     func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error>
     func HasCapability(capability: CollectionCapabilities) -> Result<Bool, Error>
     func NFCTagTemplate() -> Result<URITemplate, Error>

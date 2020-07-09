@@ -17,6 +17,10 @@ public enum SmithsonianErrors: Error {
     case invalidOEmbed
     case missingUnitID
     case missingUnitDatabase
+    case invalidOEmbedQueryParameters
+    case missingOEmbedQueryParameter
+    case invalidURITemplate
+    case missingURITemplateVariable
 }
 
 public class SmithsonianOEmbed: CollectionOEmbed {
@@ -195,28 +199,80 @@ public class SmithsonianCollection: Collection {
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
                 
-        print("GET", url)
+        // this works: GET https://ids.si.edu/ids/download?id=SAAM-1971.456.11_2_screen
+        // this doesn't: GET oembed:///?url=si%3A%2F%2Fnmaahc%2Fo%2FA2018_24_1_1_1ab
+        // as in: "si://nmaahc/o/A2018_24_1_1_1ab"
+         
+        // here is the crux of it: from 'url' we need to determine what the
+        // query field is - (image) url or (object) id - and whether the
+        // query value needs to be derived/extracted from 'url'
         
-        let unit_result = deriveUnitFromURL(url: url)
-        var unit: String?
+        var q = "SELECT body FROM oembed WHERE url = ?"
+        
+        var unit: String?   // the database to read from
+        var target: Any     // the value we are going to query against
+                
+        if url.scheme == "nfc" {
+                    
+            // query for the object
+            
+            let params = url.queryParameters
+                        
+            guard let nfc_url = params["url"] else {
+                return .failure(SmithsonianErrors.missingOEmbedQueryParameter)
+            }
+                        
+            let template_result = self.NFCTagTemplate()
+            
+            switch template_result {
+            case .failure(let error):
+                return .failure(error)
+            case .success(let template):
+                                
+                guard let nfc_variables = template.extract(nfc_url) else {
+                    return .failure(SmithsonianErrors.invalidURITemplate)
+                }
+                                
+                guard let nfc_unit = nfc_variables["collection"] else {
+                    return .failure(SmithsonianErrors.missingURITemplateVariable)
+                }
+                                
+                unit = nfc_unit.uppercased() // sigh...
+                target = nfc_url
+                
+                q = "SELECT body FROM oembed WHERE object_uri = ?"
+            }
+            
+        } else {
+        
+            // query for a particular representation of the object
+            
+            let unit_result = deriveUnitFromURL(url: url)
 
-        switch unit_result {
-        case .failure(let error):
-            return .failure(error)
-        case .success(let u):
-            unit = u
+            switch unit_result {
+            case .failure(let error):
+                return .failure(error)
+            case .success(let u):
+                unit = u
+            }
+            
+            target = url.absoluteURL
+        }
+        
+        if unit == nil {
+            return .failure(SmithsonianErrors.missingUnitID)
         }
         
         guard let database = self.databases[unit!] else {
             return .failure(SmithsonianErrors.missingUnitDatabase)
         }
-        
-        let q = "SELECT body FROM oembed WHERE url = ?"
+             
+        // print("QUERY", unit, q, target)
         
         var oe_data: Data?
         
         do {
-            let rs = try database.executeQuery(q, values: [url.absoluteURL] )
+            let rs = try database.executeQuery(q, values: [target] )
             rs.next()
             
             guard let data = rs.data(forColumn: "body") else {
@@ -257,21 +313,22 @@ public class SmithsonianCollection: Collection {
         }
     }
     
-    // EXTRACT si://{collection}/o/{object_id} Optional("si://nmaahc/o/A2018.24.1.1.1ab")
+    // remember: something like "si://nmaahc/o/A2018.24.1.1.1ab"
+    // will never work because "." is a reserved character in RFC6570
+    // https://tools.ietf.org/html/rfc6570#section-2.1
 
     public func NFCTagTemplate() -> Result<URITemplate, Error> {
-        
-        let t = URITemplate(template: "si://{collection}/o/{object_id}")
+        let t = URITemplate(template: "si://{collection}/o/{objectid}")
         return .success(t)
     }
     
     public func ObjectURLTemplate() -> Result<URITemplate, Error> {
-        let t = URITemplate(template: "si://{collection}/o/{object_id}")
+        let t = URITemplate(template: "si://{collection}/o/{objectid}")
         return .success(t)
     }
     
     public func OEmbedURLTemplate() -> Result<URITemplate, Error> {
-        let t = URITemplate(template: "si://{url}")
+        let t = URITemplate(template: "nfc:///?url={url}")
         return .success(t)
     }
     
