@@ -92,6 +92,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         share_button.isHidden = true
         save_button.isHidden = true
         
+        // please something better to load collections...
+        // https://github.com/aaronland/ios-wunderkammer/issues/19
+        
         let enable_sfomuseum = Bundle.main.object(forInfoDictionaryKey: "EnableSFOMuseum") as? String
         
         if enable_sfomuseum != nil && enable_sfomuseum == "YES" {
@@ -109,6 +112,19 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 self.showAlert(label:"There was a problem configuring the application.", message: "Unable to initialize Smithsonian collection.")
             } else {
                 self.collections.append(smithsonian_collection!)
+            }
+        }
+        
+        let enable_orthis = Bundle.main.object(forInfoDictionaryKey: "EnableOrThis") as? String
+        
+        if enable_orthis != nil && enable_orthis == "YES" {
+            
+            let orthis_collection = OrThisCollection()
+            
+            if orthis_collection == nil {
+                self.showAlert(label:"There was a problem configuring the application.", message: "Unable to initialize OrThis collection.")
+            } else {
+                self.collections.append(orthis_collection!)
             }
         }
         
@@ -211,7 +227,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
         // read this from config file
-        // self.app.logger.logLevel = .debug
+        self.app.logger.logLevel = .debug
         
     }
     
@@ -592,7 +608,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
         self.app.logger.debug("Process message \(String(describing: uri))")
-        
+                
         var possible_urls = [String]()
         var possible_collections = [Collection]()
         
@@ -617,11 +633,11 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 }
                 
             case .success(let template):
-                
+                                
                 guard let variables = template.extract(uri!) else {
                     continue
                 }
-                
+                                
                 guard let id = variables["objectid"] else {
                     continue
                 }
@@ -634,18 +650,19 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 self.app.logger.debug("Scanned object \(id)")
             } 
-            
+                        
             let url_rsp = c.ObjectURLTemplate()
             
             switch url_rsp {
             
             case .failure(let error):
+                
                 DispatchQueue.main.async {
                     self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
                 }
                 return
             case .success(let template):
-                
+                                
                 var args = [String:Any]()
                 args["objectid"] = object_id!
                 
@@ -654,7 +671,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 }
                 
                 let str_url = template.expand(args)
-                
+                                
                 if str_url == "" {
                     continue
                 }
@@ -697,7 +714,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             oembed_url = t.expand(["url": object_url])
         }
         
-        print("OEMBED", oembed_url)
         if oembed_url == "" {
             self.showAlert(label:"Failed to handle tag", message:"Unable to resolve URL")
             return
@@ -714,7 +730,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     }
     
     private func fetchOEmbed(url: URL) {
-        
+                
         guard let current_collection = self.current_collection else {
             DispatchQueue.main.async {
                 self.showAlert(label:"Unable to fetch object information", message: "Unable to determine current collection")
@@ -727,7 +743,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         }
         
         DispatchQueue.global().async { [weak self] in
-            
+                        
             let result = current_collection.GetOEmbed(url: url)
             
             switch result {
@@ -781,7 +797,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         DispatchQueue.global().async { [weak self] in
             
             var image_data: Data?
-            
+                        
             do {
                 image_data = try Data(contentsOf: url)
             } catch (let error) {

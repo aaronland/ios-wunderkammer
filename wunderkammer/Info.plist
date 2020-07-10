@@ -95,5 +95,7 @@
 	<true/>
 	<key>EnableSmithsonian</key>
 	<string>$(ENABLE_SMITHSONIAN)</string>
+	<key>EnableOrThis</key>
+	<string>$(ENABLE_ORTHIS)</string>
 </dict>
 </plist>
