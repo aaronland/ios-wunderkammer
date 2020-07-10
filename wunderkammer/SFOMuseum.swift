@@ -9,6 +9,7 @@
 import Foundation
 import CoreNFC
 import URITemplate
+import UIKit
 
 public enum SFOMuseumErrors: Error {
     case notImplemented
@@ -121,8 +122,8 @@ public class SFOMuseumCollection: Collection {
         return
     }
     
-    public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
-        return .success(CollectionObjectSaveResponse.noop)
+    public func SaveObject(oembed: CollectionOEmbed, image: UIImage?) -> Result<CollectionSaveObjectResponse, Error> {
+        return .success(CollectionSaveObjectResponse.noop)
     }
     
 }

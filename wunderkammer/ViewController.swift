@@ -22,7 +22,6 @@ enum ViewControllerErrors : Error {
     case wunderkammerMissingObject
     case wunderkammerMissingOEmbed
     case wunderkammerMissingImage
-    case wunderkammerMissingDataURL
     case debugError
 }
 
@@ -293,19 +292,12 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             return
         }
         
-        guard let data_url = current_image.dataURL() else {
-            self.showAlert(label:"There was problem saving this object", message: ViewControllerErrors.wunderkammerMissingDataURL.localizedDescription)
-            return
-        }
-        
-        let obj = CollectionObject(
-            ID: current_oembed.ObjectID(),
-            URL: current_oembed.ObjectURL(),
-            Image: data_url
-        )
-        
         save_button.isEnabled = false
+        
+        var to_complete = 1 // locally, to the wunderkammer
         var completed = 0
+        
+        var remote_save = false // flag used to determine copy in feedback messages
         
         var error_local: Error?
         var error_remote: Error?
@@ -325,7 +317,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             
             completed += 1
             
-            if completed < 2 {
+            if completed < to_complete {
                 return
             }
             
@@ -345,18 +337,66 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                     
                 } else if error_local != nil {
                     
+                    if remote_save {
+                        
                     self.showAlert(label: "This object was saved remotely but there was a problem saving this object to your device.", message: error_message(error: error_local!))
-                    
+                    } else {
+                        
+                        self.showAlert(label: "There was a problem saving this object to your device.", message: error_message(error: error_local!))
+                    }
                 } else {
-                    self.showAlert(label: "This object has been saved.", message: "This object has been saved locally and remotely")
+                    
+                    if remote_save {
+                    self.showAlert(label: "This object has been saved.", message: "This object has been saved remotely and to your device.")
+                    } else {
+                        
+                        self.showAlert(label: "This object has been saved.", message: "This object has been saved to your device.")
+                    }
                 }
                 
             }
         }
+        
+        // check for remote saving capability and update to_complete
+        // counter before we actually start saving anything
+        
+        let capability_result = collection.HasCapability(capability: .saveObject)
+        
+        switch capability_result {
+        case .failure(let error):
+            
+            DispatchQueue.main.async {
+                self.showAlert(label: "Unable to save object remotely.", message: error.localizedDescription)
+            }
+
+        case .success(let has_capability):
+            
+            if has_capability {
+                
+                remote_save = true
+                to_complete += 1
+                
+                DispatchQueue.global().async {
+                    
+                    let result = collection.SaveObject(oembed: current_oembed, image: current_image)
+                    
+                    DispatchQueue.main.async {
+                        
+                        if case .failure(let error) = result {
+                            error_local = error
+                        }
+                        
+                        on_complete()
+                    }
+                }
+            }
+        }
+        
+        // save locally to the wunderkammer
         
         DispatchQueue.global().async { [weak self] in
             
-            let result = self?.app.wunderkammer!.SaveObject(object: obj)
+            let result = self?.app.wunderkammer!.SaveObject(oembed: current_oembed, image: current_image)
             
             DispatchQueue.main.async {
                 
@@ -368,19 +408,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             }
         }
         
-        DispatchQueue.global().async {
-            
-            let result = collection.SaveObject(object:obj)
-            
-            DispatchQueue.main.async {
-                
-                if case .failure(let error) = result {
-                    error_local = error
-                }
-                
-                on_complete()
-            }
-        }
         
     }
     
@@ -530,12 +557,18 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         let payload = message.records[0]
         
+        // things written by ios-nfc-tagwriter
+        
         let text_payload = payload.wellKnownTypeTextPayload()
         
         if text_payload.0 != nil {
             uri = text_payload.0
             return .success(uri!)
         }
+        
+        // TO DO: handle payload.wellKnownTypeURIPayload()
+        
+        // things written by Cooper Hewitt tag-writer
         
         let data = payload.payload
         uri = String(decoding: data, as: UTF8.self)
@@ -558,8 +591,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             uri = u
         }
         
-        print("URI", uri)
-        
         self.app.logger.debug("Process message \(String(describing: uri))")
         
         var possible_urls = [String]()
@@ -574,12 +605,8 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             
             let template_rsp = c.NFCTagTemplate()
             
-            print("TEMPLATE", template_rsp)
-            
             switch template_rsp {
             case .failure(let error):
-                
-                print("WOMP WOMP", error)
                 
                 switch error {
                 case CollectionErrors.notImplemented:
@@ -591,14 +618,9 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
             case .success(let template):
                 
-                print("EXTRACT", template, uri)
-                
                 guard let variables = template.extract(uri!) else {
-                    print("NOTHING")
                     continue
                 }
-                
-                print("VARIABLES", variables)
                 
                 guard let id = variables["objectid"] else {
                     continue
@@ -619,7 +641,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             
             case .failure(let error):
                 DispatchQueue.main.async {
-                self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
+                    self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
                 }
                 return
             case .success(let template):
@@ -633,7 +655,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 let str_url = template.expand(args)
                 
-                print("STR URL", str_url)
                 if str_url == "" {
                     continue
                 }
@@ -654,7 +675,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         if possible_urls.count > 1 {
             DispatchQueue.main.async {
-            self.showAlert(label:"Failed to read tag", message:"Unable to determine tag source (multiple choices)")
+                self.showAlert(label:"Failed to read tag", message:"Unable to determine tag source (multiple choices)")
             }
             return
         }
@@ -669,7 +690,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         switch result {
         case .failure(let error):
             DispatchQueue.main.async {
-            self.showAlert(label:"Failed to handle tag", message:error.localizedDescription)
+                self.showAlert(label:"Failed to handle tag", message:error.localizedDescription)
             }
             return
         case .success(let t):

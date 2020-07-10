@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreNFC
+import UIKit
 
 import OAuth2Wrapper
 import OAuthSwift
@@ -127,9 +128,9 @@ public class CooperHewittCollection: Collection {
         }
     }
     
-    public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
+    public func SaveObject(oembed: CollectionOEmbed, image: UIImage?) -> Result<CollectionSaveObjectResponse, Error> {
         
-        return .success(CollectionObjectSaveResponse.noop)
+        return .success(CollectionSaveObjectResponse.noop)
         
         /*
          

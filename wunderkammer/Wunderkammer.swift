@@ -10,14 +10,23 @@ import Foundation
 import CoreNFC
 import FMDB
 import URITemplate
+import UIKit
 
 public enum WunderkammerErrors: Error {
     case notImplemented
+    case imageInvalidDataURL
+    case jsonEncoding
 }
 
 public class Wunderkammer: Collection  {
 
-    private let objects_schema = "CREATE TABLE objects(url TEXT PRIMARY KEY, id TEXT, image TEXT, created DATE)"
+    // for future reference if we ever need to do "live" updates of
+    // existing databases...
+    // sqlite> ALTER TABLE objects RENAME COLUMN id TO object_uri;
+    // sqlite> ALTER TABLE objects RENAME COLUMN url TO oembed_url;
+    
+    private let objects_schema = "CREATE TABLE objects(url TEXT PRIMARY KEY, object_uri TEXT, body TEXT, created DATE); CREATE INDEX `by_object` ON objects (`object_uri`);"
+    
     private var database: FMDatabase
     
     public init?() {
@@ -96,15 +105,39 @@ public class Wunderkammer: Collection  {
         return
     }
     
-    public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
+    public func SaveObject(oembed: CollectionOEmbed, image: UIImage?) -> Result<CollectionSaveObjectResponse, Error> {
+        
+        let oembed_url = oembed.ObjectURL()
+        let object_uri = oembed.ObjectID()
+        
+        var raw_oembed = oembed.Raw()
+        
+        if image != nil {
+            
+            guard let data_url = image!.dataURL() else {
+                return .failure(WunderkammerErrors.imageInvalidDataURL)
+            }
+            
+            raw_oembed.data_url = data_url
+        }
+        
+        let encoder = JSONEncoder()
+        var json_oembed: String?
         
         do {
-            try self.database.executeUpdate("INSERT OR REPLACE INTO objects (url, id, image) values (?, ?, ?)", values: [object.URL, object.ID, object.Image])
+            let enc = try encoder.encode(raw_oembed)
+            json_oembed = String(decoding: enc, as: UTF8.self)
+        } catch (let error) {
+            return .failure(error)
+        }
+                
+        do {
+            try self.database.executeUpdate("INSERT OR REPLACE INTO objects (url, object_uri, body) values (?, ?, ?)", values: [oembed_url, object_uri, json_oembed!])
         } catch (let error) {
             return .failure(error)
         }
 
-        return .success(CollectionObjectSaveResponse.success)
+        return .success(CollectionSaveObjectResponse.success)
     }
     
 }

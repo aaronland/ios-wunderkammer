@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreNFC
+import UIKit
 
 import URITemplate
 
@@ -113,9 +114,9 @@ public class OrThis: Collection {
         }
     }
     
-    public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
+    public func SaveObject(oembed: CollectionOEmbed, image: UIImage?) -> Result<CollectionSaveObjectResponse, Error> {
         
-        return .success(CollectionObjectSaveResponse.noop)
+        return .success(CollectionSaveObjectResponse.noop)
     }
     
     public func GetRandomURL(completion: @escaping (Result<URL, Error>) -> ()) {

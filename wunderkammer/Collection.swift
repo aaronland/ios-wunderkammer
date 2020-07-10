@@ -9,15 +9,9 @@
 import Foundation
 import CoreNFC
 import URITemplate
+import UIKit
 
-
-public struct CollectionObject {
-    var ID: String
-    var URL: String
-    var Image: String
-}
-
-public enum CollectionObjectSaveResponse {
+public enum CollectionSaveObjectResponse {
     case success
     case noop
 }
@@ -44,7 +38,9 @@ public protocol CollectionOEmbed {
 
 public protocol Collection {
     func GetRandomURL(completion: @escaping (Result<URL, Error>) -> ())
-    func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error>
+    
+    // does this need to be async with a completion handler? probably...
+    func SaveObject(oembed: CollectionOEmbed, image: UIImage?) -> Result<CollectionSaveObjectResponse, Error>
     
     // TBD: return multiple OEmbed things to account for objects with multiple
     // representations...

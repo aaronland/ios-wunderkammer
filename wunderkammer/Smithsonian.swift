@@ -8,6 +8,8 @@
 
 import Foundation
 import CoreNFC
+import UIKit
+
 import URITemplate
 import FMDB
 
@@ -29,7 +31,7 @@ public class SmithsonianOEmbed: CollectionOEmbed {
     
     public init?(oembed: OEmbedResponse) {
         
-        guard let _ = oembed.author_url else {
+        guard let _ = oembed.object_uri else {
             return nil
         }
         
@@ -41,11 +43,7 @@ public class SmithsonianOEmbed: CollectionOEmbed {
     }
     
     public func ObjectID() -> String {
-        
-        let auth_url = self.oembed.author_url!
-        
-        let fname = (auth_url as NSString).lastPathComponent
-        return fname
+        return self.oembed.object_uri!
     }
     
     public func ObjectURL() -> String {
@@ -113,7 +111,7 @@ public class SmithsonianCollection: Collection {
         
         for db_uri in db_uris {
                  
-            print("DB", db_uri)
+            // print("DB", db_uri)
             
             let db = FMDatabase(url: db_uri)
             
@@ -193,8 +191,8 @@ public class SmithsonianCollection: Collection {
         return .success(url)
     }
     
-    public func SaveObject(object: CollectionObject) -> Result<CollectionObjectSaveResponse, Error> {
-        return .success(CollectionObjectSaveResponse.noop)
+    public func SaveObject(oembed: CollectionOEmbed, image: UIImage?) -> Result<CollectionSaveObjectResponse, Error> {
+        return .success(CollectionSaveObjectResponse.noop)
     }
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
