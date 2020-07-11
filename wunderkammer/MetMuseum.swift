@@ -1,8 +1,8 @@
 //
-//  CooperHewitt.swift
+//  MetMuseum.swift
 //  wunderkammer
 //
-//  Created by asc on 6/24/20.
+//  Created by asc on 7/11/20.
 //  Copyright © 2020 Aaronland. All rights reserved.
 //
 
@@ -13,7 +13,7 @@ import UIKit
 import URITemplate
 import FMDB
 
-public enum OrThisErrors: Error {
+public enum MetMuseumErrors: Error {
     case notImplemented
     case invalidURL
     case invalidOEmbed
@@ -25,7 +25,7 @@ public enum OrThisErrors: Error {
     case missingURITemplateVariable
 }
 
-public class OrThisOEmbed: CollectionOEmbed {
+public class MetMuseumOEmbed: CollectionOEmbed {
     
     private var oembed: OEmbedResponse
     
@@ -36,12 +36,12 @@ public class OrThisOEmbed: CollectionOEmbed {
         guard let _ = oembed.object_uri else {
             return nil
         }
-        
+
         self.oembed = oembed
     }
     
     public func Collection() -> String {
-        return "Or This..."
+        return "Metropolitan Museum of Art"
     }
     
     public func ObjectID() -> String {
@@ -57,8 +57,7 @@ public class OrThisOEmbed: CollectionOEmbed {
     }
     
     public func ImageURL() -> String {
-        return self.oembed.data_url!
-        // return self.oembed.url
+        return self.oembed.url
     }
     
     public func Raw() -> OEmbedResponse {
@@ -66,7 +65,7 @@ public class OrThisOEmbed: CollectionOEmbed {
     }
 }
 
-public class OrThisCollection: Collection {
+public class MetMuseumCollection: Collection {
 
     private var databases = [String:FMDatabase]()
     
@@ -79,9 +78,9 @@ public class OrThisCollection: Collection {
         let paths = fm.urls(for: .documentDirectory, in: .userDomainMask)
         let first = paths[0]
         
-        let orthis = first.appendingPathComponent("orthis")
+        let themet = first.appendingPathComponent("metmuseum")
       
-        if !fm.fileExists(atPath: orthis.path){
+        if !fm.fileExists(atPath: themet.path){
             print("Missing Or This databases")
             return nil
         }
@@ -90,7 +89,7 @@ public class OrThisCollection: Collection {
         
         do {
             
-            let contents = try fm.contentsOfDirectory(at: orthis, includingPropertiesForKeys: nil)
+            let contents = try fm.contentsOfDirectory(at: themet, includingPropertiesForKeys: nil)
             
             db_uris = contents.filter{ $0.pathExtension == "db" }
             db_uris = contents
@@ -113,7 +112,7 @@ public class OrThisCollection: Collection {
         
         for db_uri in db_uris {
                  
-            // print("DB", db_uri)
+            print("DB", db_uri)
             
             let db = FMDatabase(url: db_uri)
             
@@ -159,7 +158,7 @@ public class OrThisCollection: Collection {
     private func deriveUnitFromURL(url: URL) -> Result<String, Error> {
         
         // Obviously this is not ideal...
-        return .success("2020")
+        return .success("metmuseum")
     }
     
     private func getRandomURL(database: FMDatabase) -> Result<URL, Error>{
@@ -173,7 +172,7 @@ public class OrThisCollection: Collection {
             rs.next()
             
             guard let u = rs.string(forColumn: "url") else {
-                return .failure(OrThisErrors.invalidURL)
+                return .failure(MetMuseumErrors.invalidURL)
             }
                         
             str_url = u
@@ -183,7 +182,7 @@ public class OrThisCollection: Collection {
         }
         
         guard let url = URL(string: str_url!) else {
-            return .failure(OrThisErrors.invalidURL)
+            return .failure(MetMuseumErrors.invalidURL)
         }
         
         return .success(url)
@@ -203,12 +202,12 @@ public class OrThisCollection: Collection {
             let params = url.queryParameters
             
             guard let nfc_url = params["url"] else {
-                return .failure(OrThisErrors.missingOEmbedQueryParameter)
+                return .failure(MetMuseumErrors.missingOEmbedQueryParameter)
             }
                                
             q = "SELECT body FROM oembed WHERE object_uri = ?"
             target = nfc_url
-            unit = "2020"   // FIX ME
+            unit = "metmuseum"   // FIX ME
             
         } else {
         
@@ -226,15 +225,12 @@ public class OrThisCollection: Collection {
             target = url.absoluteURL
         }
         
-        // FIX ME!!!!
-        unit = "2020"
-        
         if unit == nil {
-            return .failure(OrThisErrors.missingUnitID)
+            return .failure(MetMuseumErrors.missingUnitID)
         }
         
         guard let database = self.databases[unit!] else {
-            return .failure(OrThisErrors.missingUnitDatabase)
+            return .failure(MetMuseumErrors.missingUnitDatabase)
         }
                     
         var oe_data: Data?
@@ -244,7 +240,7 @@ public class OrThisCollection: Collection {
             rs.next()
             
             guard let data = rs.data(forColumn: "body") else {
-                return .failure(OrThisErrors.invalidOEmbed)
+                return .failure(MetMuseumErrors.invalidOEmbed)
             }
             
             oe_data = data
@@ -256,14 +252,14 @@ public class OrThisCollection: Collection {
         let oe = OEmbed()
         
         let oe_result = oe.ParseOEmbed(data: oe_data!)
-        
+            
         switch oe_result {
         case .failure(let error):
             return .failure(error)
         case .success(let oe_response):
             
-            guard let collection_oe = OrThisOEmbed(oembed: oe_response) else {
-                    return .failure(OrThisErrors.invalidOEmbed)
+            guard let collection_oe = MetMuseumOEmbed(oembed: oe_response) else {
+                    return .failure(MetMuseumErrors.invalidOEmbed)
             }
             
             return .success(collection_oe)
@@ -271,12 +267,12 @@ public class OrThisCollection: Collection {
     }
     
     public func NFCTagTemplate() -> Result<URITemplate, Error> {
-        let t = URITemplate(template: "aa://orthis/{objectid}")
+        let t = URITemplate(template: "metmuseum://o/{objectid}")
         return .success(t)
     }
     
     public func ObjectURLTemplate() -> Result<URITemplate, Error> {
-        let t = URITemplate(template: "aa://orthis/{objectid}")
+        let t = URITemplate(template: "metmuseum://o/{objectid}")
         return .success(t)
     }
     
@@ -289,9 +285,9 @@ public class OrThisCollection: Collection {
         
         switch capability {
         case CollectionCapabilities.nfcTags:
-            return .success(true)
-        case CollectionCapabilities.randomObject:
             return .success(false)
+        case CollectionCapabilities.randomObject:
+            return .success(true)
         case CollectionCapabilities.saveObject:
             return .success(false)
         }

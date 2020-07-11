@@ -115,6 +115,19 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             }
         }
         
+        let enable_metmuseum = Bundle.main.object(forInfoDictionaryKey: "EnableMetMuseum") as? String
+        
+        if enable_metmuseum != nil && enable_metmuseum == "YES" {
+            
+            let metmuseum_collection = MetMuseumCollection()
+            
+            if metmuseum_collection == nil {
+                self.showAlert(label:"There was a problem configuring the application.", message: "Unable to initialize Met Museum collection.")
+            } else {
+                self.collections.append(metmuseum_collection!)
+            }
+        }
+        
         let enable_orthis = Bundle.main.object(forInfoDictionaryKey: "EnableOrThis") as? String
         
         if enable_orthis != nil && enable_orthis == "YES" {

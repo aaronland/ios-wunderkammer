@@ -97,5 +97,7 @@
 	<string>$(ENABLE_SMITHSONIAN)</string>
 	<key>EnableOrThis</key>
 	<string>$(ENABLE_ORTHIS)</string>
+	<key>EnableMetMuseum</key>
+	<string>$(ENABLE_METMUSEUM)</string>
 </dict>
 </plist>
