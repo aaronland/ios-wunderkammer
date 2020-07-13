@@ -285,7 +285,7 @@ public class MetMuseumCollection: Collection {
         
         switch capability {
         case CollectionCapabilities.nfcTags:
-            return .success(false)
+            return .success(true)
         case CollectionCapabilities.randomObject:
             return .success(true)
         case CollectionCapabilities.saveObject:
