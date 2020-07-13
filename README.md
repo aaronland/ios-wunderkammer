@@ -2,7 +2,7 @@
 
 ## Important
 
-This is work in progress and documentation will follow. In the meantime you should start by reading the [bring your own pen device](https://www.aaronland.info/weblog/2020/06/16/revisiting/#pen) and the [everyone gets a wunderkammer!](https://www.aaronland.info/weblog/2020/07/07/action/#wunderkammer) blog posts.
+This is work in progress and documentation will follow. In the meantime you should start by reading the [bring your own pen device](https://www.aaronland.info/weblog/2020/06/16/revisiting/#pen) and [everyone gets a wunderkammer!](https://www.aaronland.info/weblog/2020/07/07/action/#wunderkammer) and [so that it may be remembered](https://www.aaronland.info/weblog/2020/07/13/experience/#remembered) blog posts.
 
 ## Config.xcconfig
 
@@ -18,6 +18,8 @@ ENABLE_SFOMUSEUM = YES
 ENABLE_COOPERHEWITT = YES
 
 ENABLE_SMITHSONIAN = YES
+
+ENABLE_METMUSEUM = YES
 
 COOPERHEWITT_AUTH_URL = https:$(SLASH)/collection.cooperhewitt.org/api/oauth2/authenticate/
 
@@ -35,6 +37,12 @@ COOPERHEWITT_KEYCHAIN_LABEL = wunderkammer://collection.cooperhewitt.org/access_
 ```
 
 ## Data sources
+
+### Metropolitan Museum of Art
+
+TBW.
+
+In the meantime, there is an example for producing a `metmuseum.db` SQLite database in the [go-wunderkammer](https://github.com/aaronland/go-wunderkammer#wunderkammer-db) documentation.
 
 ### Smithsonian
 
