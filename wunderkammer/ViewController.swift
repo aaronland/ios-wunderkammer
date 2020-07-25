@@ -260,6 +260,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
     }
     
+    // MARK: - Buttons
+        
     @IBAction func share() {
         
         guard let oembed = self.current_oembed else {
@@ -281,7 +283,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             popOver.sourceRect = self.share_button.frame
         }
     }
-    
+        
     @IBAction func random() {
         
         let generator = UIImpactFeedbackGenerator(style: .heavy)
@@ -319,7 +321,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.current_collection?.GetRandomURL(completion: completion)
     }
-    
+        
     @IBAction func save() {
         
         guard let collection = self.current_collection else {
@@ -477,8 +479,29 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.app.logger.debug("Scan tag")
         
         if self.has_nfc && self.has_ble {
-            print("PROMPT HERE")
-            return
+                       
+             let optionMenu = UIAlertController(title: nil, message: "Choose Option", preferredStyle: .actionSheet)
+             
+            let nfc_action = UIAlertAction(title: "NFC", style: .default, handler: {_ in
+                self.scanNFCTag()
+            })
+            
+            let ble_action = UIAlertAction(title: "Bluetooth", style: .default, handler: { _ in
+                self.scanBLETag()
+            })
+             
+             let cancel_action = UIAlertAction(title: "Cancel", style: .cancel)
+             
+             optionMenu.addAction(nfc_action)
+             optionMenu.addAction(ble_action)
+             optionMenu.addAction(cancel_action)
+             
+            // works for both iPhone & iPad
+            
+            // optionMenu.popoverPresentationController?.sourceView = presentingViewController
+            
+             self.present(optionMenu, animated: true, completion: nil)
+             return
         }
         
         if self.has_nfc {
@@ -491,6 +514,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
     }
+    
+    // MARK: - Scanning methods
     
     func scanNFCTag() {
         
@@ -516,13 +541,28 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     func scanBLETag() {
         
         if !self.ble_available {
+            // Alert...
             return
         }
+        
+        // Dialog...
         
         self.ble_manager.scanForPeripherals(withServices: nil, options: nil)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
             self.ble_manager.stopScan()
+            
+            // alert?
+            
+            DispatchQueue.main.async {
+                self.nfc_indicator.isHidden = true
+                self.nfc_indicator.stopAnimating()
+            }
+        }
+        
+        DispatchQueue.main.async {
+            self.nfc_indicator.isHidden = false
+            self.nfc_indicator.startAnimating()
         }
     }
     
@@ -617,7 +657,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         let tag = String(decoding: data, as: UTF8.self)
-        print(tag)
+        self.processTag(tag: tag)
     }
     
     // MARK: - NFCNDEFReaderSessionDelegate
@@ -745,10 +785,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         return .success(uri!)
     }
     
+    // MARK: - Tag processing methods
+    
     private func processMessage(message: NFCNDEFMessage) {
-        
-        var uri: String?
-        
+                
         let uri_result = uriFromMessage(message: message)
         
         switch uri_result {
@@ -756,11 +796,15 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
             return
-        case .success(let u):
-            uri = u
+        case .success(let uri):
+            return self.processTag(tag: uri)
         }
         
-        self.app.logger.debug("Process message \(String(describing: uri))")
+    }
+    
+    private func processTag(tag: String) {
+        
+        self.app.logger.debug("Process message \(String(describing: tag))")
                 
         var possible_urls = [String]()
         var possible_collections = [Collection]()
@@ -787,7 +831,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 
             case .success(let template):
                                 
-                guard let variables = template.extract(uri!) else {
+                guard let variables = template.extract(tag) else {
                     continue
                 }
                                 
@@ -882,6 +926,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         fetchOEmbed(url: url)
     }
     
+    // MARK:- OEmbed methods
+    
     private func fetchOEmbed(url: URL) {
                 
         guard let current_collection = self.current_collection else {
@@ -938,6 +984,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             self.loadImage(url: url)
         }
     }
+   
+    // MARK: - Image methods
     
     private func loadImage(url: URL) {
         
@@ -1024,6 +1072,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         UIApplication.shared.open(url)
     }
     
+    // MARK: - Alerts
+    
     private func showError(error: Error) {
         self.showAlert(label:"Error", message: error.localizedDescription)
     }
@@ -1048,6 +1098,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             })
         }
     }
+    
+    // MARK: - Interface methods
     
     private func startSpinner() {
         scanning_indicator.isHidden = false

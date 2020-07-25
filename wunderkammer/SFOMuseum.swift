@@ -15,6 +15,9 @@ public enum SFOMuseumErrors: Error {
     case notImplemented
     case invalidURL
     case invalidOEmbed
+    case missingOEmbedQueryParameter
+    case invalidURITemplate
+    case missingURITemplateVariable
 }
 
 public class SFOMuseumOEmbed: CollectionOEmbed {
@@ -80,7 +83,8 @@ public class SFOMuseumCollection: Collection {
     }
     
     public func NFCTagTemplate() -> Result<URITemplate, Error> {
-        return .failure(CollectionErrors.notImplemented)
+        let t = URITemplate(template: "sfom://o/{objectid}")
+        return .success(t)
     }
     
     public func ObjectURLTemplate() -> Result<URITemplate, Error> {
@@ -90,13 +94,84 @@ public class SFOMuseumCollection: Collection {
     
     public func OEmbedURLTemplate() -> Result<URITemplate, Error> {
         let t = URITemplate(template: "https://millsfield.sfomuseum.org/oembed/?url={url}")
+        // let t = URITemplate(template: "oembed:///?url={url}")
         return .success(t)
     }
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
         
+        var _url = url
+        
+        if url.scheme == "sfom" {
+                    
+            // query for the object
+            
+            let params = url.queryParameters
+                        
+            guard let nfc_url = params["url"] else {
+                return .failure(SFOMuseumErrors.missingOEmbedQueryParameter)
+            }
+               
+            var objectid: String!
+            
+            let template_result = self.NFCTagTemplate()
+            
+            switch template_result {
+            case .failure(let error):
+                return .failure(error)
+            case .success(let template):
+                                
+                guard let nfc_variables = template.extract(nfc_url) else {
+                    return .failure(SFOMuseumErrors.invalidURITemplate)
+                }
+                                
+                guard let id = nfc_variables["objectid"] else {
+                    return .failure(SFOMuseumErrors.missingURITemplateVariable)
+                }
+                 
+                objectid = id
+            }
+            
+            var sfom_template: URITemplate!
+            var oembed_template: URITemplate!
+                
+            let sfom_result = self.ObjectURLTemplate()
+                
+                switch sfom_result {
+                case .failure(let error):
+                    return .failure(error)
+                case .success(let t):
+                    sfom_template = t
+                }
+                
+                let oembed_result = self.OEmbedURLTemplate()
+                
+                switch oembed_result {
+                case .failure(let error):
+                    return .failure(error)
+                case .success(let t):
+                    oembed_template = t
+                }
+            
+            var sfom_vars = [String:Any]()
+            sfom_vars["objectid"] = objectid
+            
+            let object_url = sfom_template.expand(sfom_vars)
+            
+            var oembed_vars = [String:Any]()
+            oembed_vars["url"] = object_url
+            
+            let oembed_url = oembed_template.expand(["url": object_url])
+            
+            guard let u = URL(string: oembed_url) else {
+                return .failure(SFOMuseumErrors.invalidURITemplate)
+            }
+            
+            _url = u
+        }
+            
         let oembed = OEmbed()
-        let result = oembed.Fetch(url: url)
+        let result = oembed.Fetch(url: _url)
         
         switch result {
         case .failure(let error):

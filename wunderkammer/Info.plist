@@ -99,5 +99,7 @@
 	<string>$(ENABLE_ORTHIS)</string>
 	<key>EnableMetMuseum</key>
 	<string>$(ENABLE_METMUSEUM)</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Enable objects to be scanned using Bluetooth LE</string>
 </dict>
 </plist>
