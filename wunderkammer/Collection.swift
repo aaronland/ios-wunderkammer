@@ -18,6 +18,7 @@ public enum CollectionSaveObjectResponse {
 
 public enum CollectionCapabilities {
     case nfcTags
+    case bleTags
     case randomObject
     case saveObject
 }

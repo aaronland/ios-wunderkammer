@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreNFC
+import CoreBluetooth
 
 import OAuthSwift
 import OAuth2Wrapper
@@ -25,7 +26,14 @@ enum ViewControllerErrors : Error {
     case debugError
 }
 
-class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
+class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate, NFCNDEFReaderSessionDelegate {
+
+    let ble_service_name = "wunderkammer"
+    let ble_service_id = CBUUID(string: "7F278F93-6F26-4BE0-AB1A-6F97D2B5362A")
+    let ble_characterstic_id = CBUUID(string: "F65536AD-D2F3-40EE-9512-FB18B983EF86")
+    
+    var ble_manager: CBCentralManager!
+    var ble_target: CBPeripheral!
     
     let app = UIApplication.shared.delegate as! AppDelegate
     var opQueue = OperationQueue()
@@ -44,10 +52,14 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     // be offsets/pointers in to the collections array
     
     var collections_nfc = [Int]()
+    var collections_ble = [Int]()
     var collections_random = [Int]()
     
-    var is_simulation = false
+    var has_nfc = false
+    var has_ble = false
     
+    var ble_available = false
+        
     @IBOutlet weak var nfc_indicator: UIActivityIndicatorView!
     
     @IBOutlet weak var scan_button: UIButton!
@@ -65,17 +77,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        
-        #if targetEnvironment(simulator)
-        is_simulation  = true
-        #elseif os(OSX)
-        // is_simulation  = true
-        #elseif os(iOS)
-        #if targetEnvironment(macCatalyst)
-        // is_simulation  = true
-        #endif
-        #else
-        #endif
         
         // why is this necessary? why don't the little show/hide buttons in
         // Main.storyboard controls work? (20200618/thisisaaronland)
@@ -162,12 +163,6 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 wrapper.logger.logLevel = .debug
                 
-                if is_simulation {
-                    app.logger.logLevel = .debug
-                    wrapper.logger.logLevel = .debug
-                    app.logger.debug("Running in simulator environment.")
-                }
-                
                 guard let cooperhewitt_collection = CooperHewittCollection(oauth2_wrapper: wrapper) else {
                     self.showAlert(label:"There was a problem configuring the application.", message: "Unable to initialize Cooper Hewitt collection.")
                     return
@@ -189,6 +184,7 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         // (20200630/thisisaaronland)
         
         var nfc_enabled = false
+        var ble_enabled = false
         var random_enabled = false
         
         var idx = 0
@@ -201,6 +197,15 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
                 
                 if capability {
                     collections_nfc.append(idx)
+                }
+            }
+  
+            let ble_result = c.HasCapability(capability: CollectionCapabilities.bleTags)
+            
+            if case .success(let capability) = ble_result {
+                
+                if capability {
+                    collections_ble.append(idx)
                 }
             }
             
@@ -219,12 +224,23 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         if collections_nfc.count > 0 {
             nfc_enabled = true
         }
+  
+        if collections_ble.count > 0 {
+            ble_enabled = true
+        }
         
         if collections_random.count > 0 {
             random_enabled = true
         }
         
         if NFCNDEFReaderSession.readingAvailable && nfc_enabled {
+            self.has_nfc = true
+        }
+        
+        // has_ble is set below in centralManagerDidUpdateState
+        // (20200725/straup)
+        
+        if self.has_nfc || self.has_ble {
             scan_button.isEnabled = true
             scan_button.isHidden = false
         }
@@ -460,6 +476,24 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
         
         self.app.logger.debug("Scan tag")
         
+        if self.has_nfc && self.has_ble {
+            print("PROMPT HERE")
+            return
+        }
+        
+        if self.has_nfc {
+            self.scanNFCTag()
+            return
+        }
+        
+        if self.has_ble {
+            self.scanBLETag()
+        }
+        
+    }
+    
+    func scanNFCTag() {
+        
         guard NFCNDEFReaderSession.readingAvailable else {
             
             self.showAlert(label: "Scanning Not Supported", message: "This device doesn't support tag scanning.")
@@ -477,7 +511,113 @@ class ViewController: UIViewController, NFCNDEFReaderSessionDelegate {
             self.nfc_indicator.isHidden = false
             self.nfc_indicator.startAnimating()
         }
+    }
+    
+    func scanBLETag() {
         
+        if !self.ble_available {
+            return
+        }
+        
+        self.ble_manager.scanForPeripherals(withServices: nil, options: nil)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+            self.ble_manager.stopScan()
+        }
+    }
+    
+    // MARK: - CBCentralManagerDelegate Methods
+    
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        
+        switch central.state {
+        case .unknown:
+            print("central.state is .unknown")
+        case .resetting:
+            self.ble_available = false
+        case .unsupported:
+            self.ble_available = false
+        case .unauthorized:
+            self.ble_available = false
+        case .poweredOff:
+            self.ble_available = false
+        case .poweredOn:
+            self.ble_available = true
+        @unknown default:
+            print("WHAT IS", central.state)
+        }
+    }
+    
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        
+        if peripheral.name != ble_service_name {
+            return
+        }
+        
+        self.ble_target = peripheral
+        self.ble_target.delegate = self
+        self.ble_manager.stopScan()
+        self.ble_manager.connect(self.ble_target)
+    }
+    
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        self.ble_target.discoverServices([ble_service_id])
+    }
+    
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+                    // ...
+    }
+    
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        // ...
+    }
+    
+    // MARK: - CBPeripheralDelegate Methods
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        
+        if let errorService = error{
+            print(errorService)
+            return
+        }
+        
+        if let services = peripheral.services as [CBService]?{
+            
+            for service in services{
+                peripheral.discoverCharacteristics([ble_characterstic_id], for: service)
+            }
+        }
+        
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        
+        guard let characteristics = service.characteristics else {
+            return
+        }
+        
+        for characteristic in characteristics {
+            
+            if characteristic.properties.contains(.read) {
+                
+                // When you attempt to read the value of a characteristic, the peripheral calls the peripheral:didUpdateValueForCharacteristic:error: method of its delegate object to retrieve the value. If the value is successfully retrieved, you can access it through the characteristic’s value property,
+                peripheral.readValue(for: characteristic)
+            }
+            
+            if characteristic.properties.contains(.notify) {
+                peripheral.setNotifyValue(true, for: characteristic)
+            }
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        
+        guard let data = characteristic.value else {
+            return
+        }
+        
+        let tag = String(decoding: data, as: UTF8.self)
+        print(tag)
     }
     
     // MARK: - NFCNDEFReaderSessionDelegate

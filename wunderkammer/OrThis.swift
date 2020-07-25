@@ -290,9 +290,13 @@ public class OrThisCollection: Collection {
         switch capability {
         case CollectionCapabilities.nfcTags:
             return .success(true)
+        case CollectionCapabilities.bleTags:
+            return .success(true)
         case CollectionCapabilities.randomObject:
             return .success(false)
         case CollectionCapabilities.saveObject:
+            return .success(false)
+        default:
             return .success(false)
         }
     }
