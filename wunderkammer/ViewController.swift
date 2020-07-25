@@ -226,7 +226,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
   
         if collections_ble.count > 0 {
-            ble_enabled = true
+            ble_manager = CBCentralManager(delegate: self, queue: nil)
+            self.has_ble = true
         }
         
         if collections_random.count > 0 {
@@ -496,8 +497,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
              optionMenu.addAction(ble_action)
              optionMenu.addAction(cancel_action)
              
-            // works for both iPhone & iPad
-            
+            // PLEASE MAKE ME WORK
             // optionMenu.popoverPresentationController?.sourceView = presentingViewController
             
              self.present(optionMenu, animated: true, completion: nil)
@@ -545,11 +545,12 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
-        // Dialog...
+        // Needs an NFC style popover dialog with a cancel button
         
         self.ble_manager.scanForPeripherals(withServices: nil, options: nil)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+            print("BLE TIMEOUT")
             self.ble_manager.stopScan()
             
             // alert?
@@ -569,19 +570,24 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     // MARK: - CBCentralManagerDelegate Methods
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        
+                
         switch central.state {
         case .unknown:
             print("central.state is .unknown")
         case .resetting:
+            print("central.state is .resetting")
             self.ble_available = false
         case .unsupported:
+            print("central.state is .unsupported")
             self.ble_available = false
         case .unauthorized:
+            print("central.state is .unauthorized")
             self.ble_available = false
         case .poweredOff:
+            print("central.state is .off")
             self.ble_available = false
         case .poweredOn:
+            print("central.state is .on")
             self.ble_available = true
         @unknown default:
             print("WHAT IS", central.state)
@@ -589,6 +595,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        
+        print("FOUND", peripheral.name)
         
         if peripheral.name != ble_service_name {
             return
@@ -657,6 +665,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         let tag = String(decoding: data, as: UTF8.self)
+        print("BLE UPDATE", tag)
         self.processTag(tag: tag)
     }
     
@@ -803,6 +812,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     }
     
     private func processTag(tag: String) {
+        
+        print("PROCESS TAG", tag)
         
         self.app.logger.debug("Process message \(String(describing: tag))")
                 
