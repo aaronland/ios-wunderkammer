@@ -53,13 +53,16 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     var collections_nfc = [Int]()
     var collections_ble = [Int]()
+    var collections_tags = [Int]()
+
     var collections_random = [Int]()
     
     var has_nfc = false
     var has_ble = false
     
     var ble_available = false
-        
+    var ble_scanning = false
+    
     @IBOutlet weak var nfc_indicator: UIActivityIndicatorView!
     
     @IBOutlet weak var scan_button: UIButton!
@@ -190,13 +193,16 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         var idx = 0
         
         for c in self.collections {
+
+            var tags = false
             
             let nfc_result = c.HasCapability(capability: CollectionCapabilities.nfcTags)
-            
+
             if case .success(let capability) = nfc_result {
                 
                 if capability {
                     collections_nfc.append(idx)
+                    tags = true
                 }
             }
   
@@ -206,7 +212,12 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 
                 if capability {
                     collections_ble.append(idx)
+                    tags = true
                 }
+            }
+            
+            if tags {
+                collections_tags.append(idx)
             }
             
             let random_result = c.HasCapability(capability: CollectionCapabilities.randomObject)
@@ -545,14 +556,22 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
+        if ble_scanning {
+            // Alert
+            return
+        }
+        
+        ble_scanning = true
         // Needs an NFC style popover dialog with a cancel button
         
         self.ble_manager.scanForPeripherals(withServices: nil, options: nil)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
-            print("BLE TIMEOUT")
-            self.ble_manager.stopScan()
             
+            if self.ble_scanning {
+                print("BLE TIMEOUT")
+                self.ble_manager.stopScan()
+            }
             // alert?
             
             DispatchQueue.main.async {
@@ -604,11 +623,16 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.ble_target = peripheral
         self.ble_target.delegate = self
+        
         self.ble_manager.stopScan()
+        self.ble_scanning = false
+        
+        print("CONNECTING")
         self.ble_manager.connect(self.ble_target)
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        print("CONNECTED", ble_service_id)
         self.ble_target.discoverServices([ble_service_id])
     }
     
@@ -623,6 +647,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     // MARK: - CBPeripheralDelegate Methods
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        
+        print("SERVICES")
         
         if let errorService = error{
             print(errorService)
@@ -665,7 +691,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         let tag = String(decoding: data, as: UTF8.self)
-        print("BLE UPDATE", tag)
+        self.app.logger.debug("Received BLE message '\(tag)'")
+        
         self.processTag(tag: tag)
     }
     
@@ -812,15 +839,13 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     }
     
     private func processTag(tag: String) {
-        
-        print("PROCESS TAG", tag)
-        
+                
         self.app.logger.debug("Process message \(String(describing: tag))")
                 
         var possible_urls = [String]()
         var possible_collections = [Collection]()
         
-        for idx in self.collections_nfc {
+        for idx in self.collections_tags {
             
             let c = self.collections[idx]
             
@@ -836,7 +861,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 case CollectionErrors.notImplemented:
                     continue
                 default:
-                    self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
+                    self.showAlert(label:"Failed to retrieve tag template", message:error.localizedDescription)
                     return
                 }
                 
@@ -866,7 +891,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             case .failure(let error):
                 
                 DispatchQueue.main.async {
-                    self.showAlert(label:"Failed to read tag", message:error.localizedDescription)
+                    self.showAlert(label:"Failed to retrieve tag URL template", message:error.localizedDescription)
                 }
                 return
             case .success(let template):
@@ -874,13 +899,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 var args = [String:Any]()
                 args["objectid"] = object_id!
                 
-                if collection != nil {
-                    args["collection"] = collection!
-                }
-                
                 let str_url = template.expand(args)
-                                
+                        
                 if str_url == "" {
+                    self.app.logger.warning("Tag URL template returns an empty string")
                     continue
                 }
                 
@@ -892,7 +914,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         if possible_urls.count == 0 {
-            self.showAlert(label:"Failed to read tag", message:"Unrecognized tag")
+            self.showAlert(label:"Failed to read tag, no possible URLs", message:"Unrecognized tag")
             return
         }
         
@@ -905,6 +927,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
+        print("POSSIBLE", possible_urls)
         let object_url = possible_urls[0]
         self.current_collection = possible_collections[0]
         
@@ -927,6 +950,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
+        print("OMG", oembed_url)
         self.app.logger.debug("OEmbed URL resolves as \(oembed_url)")
         
         guard let url = URL(string: oembed_url) else {
@@ -934,6 +958,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
+        print("FETCH", url)
         fetchOEmbed(url: url)
     }
     
