@@ -26,14 +26,28 @@ enum ViewControllerErrors : Error {
     case debugError
 }
 
-class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate, NFCNDEFReaderSessionDelegate {
-
-    let ble_service_name = "wunderkammer"
-    let ble_service_id = CBUUID(string: "7F278F93-6F26-4BE0-AB1A-6F97D2B5362A")
-    let ble_characterstic_id = CBUUID(string: "F65536AD-D2F3-40EE-9512-FB18B983EF86")
+class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate, CBPeripheralManagerDelegate, NFCNDEFReaderSessionDelegate {
     
+    // BLE - reading
+    
+    let ble_service_name = "wunderkammer"
+    let ble_service_id = CBUUID(string: "7F278F93-6F26-4BE0-AB1A-6F97D2B5362A") // gallery
+    let ble_characterstic_id = CBUUID(string: "F65536AD-D2F3-40EE-9512-FB18B983EF86") // object
+        
     var ble_manager: CBCentralManager!
     var ble_target: CBPeripheral!
+    var peripheral_manager: CBPeripheralManager!
+    var broadcast_service: CBMutableService!
+    var broadcast_characteristic: CBMutableCharacteristic!
+    
+    // BLE - broadcasting
+    
+    let ble_broadcast_name = "\(UIDevice.current.name)'s wunderkammer"
+        
+
+    
+    let beaconOperationsQueue = DispatchQueue(label: "beacon_operations_queue")
+    let pm_option = [CBCentralManagerScanOptionAllowDuplicatesKey:false]
     
     let app = UIApplication.shared.delegate as! AppDelegate
     var opQueue = OperationQueue()
@@ -54,7 +68,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     var collections_nfc = [Int]()
     var collections_ble = [Int]()
     var collections_tags = [Int]()
-
+    
     var collections_random = [Int]()
     
     var has_nfc = false
@@ -62,6 +76,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     var ble_available = false
     var ble_scanning = false
+    let ble_timeout = 20.0
+    
+    var ble_known_peripherals = [UUID]()
+    
+    var broadcasting = false
     
     @IBOutlet weak var nfc_indicator: UIActivityIndicatorView!
     
@@ -76,6 +95,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     @IBOutlet weak var random_button: UIButton!
     @IBOutlet weak var share_button: UIButton!
     
+    @IBOutlet weak var broadcast_button: UIButton!
     
     override func viewDidLoad() {
         
@@ -87,6 +107,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         nfc_indicator.isHidden = true
         scanning_indicator.isHidden = true // TO DO: RENAME ME TO WAITING INDICATOR OR SOMETHING
         
+        if scan_button.imageView != nil {
+            scan_button.imageView!.transform = CGAffineTransform(scaleX: -1, y: 1)
+        }
+        
         scan_button.isEnabled = false
         scan_button.isHidden = true
         
@@ -95,6 +119,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         share_button.isHidden = true
         save_button.isHidden = true
+    
         
         // please something better to load collections...
         // https://github.com/aaronland/ios-wunderkammer/issues/19
@@ -193,11 +218,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         var idx = 0
         
         for c in self.collections {
-
+            
             var tags = false
             
             let nfc_result = c.HasCapability(capability: CollectionCapabilities.nfcTags)
-
+            
             if case .success(let capability) = nfc_result {
                 
                 if capability {
@@ -205,7 +230,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                     tags = true
                 }
             }
-  
+            
             let ble_result = c.HasCapability(capability: CollectionCapabilities.bleTags)
             
             if case .success(let capability) = ble_result {
@@ -235,7 +260,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         if collections_nfc.count > 0 {
             nfc_enabled = true
         }
-  
+        
         if collections_ble.count > 0 {
             ble_manager = CBCentralManager(delegate: self, queue: nil)
             self.has_ble = true
@@ -267,13 +292,15 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
+        peripheral_manager = CBPeripheralManager(delegate: self, queue: beaconOperationsQueue, options: pm_option)
+        
         // read this from config file
         self.app.logger.logLevel = .debug
         
     }
     
     // MARK: - Buttons
-        
+    
     @IBAction func share() {
         
         guard let oembed = self.current_oembed else {
@@ -295,7 +322,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             popOver.sourceRect = self.share_button.frame
         }
     }
-        
+    
     @IBAction func random() {
         
         let generator = UIImpactFeedbackGenerator(style: .heavy)
@@ -333,7 +360,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.current_collection?.GetRandomURL(completion: completion)
     }
-        
+    
     @IBAction func save() {
         
         guard let collection = self.current_collection else {
@@ -398,7 +425,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                     
                     if remote_save {
                         
-                    self.showAlert(label: "This object was saved remotely but there was a problem saving this object to your device.", message: error_message(error: error_local!))
+                        self.showAlert(label: "This object was saved remotely but there was a problem saving this object to your device.", message: error_message(error: error_local!))
                     } else {
                         
                         self.showAlert(label: "There was a problem saving this object to your device.", message: error_message(error: error_local!))
@@ -406,7 +433,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 } else {
                     
                     if remote_save {
-                    self.showAlert(label: "This object has been saved.", message: "This object has been saved remotely and to your device.")
+                        self.showAlert(label: "This object has been saved.", message: "This object has been saved remotely and to your device.")
                     } else {
                         
                         self.showAlert(label: "This object has been saved.", message: "This object has been saved to your device.")
@@ -427,7 +454,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             DispatchQueue.main.async {
                 self.showAlert(label: "Unable to save object remotely.", message: error.localizedDescription)
             }
-
+            
         case .success(let has_capability):
             
             if has_capability {
@@ -484,6 +511,13 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.clear_button.isHidden = true
         
         self.share_button.isHidden = true
+        
+        // This is probably not the best place to put this but it
+        // will do for now (20200727/thisisaaronland)
+        
+        if self.ble_target != nil {
+            self.disconnectBLEPeripheral()
+        }
     }
     
     @IBAction func scanTag() {
@@ -491,9 +525,9 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.app.logger.debug("Scan tag")
         
         if self.has_nfc && self.has_ble {
-                       
-             let optionMenu = UIAlertController(title: nil, message: "Choose Option", preferredStyle: .actionSheet)
-             
+            
+            let optionMenu = UIAlertController(title: nil, message: "Choose Option", preferredStyle: .actionSheet)
+            
             let nfc_action = UIAlertAction(title: "NFC", style: .default, handler: {_ in
                 self.scanNFCTag()
             })
@@ -501,18 +535,18 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             let ble_action = UIAlertAction(title: "Bluetooth", style: .default, handler: { _ in
                 self.scanBLETag()
             })
-             
-             let cancel_action = UIAlertAction(title: "Cancel", style: .cancel)
-             
-             optionMenu.addAction(nfc_action)
-             optionMenu.addAction(ble_action)
-             optionMenu.addAction(cancel_action)
-             
+            
+            let cancel_action = UIAlertAction(title: "Cancel", style: .cancel)
+            
+            optionMenu.addAction(nfc_action)
+            optionMenu.addAction(ble_action)
+            optionMenu.addAction(cancel_action)
+            
             // PLEASE MAKE ME WORK
             // optionMenu.popoverPresentationController?.sourceView = presentingViewController
             
-             self.present(optionMenu, animated: true, completion: nil)
-             return
+            self.present(optionMenu, animated: true, completion: nil)
+            return
         }
         
         if self.has_nfc {
@@ -526,13 +560,109 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
     }
     
-    // MARK: - Scanning methods
+    @IBAction func broadcast() {
+                
+        if self.broadcasting == true {
+            
+            self.app.logger.debug("Stop broadcasting")
+            
+            self.broadcast_button.isHighlighted = false
+            self.broadcast_button.tintColor = .systemBlue
+            
+            self.broadcasting = false
+            self.stopBroadcasting()
+            
+            return
+        }
+        
+        self.app.logger.debug("Start broadcasting")
+
+        self.broadcasting = true
+        
+        self.broadcast_button.isHighlighted = true
+        self.broadcast_button.tintColor = .red
+        
+        self.startBroadcasting()
+    }
+      
+    // MARK: - BLE Methods
+    
+    func bleIsEnabled(enabled: Bool) {
+        
+        self.ble_available = true
+        
+        DispatchQueue.main.async {
+            self.broadcast_button.isHidden = !self.ble_available
+        }
+    }
+    
+    // MARK: - BLE Broadcasting Methods
+    
+    func broadcastURI(uri: String){
+        
+        guard let data = uri.data(using: .utf8) else {
+            return
+        }
+        
+        guard let ch = self.broadcast_characteristic else {
+            return
+        }
+        
+        self.app.logger.debug("Broadcast \(uri)")
+        
+        let ok = self.peripheral_manager.updateValue(data, for: ch, onSubscribedCentrals: nil)
+        
+        if !ok {
+            self.app.logger.warning("Failed to broadcast \(uri)")
+        }
+    }
+    
+    private func startBroadcasting() {
+        
+        if self.peripheral_manager == nil {
+            return
+        }
+        
+        let ble_broadcast_service = ble_service_id // CBUUID(string: UUID().uuidString) // gallery
+        let ble_broadcast_characterstic = ble_characterstic_id // CBUUID(string: UUID().uuidString) // object
+        
+        broadcast_characteristic = CBMutableCharacteristic(type: ble_broadcast_characterstic, properties: [.read, .notify], value: nil, permissions: [.readable])
+        
+        broadcast_service = CBMutableService(type: ble_broadcast_service, primary: true)
+        
+        broadcast_service.characteristics = [
+            broadcast_characteristic
+        ]
+        
+        peripheral_manager.add(broadcast_service)
+        
+        peripheral_manager.startAdvertising([
+            CBAdvertisementDataServiceUUIDsKey: [ble_broadcast_service],
+            CBAdvertisementDataLocalNameKey: self.ble_broadcast_name
+        ])
+        
+        self.app.logger.debug("Start advertising as \(self.ble_broadcast_name)")
+    }
+    
+    private func stopBroadcasting() {
+        
+        if self.peripheral_manager == nil {
+            return
+        }
+        
+        if self.peripheral_manager.isAdvertising{
+            self.peripheral_manager.stopAdvertising()
+        }
+        
+        self.peripheral_manager.removeAllServices()
+    }
+    
+    // MARK: - NFC Scanning methods
     
     func scanNFCTag() {
         
         guard NFCNDEFReaderSession.readingAvailable else {
-            
-            self.showAlert(label: "Scanning Not Supported", message: "This device doesn't support tag scanning.")
+            self.showAlert(label: "NFC scanning Not Supported", message: "This device doesn't support NFC tag scanning.")
             return
         }
         
@@ -549,34 +679,76 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
     }
     
+    // MARK: - BLE Scanning Methods
+    
     func scanBLETag() {
         
         if !self.ble_available {
-            // Alert...
+            self.showAlert(label: "BLE scanning Not Supported", message: "This device doesn't support Bluetooth Low Energy tag scanning.")
             return
         }
         
         if ble_scanning {
-            // Alert
+            self.app.logger.debug("Already scanning")
             return
         }
         
-        ble_scanning = true
         // Needs an NFC style popover dialog with a cancel button
+        
+        self.startBLEScanning()
+    }
+    
+    func startBLEScanning() {
+            
+        self.app.logger.debug("Start BLE scanning")
+
+        self.ble_scanning  = true
+    
+        self.random_button.isEnabled = false
+        
+        self.scan_button.tintColor = .red
+        self.scan_button.isHighlighted = true
         
         self.ble_manager.scanForPeripherals(withServices: nil, options: nil)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+        // "50857FE5-CC14-4469-A971-FF0325B255E3"
+        
+        if self.ble_known_peripherals.count >= 1 {
             
-            if self.ble_scanning {
-                print("BLE TIMEOUT")
-                self.ble_manager.stopScan()
+            let known = self.ble_manager.retrievePeripherals(withIdentifiers: self.ble_known_peripherals)
+            
+            // Choose peripheral? Probably, imagine a space with multiple
+            // wunderkammer devices...
+            if known.count == 1 {
+                
+                self.app.logger.debug("Found peripheral, reconnecting to \(known[0].identifier).")
+                self.ble_target = known[0]
+                self.ble_target.delegate = self
+                
+                self.stopBLEScanning()
+                self.ble_manager.connect(self.ble_target)
+                return
             }
-            // alert?
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + ble_timeout) {
+            
+            if !self.ble_scanning {
+                return
+            }
+            
+            self.app.logger.debug("BLE scanning timeout")
+            self.stopBLEScanning()
             
             DispatchQueue.main.async {
-                self.nfc_indicator.isHidden = true
-                self.nfc_indicator.stopAnimating()
+                self.random_button.isEnabled = true
+            
+                self.scan_button.tintColor = .systemBlue
+                self.scan_button.isHighlighted = false
+            }
+            
+            DispatchQueue.main.async {
+                self.showAlert(label: "There was a problem finding any tags.", message: "Time to find suitable tags for reading has expired.")
             }
         }
         
@@ -586,28 +758,119 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
     }
     
+    func stopBLEScanning() {
+        
+        self.app.logger.debug("Stop BLE scanning")
+        
+        self.ble_manager.stopScan()
+        self.ble_scanning = false
+        
+        DispatchQueue.main.async {
+            self.nfc_indicator.isHidden = true
+            self.nfc_indicator.stopAnimating()
+        }
+    }
+    
+    func disconnectBLEPeripheral() {
+        
+        self.ble_manager.cancelPeripheralConnection(self.ble_target)
+        self.ble_target = nil
+        
+        DispatchQueue.main.async {
+            self.random_button.isEnabled = true
+            self.scan_button.isHighlighted = false
+            self.scan_button.tintColor = .systemBlue
+        }
+    }
+    
+    // MARK: - CBPeripheralManager Methods
+    
+    func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
+                
+        switch peripheral.state {
+        case .unknown:
+            print("peripheral.state is .unknown")
+        case .resetting:
+            print("peripheral.state is .resetting")
+            self.bleIsEnabled(enabled: false)
+            self.stopBroadcasting()
+        case .unsupported:
+            print("peripheral.state is .unsupported")
+            self.bleIsEnabled(enabled: false)
+            self.stopBroadcasting()
+        case .unauthorized:
+            print("peripheral.state is .unauthorized")
+            self.bleIsEnabled(enabled: false)
+            self.stopBroadcasting()
+        case .poweredOff:
+            print("peripheral.state is .off")
+            self.bleIsEnabled(enabled: false)
+            self.stopBroadcasting()
+        case .poweredOn:
+            print("peripheral.state is .on")
+            self.bleIsEnabled(enabled: true)
+        @unknown default:
+            print("WHAT IS", peripheral.state)
+        }
+    }
+    
+    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+        
+        if request.characteristic.uuid != ble_characterstic_id {
+            return
+        }
+        
+        guard let current = self.current_oembed else {
+            return
+        }
+                
+        let object_uri = current.ObjectURL()
+        
+        guard let data = object_uri.data(using: .utf8) else {
+            return
+        }
+        
+        request.value = data
+        
+        self.peripheral_manager.respond(to: request, withResult: .success)
+    }
+    
+    func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
+        
+        if error != nil {
+            self.app.logger.warning("\(String(describing: error))")
+        }
+    }
+    
+    func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
+
+        if error != nil {
+            self.app.logger.warning("\(String(describing: error))")
+        }
+    }
+    
     // MARK: - CBCentralManagerDelegate Methods
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-                
+        
         switch central.state {
         case .unknown:
             print("central.state is .unknown")
         case .resetting:
             print("central.state is .resetting")
-            self.ble_available = false
+            self.bleIsEnabled(enabled: false)
         case .unsupported:
             print("central.state is .unsupported")
-            self.ble_available = false
+            self.bleIsEnabled(enabled: false)
         case .unauthorized:
             print("central.state is .unauthorized")
-            self.ble_available = false
+            self.bleIsEnabled(enabled: false)
         case .poweredOff:
             print("central.state is .off")
-            self.ble_available = false
+            self.bleIsEnabled(enabled: false)
         case .poweredOn:
             print("central.state is .on")
-            self.ble_available = true
+            self.bleIsEnabled(enabled: true)
         @unknown default:
             print("WHAT IS", central.state)
         }
@@ -615,43 +878,74 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         
-        print("FOUND", peripheral.name)
+        self.app.logger.debug("Found peripheral named '\(String(describing: peripheral.name))', \(peripheral.identifier)")
         
         if peripheral.name != ble_service_name {
-            return
+            
+            if let local_name = advertisementData["kCBAdvDataLocalName"] {
+                
+                if local_name as! String != ble_service_name {
+                    return
+                }
+                
+            } else {
+                return
+            }
+        }
+        
+        let uuid = peripheral.identifier
+        
+        if !self.ble_known_peripherals.contains(uuid){
+            self.ble_known_peripherals.append(uuid)
         }
         
         self.ble_target = peripheral
         self.ble_target.delegate = self
         
-        self.ble_manager.stopScan()
-        self.ble_scanning = false
+        self.stopBLEScanning()
         
-        print("CONNECTING")
+        self.scan_button.isHighlighted = true
+
+        self.app.logger.debug("Connecting to '\(ble_service_name)'")
         self.ble_manager.connect(self.ble_target)
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("CONNECTED", ble_service_id)
+        self.app.logger.debug("Connected to '\(ble_service_name)'")
         self.ble_target.discoverServices([ble_service_id])
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-                    // ...
+        
+        if error == nil {
+            return
+        }
+        
+        self.app.logger.warning("Failed to connect to '\(String(describing: peripheral.name))', \(String(describing: error))")
+
+        DispatchQueue.main.async {
+            self.showAlert(label: "Failed to connect to Bluetooth tag", message: error!.localizedDescription)
+        }
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        // ...
+        
+        if error != nil {
+            self.app.logger.warning("Failed to disconnect from '\(String(describing: peripheral.name))', \(String(describing: error))")
+        }
     }
     
     // MARK: - CBPeripheralDelegate Methods
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         
-        print("SERVICES")
-        
-        if let errorService = error{
-            print(errorService)
+        if error != nil {
+            self.app.logger.warning("Failed to discover services for '\(ble_service_name)': \(String(describing: error))")
+            
+            DispatchQueue.main.async {
+                self.showAlert(label: "Failed to read Bluetooth tag", message: error!.localizedDescription)
+            }
+            
             return
         }
         
@@ -665,6 +959,16 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        
+        if error != nil {
+            self.app.logger.warning("Failed to discover characteristics for '\(ble_service_name)': \(String(describing: error))")
+            
+            DispatchQueue.main.async {
+                self.showAlert(label: "Failed to read Bluetooth tag", message: error!.localizedDescription)
+            }
+
+            return
+        }
         
         guard let characteristics = service.characteristics else {
             return
@@ -754,7 +1058,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                         
                         self.app.logger.debug("Found 1 NDEF message")
                         statusMessage = "Found 1 NDEF message"
-                        self.processMessage(message: message!)
+                        self.processNDEFMessage(message: message!)
                     }
                     
                     session.alertMessage = statusMessage
@@ -762,11 +1066,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 })
             })
         })
-    }
-    
-    /// - Tag: sessionBecomeActive
-    func readerSessionDidBecomeActive(_ session: NFCNDEFReaderSession) {
-        
     }
     
     /// - Tag: endScanning
@@ -823,8 +1122,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     // MARK: - Tag processing methods
     
-    private func processMessage(message: NFCNDEFMessage) {
-                
+    private func processNDEFMessage(message: NFCNDEFMessage) {
+        
         let uri_result = uriFromMessage(message: message)
         
         switch uri_result {
@@ -839,9 +1138,9 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     }
     
     private func processTag(tag: String) {
-                
+        
         self.app.logger.debug("Process message \(String(describing: tag))")
-                
+        
         var possible_urls = [String]()
         var possible_collections = [Collection]()
         
@@ -866,11 +1165,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 }
                 
             case .success(let template):
-                                
+                
                 guard let variables = template.extract(tag) else {
                     continue
                 }
-                                
+                
                 guard let id = variables["objectid"] else {
                     continue
                 }
@@ -882,8 +1181,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 }
                 
                 self.app.logger.debug("Scanned object \(id)")
-            } 
-                        
+            }
+            
             let url_rsp = c.ObjectURLTemplate()
             
             switch url_rsp {
@@ -895,12 +1194,12 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 }
                 return
             case .success(let template):
-                                
+                
                 var args = [String:Any]()
                 args["objectid"] = object_id!
                 
                 let str_url = template.expand(args)
-                        
+                
                 if str_url == "" {
                     self.app.logger.warning("Tag URL template returns an empty string")
                     continue
@@ -927,7 +1226,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
-        print("POSSIBLE", possible_urls)
         let object_url = possible_urls[0]
         self.current_collection = possible_collections[0]
         
@@ -950,7 +1248,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
-        print("OMG", oembed_url)
         self.app.logger.debug("OEmbed URL resolves as \(oembed_url)")
         
         guard let url = URL(string: oembed_url) else {
@@ -958,14 +1255,13 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
-        print("FETCH", url)
         fetchOEmbed(url: url)
     }
     
     // MARK:- OEmbed methods
     
     private func fetchOEmbed(url: URL) {
-                
+        
         guard let current_collection = self.current_collection else {
             DispatchQueue.main.async {
                 self.showAlert(label:"Unable to fetch object information", message: "Unable to determine current collection")
@@ -978,7 +1274,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         DispatchQueue.global().async { [weak self] in
-                        
+            
             let result = current_collection.GetOEmbed(url: url)
             
             switch result {
@@ -1019,8 +1315,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         DispatchQueue.main.async {
             self.loadImage(url: url)
         }
+        
+        self.broadcastURI(uri: oembed.ObjectURL())
     }
-   
+    
     // MARK: - Image methods
     
     private func loadImage(url: URL) {
@@ -1034,7 +1332,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         DispatchQueue.global().async { [weak self] in
             
             var image_data: Data?
-                        
+            
             do {
                 image_data = try Data(contentsOf: url)
             } catch (let error) {

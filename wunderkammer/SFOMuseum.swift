@@ -100,7 +100,6 @@ public class SFOMuseumCollection: Collection {
     
     public func GetOEmbed(url: URL) -> Result<CollectionOEmbed, Error> {
         
-        print("GET OEMBED", url)
         var _url = url
         
         if url.scheme == "sfom" {
@@ -170,34 +169,12 @@ public class SFOMuseumCollection: Collection {
             
             _url = u
         }
-            
-        /*
-         OKAY
-         
-         GET OEMBED https://millsfield.sfomuseum.org/oembed?url=https://millsfield.sfomuseum.org/random
-         FETCH https://millsfield.sfomuseum.org/oembed?url=https://millsfield.sfomuseum.org/random
-               https://millsfield.sfomuseum.org/oembed?url=
-         */
-        
-        /*
-         NOT OKAY
-         
-         POSSIBLE ["https://millsfield.sfomuseum.org/objects/1159341349"]
-         OMG https://millsfield.sfomuseum.org/oembed/?url=https%3A%2F%2Fmillsfield.sfomuseum.org%2Fobjects%2F1159341349
-         2020-07-27T12:45:18-0700 debug: OEmbed URL resolves as https://millsfield.sfomuseum.org/oembed/?url=https%3A%2F%2Fmillsfield.sfomuseum.org%2Fobjects%2F1159341349
-         FETCH https://millsfield.sfomuseum.org/oembed/?url=https%3A%2F%2Fmillsfield.sfomuseum.org%2Fobjects%2F1159341349
-         GET OEMBED https://millsfield.sfomuseum.org/oembed/?url=https%3A%2F%2Fmillsfield.sfomuseum.org%2Fobjects%2F1159341349
-         FETCH https://millsfield.sfomuseum.org/oembed/?url=https%3A%2F%2Fmillsfield.sfomuseum.org%2Fobjects%2F1159341349
-         
-         */
-        print("FETCH", _url)
-        
+                    
         let oembed = OEmbed()
         let result = oembed.Fetch(url: _url)
         
         switch result {
         case .failure(let error):
-            print("WOMP WOMP WOMP", error)
             return .failure(error)
         case .success(let oembed_response):
             

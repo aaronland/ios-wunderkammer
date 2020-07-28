@@ -33,18 +33,32 @@
                                 <color key="barTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <items>
                                     <navigationItem id="J8i-Rd-Bz1">
-                                        <barButtonItem key="leftBarButtonItem" image="antenna.radiowaves.left.and.right" catalog="system" landscapeImage="antenna.radiowaves.left.and.right" largeContentSizeImage="antenna.radiowaves.left.and.right" style="done" id="X0q-4r-cgt">
-                                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="skZ-r6-3m6">
-                                                <rect key="frame" x="20" y="11" width="25.5" height="22"/>
-                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                <state key="normal" image="antenna.radiowaves.left.and.right" catalog="system">
-                                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
-                                                </state>
-                                                <connections>
-                                                    <action selector="scanTag" destination="BYZ-38-t0r" eventType="touchUpInside" id="G3z-cK-Yjt"/>
-                                                </connections>
-                                            </button>
-                                        </barButtonItem>
+                                        <leftBarButtonItems>
+                                            <barButtonItem image="antenna.radiowaves.left.and.right" catalog="system" landscapeImage="antenna.radiowaves.left.and.right" largeContentSizeImage="antenna.radiowaves.left.and.right" style="done" id="X0q-4r-cgt">
+                                                <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="skZ-r6-3m6">
+                                                    <rect key="frame" x="20" y="10" width="29.5" height="24"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <state key="normal" image="badge.plus.radiowaves.right" catalog="system">
+                                                        <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
+                                                    </state>
+                                                    <connections>
+                                                        <action selector="scanTag" destination="BYZ-38-t0r" eventType="touchUpInside" id="G3z-cK-Yjt"/>
+                                                    </connections>
+                                                </button>
+                                            </barButtonItem>
+                                            <barButtonItem style="plain" id="Te5-hf-6KY">
+                                                <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="etZ-Op-rTK">
+                                                    <rect key="frame" x="57.5" y="9" width="111" height="26"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <state key="normal" image="antenna.radiowaves.left.and.right" catalog="system">
+                                                        <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
+                                                    </state>
+                                                    <connections>
+                                                        <action selector="broadcast" destination="BYZ-38-t0r" eventType="touchUpInside" id="UGy-gb-a6d"/>
+                                                    </connections>
+                                                </button>
+                                            </barButtonItem>
+                                        </leftBarButtonItems>
                                         <barButtonItem key="rightBarButtonItem" image="tray.full" catalog="system" style="done" id="Yxj-6l-17V">
                                             <button key="customView" hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" hasAttributedTitle="YES" id="pzZ-AW-h9w">
                                                 <rect key="frame" x="364" y="11" width="30" height="22"/>
@@ -153,6 +167,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="broadcast_button" destination="etZ-Op-rTK" id="XN4-oY-BVm"/>
                         <outlet property="clear_button" destination="k0i-3b-fNS" id="7N7-F7-knc"/>
                         <outlet property="nfc_indicator" destination="bqQ-g6-uZZ" id="tqy-QN-A0r"/>
                         <outlet property="random_button" destination="J43-nF-j9O" id="xId-4D-707"/>
@@ -171,6 +186,7 @@
     </scenes>
     <resources>
         <image name="antenna.radiowaves.left.and.right" catalog="system" width="128" height="109"/>
+        <image name="badge.plus.radiowaves.right" catalog="system" width="128" height="101"/>
         <image name="clear" catalog="system" width="128" height="114"/>
         <image name="goforward" catalog="system" width="121" height="128"/>
         <image name="square.and.arrow.down" catalog="system" width="121" height="128"/>
