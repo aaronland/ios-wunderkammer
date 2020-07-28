@@ -33,7 +33,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     let ble_service_name = "wunderkammer"
     let ble_service_id = CBUUID(string: "7F278F93-6F26-4BE0-AB1A-6F97D2B5362A") // gallery
     let ble_characterstic_id = CBUUID(string: "F65536AD-D2F3-40EE-9512-FB18B983EF86") // object
-        
+    
     var ble_manager: CBCentralManager!
     var ble_target: CBPeripheral!
     var peripheral_manager: CBPeripheralManager!
@@ -43,8 +43,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     // BLE - broadcasting
     
     let ble_broadcast_name = "\(UIDevice.current.name)'s wunderkammer"
-        
-
     
     let beaconOperationsQueue = DispatchQueue(label: "beacon_operations_queue")
     let pm_option = [CBCentralManagerScanOptionAllowDuplicatesKey:false]
@@ -119,7 +117,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         share_button.isHidden = true
         save_button.isHidden = true
-    
+        
         
         // please something better to load collections...
         // https://github.com/aaronland/ios-wunderkammer/issues/19
@@ -561,7 +559,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     }
     
     @IBAction func broadcast() {
-                
+        
         if self.broadcasting == true {
             
             self.app.logger.debug("Stop broadcasting")
@@ -576,7 +574,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         self.app.logger.debug("Start broadcasting")
-
+        
         self.broadcasting = true
         
         self.broadcast_button.isHighlighted = true
@@ -584,15 +582,21 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.startBroadcasting()
     }
-      
+    
     // MARK: - BLE Methods
     
     func bleIsEnabled(enabled: Bool) {
         
-        self.ble_available = true
+        self.app.logger.debug("Bluetooth is enabled: \(enabled)")
+        
+        self.ble_available = enabled
         
         DispatchQueue.main.async {
-            self.broadcast_button.isHidden = !self.ble_available
+            if self.ble_available {
+                self.broadcast_button.isHidden = false
+            } else {
+                self.broadcast_button.isHidden = true
+            }
         }
     }
     
@@ -699,11 +703,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     }
     
     func startBLEScanning() {
-            
+        
         self.app.logger.debug("Start BLE scanning")
-
+        
         self.ble_scanning  = true
-    
+        
         self.random_button.isEnabled = false
         
         self.scan_button.tintColor = .red
@@ -742,7 +746,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             DispatchQueue.main.async {
                 self.random_button.isEnabled = true
-            
+                
                 self.scan_button.tintColor = .systemBlue
                 self.scan_button.isHighlighted = false
             }
@@ -786,7 +790,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     // MARK: - CBPeripheralManager Methods
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-                
+        
         switch peripheral.state {
         case .unknown:
             print("peripheral.state is .unknown")
@@ -823,7 +827,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         guard let current = self.current_oembed else {
             return
         }
-                
+        
         let object_uri = current.ObjectURL()
         
         guard let data = object_uri.data(using: .utf8) else {
@@ -843,7 +847,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
-
+        
         if error != nil {
             self.app.logger.warning("\(String(describing: error))")
         }
@@ -905,7 +909,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.stopBLEScanning()
         
         self.scan_button.isHighlighted = true
-
+        
         self.app.logger.debug("Connecting to '\(ble_service_name)'")
         self.ble_manager.connect(self.ble_target)
     }
@@ -922,7 +926,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         self.app.logger.warning("Failed to connect to '\(String(describing: peripheral.name))', \(String(describing: error))")
-
+        
         DispatchQueue.main.async {
             self.showAlert(label: "Failed to connect to Bluetooth tag", message: error!.localizedDescription)
         }
@@ -966,7 +970,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             DispatchQueue.main.async {
                 self.showAlert(label: "Failed to read Bluetooth tag", message: error!.localizedDescription)
             }
-
+            
             return
         }
         
