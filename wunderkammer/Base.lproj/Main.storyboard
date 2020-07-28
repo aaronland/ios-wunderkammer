@@ -74,12 +74,6 @@
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="dAL-N1-mXf">
                                 <rect key="frame" x="20" y="88" width="374" height="601"/>
                             </imageView>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="bqQ-g6-uZZ">
-                                <rect key="frame" x="128" y="44" width="53" height="44"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="13J-Bf-fKY"/>
-                                </constraints>
-                            </activityIndicatorView>
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="8QY-EQ-a7d">
                                 <rect key="frame" x="188.5" y="429.5" width="37" height="37"/>
                             </activityIndicatorView>
@@ -148,7 +142,6 @@
                         <constraints>
                             <constraint firstItem="0R1-S3-3Ye" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="1A3-dl-d1t"/>
                             <constraint firstItem="WcI-dW-hcu" firstAttribute="leading" secondItem="9Ih-BH-azh" secondAttribute="leading" constant="20" id="1TA-ON-jrC"/>
-                            <constraint firstItem="bqQ-g6-uZZ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="128" id="9Aw-kD-KK5"/>
                             <constraint firstItem="WcI-dW-hcu" firstAttribute="centerX" secondItem="8QY-EQ-a7d" secondAttribute="centerX" id="H7w-2u-zQZ"/>
                             <constraint firstItem="0R1-S3-3Ye" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-20" id="H8y-Xp-Hzb"/>
                             <constraint firstItem="dAL-N1-mXf" firstAttribute="top" secondItem="0R1-S3-3Ye" secondAttribute="bottom" id="LBE-0d-97T"/>
@@ -156,9 +149,7 @@
                             <constraint firstItem="0R1-S3-3Ye" firstAttribute="trailing" secondItem="dAL-N1-mXf" secondAttribute="trailing" constant="20" id="Qod-pw-nmA"/>
                             <constraint firstItem="8QY-EQ-a7d" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="WdP-Zx-vbx"/>
                             <constraint firstItem="8QY-EQ-a7d" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Wj6-Fh-dlO"/>
-                            <constraint firstItem="0R1-S3-3Ye" firstAttribute="top" secondItem="bqQ-g6-uZZ" secondAttribute="top" id="Z4K-qo-HLa"/>
                             <constraint firstItem="WcI-dW-hcu" firstAttribute="top" secondItem="dAL-N1-mXf" secondAttribute="bottom" constant="8" symbolic="YES" id="a9l-jB-eog"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="bqQ-g6-uZZ" secondAttribute="trailing" constant="233" id="fna-Yu-Y5W"/>
                             <constraint firstItem="9Ih-BH-azh" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="heX-zb-WpD"/>
                             <constraint firstItem="dAL-N1-mXf" firstAttribute="leading" secondItem="WcI-dW-hcu" secondAttribute="leading" id="i8G-7s-Sqb"/>
                             <constraint firstItem="dAL-N1-mXf" firstAttribute="trailing" secondItem="WcI-dW-hcu" secondAttribute="trailing" id="ksy-qF-QDA"/>
@@ -169,7 +160,6 @@
                     <connections>
                         <outlet property="broadcast_button" destination="etZ-Op-rTK" id="XN4-oY-BVm"/>
                         <outlet property="clear_button" destination="k0i-3b-fNS" id="7N7-F7-knc"/>
-                        <outlet property="nfc_indicator" destination="bqQ-g6-uZZ" id="tqy-QN-A0r"/>
                         <outlet property="random_button" destination="J43-nF-j9O" id="xId-4D-707"/>
                         <outlet property="save_button" destination="NFO-2r-xGq" id="Wl3-67-MvB"/>
                         <outlet property="scan_button" destination="skZ-r6-3m6" id="YbH-Ce-Jwd"/>

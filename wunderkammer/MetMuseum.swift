@@ -56,6 +56,16 @@ public class MetMuseumOEmbed: CollectionOEmbed {
         return self.oembed.title
     }
     
+    public func ObjectURI() -> String {
+        
+        guard let object_uri = self.oembed.object_uri else {
+            // FIX ME...
+            return "x-urn:\(self.ObjectID())"
+        }
+        
+        return object_uri
+    }
+    
     public func ImageURL() -> String {
         return self.oembed.url
     }

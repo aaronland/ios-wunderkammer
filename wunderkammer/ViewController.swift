@@ -80,9 +80,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     var broadcasting = false
     
-    @IBOutlet weak var nfc_indicator: UIActivityIndicatorView!
+    var nfc_scanning = false
     
     @IBOutlet weak var scan_button: UIButton!
+    
+    // PLEASE RENAME ME (see below)
     @IBOutlet weak var scanning_indicator: UIActivityIndicatorView!
     
     @IBOutlet weak var scanned_image: UIImageView!
@@ -102,7 +104,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         // why is this necessary? why don't the little show/hide buttons in
         // Main.storyboard controls work? (20200618/thisisaaronland)
         
-        nfc_indicator.isHidden = true
         scanning_indicator.isHidden = true // TO DO: RENAME ME TO WAITING INDICATOR OR SOMETHING
         
         if scan_button.imageView != nil {
@@ -117,7 +118,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         share_button.isHidden = true
         save_button.isHidden = true
-        
         
         // please something better to load collections...
         // https://github.com/aaronland/ios-wunderkammer/issues/19
@@ -510,20 +510,30 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.clear_button.isHidden = true
         
         self.share_button.isHidden = true
-        
-        // This is probably not the best place to put this but it
-        // will do for now (20200727/thisisaaronland)
-        
-        if self.ble_target != nil {
-            self.disconnectBLEPeripheral()
-        }
     }
     
     @IBAction func scanTag() {
         
+        if self.ble_scanning {
+            
+            self.app.logger.debug("Stop BLE scanning")
+            
+            self.ble_scanning = false
+            
+            if self.ble_target != nil {
+                self.disconnectBLEPeripheral()
+            }
+            
+            self.updateRandomButtonVisibility()
+            self.updateClearButtonVisibility()
+            
+            self.scan_button.tintColor = .systemBlue
+            return
+        }
+        
         self.app.logger.debug("Scan tag")
         
-        if self.has_nfc && self.has_ble {
+        if self.has_nfc && self.has_ble && self.ble_available {
             
             let optionMenu = UIAlertController(title: nil, message: "Choose Option", preferredStyle: .actionSheet)
             
@@ -592,20 +602,16 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.ble_available = enabled
         
-        DispatchQueue.main.async {
-            if self.ble_available {
-                self.broadcast_button.isHidden = false
-            } else {
-                self.broadcast_button.isHidden = true
-            }
-        }
         
+        self.updateBroadcastButtonVisibility()
         self.updateScanButtonVisibility()
     }
     
     // MARK: - BLE Broadcasting Methods
     
-    func broadcastURI(uri: String){
+    func broadcastOEmbed(oembed: CollectionOEmbed){
+        
+        let uri = oembed.ObjectURI()
         
         guard let data = uri.data(using: .utf8) else {
             return
@@ -674,20 +680,15 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         self.app.logger.debug("Starting NFC session")
-   
+        
         
         session = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
         session?.alertMessage = "Hold your iPhone near the item to learn more about it."
         session?.begin()
         ()
-   
+        
         self.updateRandomButtonVisibility()
         self.updateClearButtonVisibility()
-        
-        DispatchQueue.main.async {
-            self.nfc_indicator.isHidden = false
-            self.nfc_indicator.startAnimating()
-        }
     }
     
     // MARK: - BLE Scanning Methods
@@ -715,11 +716,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.ble_scanning  = true
         
-        self.random_button.isEnabled = false
+        self.updateRandomButtonVisibility()
+        self.updateClearButtonVisibility()
+        self.updateScanButtonVisibility()
         
-        self.scan_button.tintColor = .red
-        self.scan_button.isHighlighted = true
-                        
         if self.ble_known_peripherals.count >= 1 {
             
             let known = self.ble_manager.retrievePeripherals(withIdentifiers: self.ble_known_peripherals)
@@ -740,9 +740,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         self.ble_manager.scanForPeripherals(withServices: [self.ble_service_id], options: nil)
-
-        self.updateRandomButtonVisibility()
-        self.updateClearButtonVisibility()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + ble_timeout) {
             
@@ -752,25 +749,12 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             self.app.logger.debug("BLE scanning timeout")
             self.stopBLEScanning()
-           
-            self.updateRandomButtonVisibility()
-            self.updateClearButtonVisibility()
-            
-            DispatchQueue.main.async {
-                
-                self.scan_button.tintColor = .systemBlue
-                self.scan_button.isHighlighted = false
-            }
             
             DispatchQueue.main.async {
                 self.showAlert(label: "There was a problem finding any tags.", message: "Time to find suitable tags for reading has expired.")
             }
         }
         
-        DispatchQueue.main.async {
-            self.nfc_indicator.isHidden = false
-            self.nfc_indicator.startAnimating()
-        }
     }
     
     func stopBLEScanning() {
@@ -782,11 +766,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.updateRandomButtonVisibility()
         self.updateClearButtonVisibility()
-        
-        DispatchQueue.main.async {
-            self.nfc_indicator.isHidden = true
-            self.nfc_indicator.stopAnimating()
-        }
+        self.updateScanButtonVisibility()
     }
     
     func disconnectBLEPeripheral() {
@@ -794,11 +774,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.ble_manager.cancelPeripheralConnection(self.ble_target)
         self.ble_target = nil
         
-        DispatchQueue.main.async {
-            self.random_button.isEnabled = true
-            self.scan_button.isHighlighted = false
-            self.scan_button.tintColor = .systemBlue
-        }
+        self.updateRandomButtonVisibility()
+        self.updateClearButtonVisibility()
+        self.updateScanButtonVisibility()
+        
     }
     
     // MARK: - CBPeripheralManager Methods
@@ -1020,6 +999,15 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     // MARK: - NFCNDEFReaderSessionDelegate
     
+    func readerSessionDidBecomeActive(_ session: NFCNDEFReaderSession) {
+        self.app.logger.debug("NFC reader session is active")
+        self.nfc_scanning = true
+        
+        self.updateScanButtonVisibility()
+        self.updateRandomButtonVisibility()
+        self.updateClearButtonVisibility()
+    }
+    
     /// - Tag: processingTagData
     func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFs messages: [NFCNDEFMessage]) {
         
@@ -1032,11 +1020,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     /// - Tag: processingNDEFTag
     func readerSession(_ session: NFCNDEFReaderSession, didDetect tags: [NFCNDEFTag]) {
-        
-        DispatchQueue.main.async {
-            self.nfc_indicator.isHidden = true
-            self.nfc_indicator.stopAnimating()
-        }
         
         if tags.count > 1 {
             // Restart polling in 500ms
@@ -1089,11 +1072,9 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     /// - Tag: endScanning
     func readerSession(_ session: NFCNDEFReaderSession, didInvalidateWithError error: Error) {
         
-        DispatchQueue.main.async {
-            self.nfc_indicator.isHidden = true
-            self.nfc_indicator.stopAnimating()
-        }
-        
+        self.app.logger.debug("NFC reader session is ended")
+        self.nfc_scanning = false
+
         // Check the invalidation reason from the returned error.
         if let readerError = error as? NFCReaderError {
             // Show an alert when the invalidation reason is not because of a
@@ -1111,6 +1092,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         // To read new tags, a new session instance is required.
         self.session = nil
+        
+        self.updateScanButtonVisibility()
+        self.updateRandomButtonVisibility()
+        self.updateClearButtonVisibility()
     }
     
     private func uriFromMessage(message: NFCNDEFMessage) -> Result<String, Error> {
@@ -1334,7 +1319,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             self.loadImage(url: url)
         }
         
-        self.broadcastURI(uri: oembed.ObjectURL())
+        self.broadcastOEmbed(oembed: oembed)
     }
     
     // MARK: - Image methods
@@ -1462,7 +1447,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         if !self.has_nfc && !self.has_ble {
             
             DispatchQueue.main.async {
-                self.scan_button.isHidden = true
+                self.scan_button.isEnabled = false
             }
             
             return
@@ -1471,14 +1456,20 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         if !self.has_nfc && self.has_ble && !self.ble_available {
             
             DispatchQueue.main.async {
-                self.scan_button.isHidden = true
+                self.scan_button.isEnabled = false
             }
             
             return
         }
         
         DispatchQueue.main.async {
-            self.scan_button.isHidden = false
+            self.scan_button.isEnabled = true
+                            
+                if self.ble_scanning || self.nfc_scanning {
+                    self.scan_button.tintColor = .red
+                } else {
+                    self.scan_button.tintColor = .systemBlue
+                }
         }
         
         return
@@ -1520,12 +1511,40 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         return
     }
     
+    func updateBroadcastButtonVisibility() {
+        
+        if !self.ble_available {
+            
+            DispatchQueue.main.async {
+                self.broadcast_button.isEnabled = false
+            }
+            
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.broadcast_button.isEnabled = true
+            
+            if self.broadcasting {
+                self.broadcast_button.tintColor = .red
+            } else {
+                self.broadcast_button.tintColor = .systemBlue
+            }
+        }
+        
+    }
+    
+    // These are poorly named and are really "waiting for an image to load"
+    // indictators
+    
     private func startSpinner() {
+        
         scanning_indicator.isHidden = false
         scanning_indicator.startAnimating()
     }
     
     private func stopSpinner(){
+        
         scanning_indicator.isHidden = true
         scanning_indicator.stopAnimating()
     }

@@ -32,6 +32,7 @@ public protocol CollectionOEmbed {
     func ObjectID() -> String
     func ObjectURL() -> String
     func ObjectTitle() -> String
+    func ObjectURI() -> String
     func Collection() -> String
     func ImageURL() -> String
     func Raw() -> OEmbedResponse

@@ -50,6 +50,16 @@ public class SmithsonianOEmbed: CollectionOEmbed {
         return self.oembed.author_url!
     }
     
+    public func ObjectURI() -> String {
+        
+        guard let object_uri = self.oembed.object_uri else {
+            // FIX ME...
+            return "x-urn:\(self.ObjectID())"
+        }
+        
+        return object_uri
+    }
+    
     public func ObjectTitle() -> String {
         return self.oembed.title
     }
