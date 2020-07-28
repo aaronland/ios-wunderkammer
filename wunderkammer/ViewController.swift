@@ -321,7 +321,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         if let popOver = activityViewController.popoverPresentationController {
             popOver.sourceView = self.view
-            popOver.sourceRect = self.share_button.frame
+            // popOver.sourceRect = self.share_button.frame
+            popOver.sourceRect = self.share_button.bounds
         }
     }
     
@@ -1041,9 +1042,17 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
         
+        for s in invalidatedServices {
+            self.app.logger.warning("Lost connection to \(s.uuid)")
+        }
+        
         // This is probably not as subtle as it should be
         
         self.disconnectBLEPeripheral()
+        
+        DispatchQueue.main.async {
+            self.showAlert(label:"No longer able to read tags.", message: "The Bluetooth connection was interrupted.")
+        }
     }
     
     // MARK: - NFCNDEFReaderSessionDelegate
@@ -1434,10 +1443,12 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 
                 let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self?.imageTapped))
                 
-                // self?.scanned_image.image = resized
                 self?.scanned_image.isUserInteractionEnabled = true
                 self?.scanned_image.addGestureRecognizer(tapGestureRecognizer)
                 
+                self?.scanned_image.image = resized
+                self?.scanned_image.isHidden = false
+
                 // self?.scanned_image.enableZoom()
                 
                 self?.random_polling = false
