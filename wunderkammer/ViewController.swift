@@ -534,10 +534,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 self.disconnectBLEPeripheral()
             }
             
-            self.updateRandomButtonVisibility()
-            self.updateClearButtonVisibility()
-            self.updateScanButtonVisibility()
-            
+            self.updateButtonsVisibility()
             return
         }
         
@@ -615,9 +612,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.ble_available = enabled
         
-        
-        self.updateBroadcastButtonVisibility()
-        self.updateScanButtonVisibility()
+        self.updateButtonsVisibility()
     }
     
     // MARK: - BLE Broadcasting Methods
@@ -701,8 +696,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         session?.begin()
         ()
         
-        self.updateRandomButtonVisibility()
-        self.updateClearButtonVisibility()
+        self.updateButtonsVisibility()
     }
     
     // MARK: - BLE Scanning Methods
@@ -731,10 +725,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.startSpinner()
         self.ble_scanning  = true
         
-        self.updateRandomButtonVisibility()
-        self.updateClearButtonVisibility()
-        self.updateScanButtonVisibility()
-                
+        self.updateButtonsVisibility()
+
         /*
         if self.ble_known_peripherals.count >= 1 {
             
@@ -783,9 +775,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                     self.showAlert(label: "There was a problem finding any tags.", message: "Unable to find any devices to connect to.")
                 }
                 
-                self.updateRandomButtonVisibility()
-                self.updateClearButtonVisibility()
-                self.updateScanButtonVisibility()
+                self.updateButtonsVisibility()
                 
             case 1:
                 self.connectBLEPeripheral(peripheral: self.ble_candidate_peripherals[0])
@@ -847,9 +837,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.ble_target = nil
         self.ble_listening = false
         
-        self.updateRandomButtonVisibility()
-        self.updateClearButtonVisibility()
-        self.updateScanButtonVisibility()
+        self.updateButtonsVisibility()
     }
     
     // MARK: - CBPeripheralManager Methods
@@ -1164,9 +1152,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         // To read new tags, a new session instance is required.
         self.session = nil
         
-        self.updateScanButtonVisibility()
-        self.updateRandomButtonVisibility()
-        self.updateClearButtonVisibility()
+        self.updateButtonsVisibility()
     }
     
     private func uriFromMessage(message: NFCNDEFMessage) -> Result<String, Error> {
