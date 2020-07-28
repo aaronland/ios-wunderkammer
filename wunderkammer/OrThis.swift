@@ -58,9 +58,11 @@ public class OrThisOEmbed: CollectionOEmbed {
     
     public func ObjectURI() -> String {
         
+        // PLEASE RECONCILE ME WITH NFCTagTemplate BELOW
+        
         guard let object_uri = self.oembed.object_uri else {
-            // FIX ME...
-            return "x-urn:\(self.ObjectID())"
+            let t = URITemplate(template: "aa://orthis/{objectid}")
+            return t.expand(["objectid":self.ObjectID()])
         }
         
         return object_uri

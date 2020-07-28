@@ -52,9 +52,12 @@ public class SmithsonianOEmbed: CollectionOEmbed {
     
     public func ObjectURI() -> String {
         
+        // PLEASE RECONCILE ME WITH NFCTagTemplate BELOW
+        // HOW TO... what if no collection?
+        
         guard let object_uri = self.oembed.object_uri else {
-            // FIX ME...
-            return "x-urn:\(self.ObjectID())"
+            let t = URITemplate(template: "si://{collection}/o/{objectid}")
+            return t.expand(["objectid":self.ObjectID(), "collection":""])
         }
         
         return object_uri
