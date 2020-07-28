@@ -77,6 +77,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     let ble_timeout = 20.0
     
     var ble_known_peripherals = [UUID]()
+    var ble_candidate_peripheral = [CBPeripheral]()
     
     var broadcasting = false
     
@@ -633,6 +634,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     private func startBroadcasting() {
         
         if self.peripheral_manager == nil {
+            self.app.logger.warning("Unable to start broadcasting since there is no peripheral manager.")
             return
         }
         
@@ -727,17 +729,25 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             // Choose peripheral? Probably, imagine a space with multiple
             // wunderkammer devices...
             
-            if known.count == 1 {
+            switch known.count {
+            case 0:
+                self.app.logger.debug("No known peripherals")
+            case 1:
                 
                 self.app.logger.debug("Found peripheral, reconnecting to \(known[0].identifier).")
-                self.ble_target = known[0]
-                self.ble_target.delegate = self
-                
+
                 self.stopBLEScanning()
-                self.ble_manager.connect(self.ble_target)
+                self.connectBLEPeripheral(peripheral: known[0])
+                return
+                
+            default:
+                self.chooseBLEPeripheral(peripherals: known)
                 return
             }
+        
         }
+        
+        self.ble_candidate_peripheral = [CBPeripheral]()
         
         self.ble_manager.scanForPeripherals(withServices: [self.ble_service_id], options: nil)
         
@@ -749,10 +759,20 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             self.app.logger.debug("BLE scanning timeout")
             self.stopBLEScanning()
-            
-            DispatchQueue.main.async {
-                self.showAlert(label: "There was a problem finding any tags.", message: "Time to find suitable tags for reading has expired.")
+ 
+            switch self.ble_candidate_peripheral.count {
+            case 0:
+                            
+                DispatchQueue.main.async {
+                    self.showAlert(label: "There was a problem finding any tags.", message: "Unable to find any devices to connect to.")
+                }
+                
+            case 1:
+                self.connectBLEPeripheral(peripheral: self.ble_candidate_peripheral[0])
+            default:
+                self.chooseBLEPeripheral(peripherals: self.ble_candidate_peripheral)
             }
+            
         }
         
     }
@@ -767,6 +787,34 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.updateRandomButtonVisibility()
         self.updateClearButtonVisibility()
         self.updateScanButtonVisibility()
+    }
+    
+    func chooseBLEPeripheral(peripherals: [CBPeripheral]) {
+        
+        if peripherals.count == 1 {
+            
+            
+        }
+        
+        let optionMenu = UIAlertController(title: nil, message: "Choose Device to Connect to", preferredStyle: .actionSheet)
+        
+        for p in peripherals {
+            let label = "\(String(describing: p.name)) (\(p.identifier))"
+            let action = UIAlertAction(title: label, style: .default)
+            optionMenu.addAction(action)
+        }
+        
+        // PLEASE MAKE ME WORK
+        // optionMenu.popoverPresentationController?.sourceView = presentingViewController
+        
+        self.present(optionMenu, animated: true, completion: nil)
+        return
+    }
+    
+    func connectBLEPeripheral(peripheral: CBPeripheral) {
+        self.ble_target = peripheral
+        self.ble_target.delegate = self
+        self.ble_manager.connect(self.ble_target)
     }
     
     func disconnectBLEPeripheral() {
@@ -875,6 +923,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         
+        
+        self.ble_candidate_peripheral.append(peripheral)
+        return
+            
         self.app.logger.debug("Found peripheral named '\(String(describing: peripheral.name))', \(peripheral.identifier)")
         
         if peripheral.name != ble_service_name {
