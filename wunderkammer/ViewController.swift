@@ -74,7 +74,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     var ble_available = false
     var ble_scanning = false
-    let ble_timeout = 20.0
+    let ble_timeout = 5.0
     
     var ble_known_peripherals = [UUID]()
     var ble_candidate_peripherals = [CBPeripheral]()
@@ -722,6 +722,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.updateClearButtonVisibility()
         self.updateScanButtonVisibility()
         
+        print("KNOWN", self.ble_known_peripherals)
+        
         if self.ble_known_peripherals.count >= 1 {
             
             let known = self.ble_manager.retrievePeripherals(withIdentifiers: self.ble_known_peripherals)
@@ -761,6 +763,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             self.app.logger.debug("BLE scanning timeout")
             self.stopBLEScanning()
  
+            print("CANDIDATES", self.ble_candidate_peripherals.count)
+            
             switch self.ble_candidate_peripherals.count {
             case 0:
                             
@@ -769,8 +773,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 }
                 
             case 1:
+                print("CONNECT")
                 self.connectBLEPeripheral(peripheral: self.ble_candidate_peripherals[0])
             default:
+                print("CHOOSE")
                 self.chooseBLEPeripheral(peripherals: self.ble_candidate_peripherals)
             }
             
@@ -797,15 +803,23 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         for p in peripherals {
             let label = "\(String(describing: p.name)) (\(p.identifier))"
+            print(label)
             let action = UIAlertAction(title: label, style: .default, handler: { _ in
                 print(p, label)
                 self.connectBLEPeripheral(peripheral: p)
             })
             optionMenu.addAction(action)
         }
+      
+        let action = UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            return
+        })
+        
+        optionMenu.addAction(action)
         
         optionMenu.popoverPresentationController?.sourceView = self.view
         self.present(optionMenu, animated: true, completion: nil)
+        
         return
     }
     
@@ -920,42 +934,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         
+        if !self.ble_candidate_peripherals.contains(peripheral){
+            self.ble_candidate_peripherals.append(peripheral)
+        }
         
-        self.ble_candidate_peripherals.append(peripheral)
         return
-            
-            /*
-        self.app.logger.debug("Found peripheral named '\(String(describing: peripheral.name))', \(peripheral.identifier)")
-        
-        if peripheral.name != ble_service_name {
-            
-            if let local_name = advertisementData["kCBAdvDataLocalName"] {
-                
-                if local_name as! String != ble_service_name {
-                    return
-                }
-                
-            } else {
-                return
-            }
-        }
-        
-        let uuid = peripheral.identifier
-        
-        if !self.ble_known_peripherals.contains(uuid){
-            self.ble_known_peripherals.append(uuid)
-        }
-        
-        self.ble_target = peripheral
-        self.ble_target.delegate = self
-        
-        self.stopBLEScanning()
-        
-        self.scan_button.isHighlighted = true
-        
-        self.app.logger.debug("Connecting to '\(ble_service_name)'")
-        self.ble_manager.connect(self.ble_target)
-    */
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
