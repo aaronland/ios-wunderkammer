@@ -101,5 +101,11 @@
 	<string>$(ENABLE_METMUSEUM)</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Enable objects to be scanned using Bluetooth LE</string>
+	<key>EnableBluetoothScanning</key>
+	<string>$(ENABLE_BLUETOOTH_SCANNING)</string>
+	<key>EnableBluetoothBroadcasting</key>
+	<string>$(ENABLE_BLUETOOTH_BROADCASTING)</string>
+	<key>EnableNFCScanning</key>
+	<string>$(ENABLE_NFC_SCANNING)</string>
 </dict>
 </plist>

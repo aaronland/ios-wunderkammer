@@ -28,6 +28,10 @@ enum ViewControllerErrors : Error {
 
 class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate, CBPeripheralManagerDelegate, NFCNDEFReaderSessionDelegate {
     
+    var enable_ble_scanning = false
+    var enable_ble_broadcasting = false
+    var enable_nfc_scanning = false
+    
     // BLE - reading
     
     let ble_service_name = "wunderkammer"
@@ -122,6 +126,15 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         share_button.isHidden = true
         save_button.isHidden = true
+        
+        let ble_scanning = Bundle.main.object(forInfoDictionaryKey: "EnableBluetoothScanning") as? String
+        self.enable_ble_scanning = ble_scanning != nil && ble_scanning == "YES"
+ 
+        let ble_broadcasting = Bundle.main.object(forInfoDictionaryKey: "EnableBluetoothBroadcasting") as? String
+        self.enable_ble_broadcasting = ble_broadcasting != nil && ble_broadcasting == "YES"
+        
+        let nfc_scanning = Bundle.main.object(forInfoDictionaryKey: "EnableNFCScanning") as? String
+        self.enable_nfc_scanning = nfc_scanning != nil && nfc_scanning == "YES"
         
         // please something better to load collections...
         // https://github.com/aaronland/ios-wunderkammer/issues/19
@@ -1516,9 +1529,18 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     func updateScanButtonVisibility() {
         
-        // print("HAS NFC", self.has_nfc)
-        // print("HAS BLE", self.has_ble)
-        // print("BLE", self.ble_available)
+        if !self.enable_nfc_scanning && !self.enable_ble_scanning {
+            
+            DispatchQueue.main.async {
+                self.scan_button.isHidden = true
+            }
+            
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.scan_button.isHidden = false
+        }
         
         if !self.has_nfc && !self.has_ble {
             
@@ -1687,6 +1709,19 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     }
     
     func updateBroadcastButtonVisibility() {
+        
+        if !self.enable_ble_broadcasting {
+            
+            DispatchQueue.main.async {
+                self.broadcast_button.isHidden = true
+            }
+            
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.broadcast_button.isHidden = false
+        }
         
         if !self.ble_available {
             
