@@ -74,6 +74,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     var ble_available = false
     var ble_scanning = false
+    var ble_listening = false
     let ble_timeout = 5.0
     
     var ble_known_peripherals = [UUID]()
@@ -82,6 +83,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     var broadcasting = false
     
     var nfc_scanning = false
+    
+    var random_polling = false
     
     @IBOutlet weak var scan_button: UIButton!
     
@@ -211,7 +214,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         // (20200630/thisisaaronland)
         
         var nfc_enabled = false
-        var ble_enabled = false
         var random_enabled = false
         
         var idx = 0
@@ -330,11 +332,9 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.resetCurrent()
         
-        self.clear_button.isHidden = true
-        self.save_button.isHidden = true
-        self.share_button.isHidden = true
+        self.random_polling = true
         
-        self.random_button.isEnabled = false
+        self.updateButtonsVisibility()
         self.startSpinner()
         
         let idx = self.collections_random.randomElement()!
@@ -346,9 +346,12 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             case .failure(let error):
                 
+                self.random_polling = false
+                
+                self.updateButtonsVisibility()
+                self.stopSpinner()
+
                 DispatchQueue.main.async {
-                    self.random_button.isEnabled = true
-                    self.stopSpinner()
                     
                     self.showAlert(label:"There was problem generating the URL for a random image", message: error.localizedDescription)
                 }
@@ -494,7 +497,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             }
         }
         
-        
     }
     
     @IBAction func clear() {
@@ -502,24 +504,17 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.resetCurrent()
         
         self.scanned_image.image = nil
-        self.scanned_image.isHidden = true
-        
-        self.scanned_meta.text = ""
-        self.scanned_meta.isHidden = true
-        
-        self.save_button.isHidden = true
-        self.clear_button.isHidden = true
-        
-        self.share_button.isHidden = true
+        self.updateButtonsVisibility()
     }
     
     @IBAction func scanTag() {
         
-        if self.ble_scanning {
+        if self.ble_scanning || self.ble_listening {
             
             self.app.logger.debug("Stop BLE scanning")
             
             self.ble_scanning = false
+            self.ble_listening = false
             
             if self.ble_target != nil {
                 self.disconnectBLEPeripheral()
@@ -527,8 +522,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             self.updateRandomButtonVisibility()
             self.updateClearButtonVisibility()
+            self.updateScanButtonVisibility()
             
-            self.scan_button.tintColor = .systemBlue
             return
         }
         
@@ -553,7 +548,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             optionMenu.addAction(cancel_action)
 
             optionMenu.popoverPresentationController?.sourceView = self.view
-
+            
+            optionMenu.popoverPresentationController?.sourceView = self.view
+            optionMenu.popoverPresentationController?.sourceRect = self.scan_button.bounds
+            optionMenu.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.left
+            
             self.present(optionMenu, animated: true, completion: nil)
             return
         }
@@ -721,9 +720,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.updateRandomButtonVisibility()
         self.updateClearButtonVisibility()
         self.updateScanButtonVisibility()
-        
-        print("KNOWN", self.ble_known_peripherals)
-        
+                
+        /*
         if self.ble_known_peripherals.count >= 1 {
             
             let known = self.ble_manager.retrievePeripherals(withIdentifiers: self.ble_known_peripherals)
@@ -749,6 +747,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             }
         
         }
+        */
         
         self.ble_candidate_peripherals = [CBPeripheral]()
         
@@ -762,9 +761,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             self.app.logger.debug("BLE scanning timeout")
             self.stopBLEScanning()
- 
-            print("CANDIDATES", self.ble_candidate_peripherals.count)
-            
+             
             switch self.ble_candidate_peripherals.count {
             case 0:
                             
@@ -772,11 +769,13 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                     self.showAlert(label: "There was a problem finding any tags.", message: "Unable to find any devices to connect to.")
                 }
                 
+                self.updateRandomButtonVisibility()
+                self.updateClearButtonVisibility()
+                self.updateScanButtonVisibility()
+                
             case 1:
-                print("CONNECT")
                 self.connectBLEPeripheral(peripheral: self.ble_candidate_peripherals[0])
             default:
-                print("CHOOSE")
                 self.chooseBLEPeripheral(peripherals: self.ble_candidate_peripherals)
             }
             
@@ -790,10 +789,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.ble_manager.stopScan()
         self.ble_scanning = false
-        
-        self.updateRandomButtonVisibility()
-        self.updateClearButtonVisibility()
-        self.updateScanButtonVisibility()
         self.stopSpinner()
     }
     
@@ -818,8 +813,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         optionMenu.addAction(action)
         
         optionMenu.popoverPresentationController?.sourceView = self.view
-        self.present(optionMenu, animated: true, completion: nil)
+        optionMenu.popoverPresentationController?.sourceRect = self.scan_button.bounds
+        optionMenu.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.left
         
+        // optionMenu.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 50, width: 1.0, height: 1.0)
+        self.present(optionMenu, animated: true, completion: nil)
         return
     }
     
@@ -833,6 +831,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.ble_manager.cancelPeripheralConnection(self.ble_target)
         self.ble_target = nil
+        self.ble_listening = false
         
         self.updateRandomButtonVisibility()
         self.updateClearButtonVisibility()
@@ -880,7 +879,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
-        let object_uri = current.ObjectURL()
+        let object_uri = current.ObjectURI()
         
         guard let data = object_uri.data(using: .utf8) else {
             return
@@ -1022,6 +1021,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             if characteristic.properties.contains(.notify) {
                 peripheral.setNotifyValue(true, for: characteristic)
+                self.ble_listening = true
+                self.app.logger.debug("Listening for notifications from characteristic \(characteristic.uuid)")
             }
         }
     }
@@ -1036,6 +1037,13 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.app.logger.debug("Received BLE message '\(tag)'")
         
         self.processTag(tag: tag)
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        
+        // This is probably not as subtle as it should be
+        
+        self.disconnectBLEPeripheral()
     }
     
     // MARK: - NFCNDEFReaderSessionDelegate
@@ -1313,6 +1321,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
+        self.app.logger.debug("Fetch OEmbed URL \(url.absoluteString)")
+        
         DispatchQueue.main.async {
             self.startSpinner()
         }
@@ -1324,11 +1334,15 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             switch result {
             case .failure(let error):
                 
-                self?.resetCurrent()
+                self?.random_polling = false
+                
+                self?.updateButtonsVisibility()
+                self?.stopSpinner()
+                
+                // self?.resetCurrent()
                 
                 DispatchQueue.main.async {
-                    self?.stopSpinner()
-                    self?.showAlert(label:"Unable to load object information", message: error.localizedDescription)
+                    self?.showAlert(label:"Unable to load OEmbed information", message: error.localizedDescription)
                 }
                 
             case .success(let oembed_response):
@@ -1344,6 +1358,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         let image_url = oembed.ImageURL()
         let title = oembed.ObjectTitle()
         let col = oembed.Collection()
+        
+        self.app.logger.debug("Display \(title) (\(col))")
         
         guard let url = URL(string: image_url) else {
             self.showError(error: ViewControllerErrors.invalidURL)
@@ -1367,6 +1383,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     private func loadImage(url: URL) {
         
+        self.app.logger.debug("Load image \(url.absoluteString)")
+        
         self.save_button.isHidden = true
         self.clear_button.isHidden = true
         
@@ -1381,13 +1399,12 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 image_data = try Data(contentsOf: url)
             } catch (let error) {
                 
+                self?.random_polling = false
+                self?.updateButtonsVisibility()
+                self?.stopSpinner()
+
                 DispatchQueue.main.async {
-                    
-                    self?.stopSpinner()
-                    self?.resetCurrent()
-                    self?.random_button.isEnabled = true
                     self?.showAlert(label:"Unable to retrieve object image", message: error.localizedDescription)
-                    
                 }
                 
                 return
@@ -1395,10 +1412,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             guard let image = UIImage(data: image_data!) else {
                 
+                self?.random_polling = false
+                self?.updateButtonsVisibility()
+                self?.stopSpinner()
+                
                 DispatchQueue.main.async {
-                    self?.stopSpinner()
-                    self?.resetCurrent()
-                    self?.random_button.isEnabled = true
                     self?.showAlert(label:"Unable to load object image", message: "")
                 }
                 
@@ -1416,21 +1434,15 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 
                 let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self?.imageTapped))
                 
+                // self?.scanned_image.image = resized
                 self?.scanned_image.isUserInteractionEnabled = true
                 self?.scanned_image.addGestureRecognizer(tapGestureRecognizer)
                 
                 // self?.scanned_image.enableZoom()
                 
+                self?.random_polling = false
+                self?.updateButtonsVisibility()
                 self?.stopSpinner()
-                
-                self?.scanned_image.image = resized
-                self?.scanned_image.isHidden = false
-                
-                self?.save_button.isHidden = false
-                self?.clear_button.isHidden = false
-                self?.share_button.isHidden = false
-                
-                self?.random_button.isEnabled = true
             }
         }
     }
@@ -1479,6 +1491,18 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     // MARK: - Interface methods
     
+    func updateButtonsVisibility() {
+        
+        self.updateScanButtonVisibility()
+        self.updateBroadcastButtonVisibility()
+        
+        self.updateClearButtonVisibility()
+        self.updateRandomButtonVisibility()
+        
+        self.updateShareButtonVisibility()
+        self.updateSaveButtonVisibility()
+    }
+    
     func updateScanButtonVisibility() {
         
         // print("HAS NFC", self.has_nfc)
@@ -1503,10 +1527,20 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
+        if self.random_polling {
+            
+            DispatchQueue.main.async {
+                self.scan_button.isEnabled = false
+            }
+            
+            return
+        }
+        
         DispatchQueue.main.async {
+            
             self.scan_button.isEnabled = true
                             
-                if self.ble_scanning || self.nfc_scanning {
+            if self.ble_scanning || self.ble_listening || self.nfc_scanning {
                     self.scan_button.tintColor = .red
                 } else {
                     self.scan_button.tintColor = .systemBlue
@@ -1518,7 +1552,16 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     func updateRandomButtonVisibility() {
         
-        if self.ble_scanning {
+        if self.ble_scanning || self.ble_listening || self.nfc_scanning {
+            
+            DispatchQueue.main.async {
+                self.random_button.isEnabled = false
+            }
+            
+            return
+        }
+        
+        if self.random_polling {
             
             DispatchQueue.main.async {
                 self.random_button.isEnabled = false
@@ -1536,7 +1579,29 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     func updateClearButtonVisibility() {
         
-        if self.ble_scanning {
+        if self.current_image == nil {
+            
+            DispatchQueue.main.async {
+                self.clear_button.isHidden = true
+            }
+            
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.clear_button.isHidden = false
+        }
+        
+        if self.ble_scanning || self.ble_listening || self.nfc_scanning {
+            
+            DispatchQueue.main.async {
+                self.clear_button.isEnabled = false
+            }
+            
+            return
+        }
+        
+        if self.random_polling {
             
             DispatchQueue.main.async {
                 self.clear_button.isEnabled = false
@@ -1550,6 +1615,64 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         return
+    }
+    
+    func updateShareButtonVisibility() {
+        
+        if self.current_image == nil {
+            
+            DispatchQueue.main.async {
+                self.share_button.isHidden = true
+            }
+            
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.share_button.isHidden = false
+        }
+        
+        if self.random_polling {
+            
+            DispatchQueue.main.async {
+                self.share_button.isEnabled = false
+            }
+            
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.share_button.isEnabled = true
+        }
+    }
+    
+    func updateSaveButtonVisibility() {
+        
+        if self.current_image == nil {
+            
+            DispatchQueue.main.async {
+                self.save_button.isHidden = true
+            }
+            
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.save_button.isHidden = false
+        }
+        
+        if self.random_polling {
+            
+            DispatchQueue.main.async {
+                self.save_button.isEnabled = false
+            }
+            
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.save_button.isEnabled = true
+        }
     }
     
     func updateBroadcastButtonVisibility() {
