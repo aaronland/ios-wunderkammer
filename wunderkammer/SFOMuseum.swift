@@ -58,7 +58,7 @@ public class SFOMuseumOEmbed: CollectionOEmbed {
         // PLEASE RECONCILE ME WITH NFCTagTemplate BELOW
         
         guard let object_uri = self.oembed.object_uri else {
-            let t = URITemplate(template: "sfom://o/{objectid}")
+            let t = URITemplate(template: "sfom://id/{objectid}")
             return t.expand(["objectid":self.ObjectID()])
         }
         
@@ -95,7 +95,7 @@ public class SFOMuseumCollection: Collection {
     }
     
     public func NFCTagTemplate() -> Result<URITemplate, Error> {
-        let t = URITemplate(template: "sfom://o/{objectid}")
+        let t = URITemplate(template: "sfom://id/{objectid}")
         return .success(t)
     }
     

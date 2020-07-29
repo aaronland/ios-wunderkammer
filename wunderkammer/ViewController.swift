@@ -969,9 +969,14 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         
+        // 2020-07-29T12:16:27-0700 warning: Failed to disconnect from 'Optional("SD-931")', Optional(Error Domain=CBErrorDomain Code=7 "The specified device has disconnected from us." UserInfo={NSLocalizedDescription=The specified device has disconnected from us.})
+        
         if error != nil {
             self.app.logger.warning("Failed to disconnect from '\(String(describing: peripheral.name))', \(String(describing: error))")
         }
+        
+        self.ble_listening = false
+        self.updateButtonsVisibility()
     }
     
     // MARK: - CBPeripheralDelegate Methods
@@ -1252,7 +1257,9 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 DispatchQueue.main.async {
                     self.showAlert(label:"Failed to retrieve tag URL template", message:error.localizedDescription)
                 }
+                
                 return
+                
             case .success(let template):
                 
                 var args = [String:Any]()
@@ -1273,7 +1280,23 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         if possible_urls.count == 0 {
-            self.showAlert(label:"Failed to read tag, no possible URLs", message:"Unrecognized tag")
+                        
+            if self.ble_listening {
+     
+                self.app.logger.debug("Disconnect BLE peripheral")
+                self.disconnectBLEPeripheral()
+                
+                DispatchQueue.main.async {
+                    self.showAlert(label:"Failed to read tag, no possible URLs", message:"Unrecognized tag. Disconnecting Bluetooth connection.")
+                }
+
+            } else {
+                
+                DispatchQueue.main.async {
+                    self.showAlert(label:"Failed to read tag, no possible URLs", message:"Unrecognized tag")
+                }
+            }
+            
             return
         }
         
