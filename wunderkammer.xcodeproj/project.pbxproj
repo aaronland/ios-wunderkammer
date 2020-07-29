@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4A4D15692497D8F100622E86 /* CooperHewittAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 4A4D15682497D8F100622E86 /* CooperHewittAPI */; };
-		4A533A6C24944EF30048C0A6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4A533A6B24944EF30048C0A6 /* Config.xcconfig */; };
 		4A5424D724ABD22D00911252 /* URITemplate in Frameworks */ = {isa = PBXBuildFile; productRef = 4A5424D624ABD22D00911252 /* URITemplate */; };
 		4A5424DB24AD50F500911252 /* UIImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5424DA24AD50F500911252 /* UIImageView.swift */; };
 		4A8D8CD124A3C093005AC432 /* SFOMuseum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8D8CD024A3C093005AC432 /* SFOMuseum.swift */; };
@@ -152,7 +151,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1150;
-				LastUpgradeCheck = 1150;
+				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = Aaronland;
 				TargetAttributes = {
 					4ACA4EC624905FB500E9E695 = {
@@ -190,7 +189,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A533A6C24944EF30048C0A6 /* Config.xcconfig in Resources */,
 				4ACA4ED724905FB600E9E695 /* LaunchScreen.storyboard in Resources */,
 				4ACA4ED424905FB600E9E695 /* Assets.xcassets in Resources */,
 				4ACA4ED224905FB500E9E695 /* Main.storyboard in Resources */,
@@ -270,6 +268,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -330,6 +329,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
