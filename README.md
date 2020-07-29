@@ -2,7 +2,11 @@
 
 ## Important
 
-This is work in progress and documentation will follow. In the meantime you should start by reading the [bring your own pen device](https://www.aaronland.info/weblog/2020/06/16/revisiting/#pen) and [everyone gets a wunderkammer!](https://www.aaronland.info/weblog/2020/07/07/action/#wunderkammer) and [so that it may be remembered](https://www.aaronland.info/weblog/2020/07/13/experience/#remembered) blog posts.
+This is work in progress and documentation will follow. In the meantime you should start by reading these blog posts:
+
+* [bring your own pen device](https://www.aaronland.info/weblog/2020/06/16/revisiting/#pen)
+* [everyone gets a wunderkammer!](https://www.aaronland.info/weblog/2020/07/07/action/#wunderkammer)
+* [so that it may be remembered](https://www.aaronland.info/weblog/2020/07/13/experience/#remembered) blog posts.
 
 ## Config.xcconfig
 
@@ -12,6 +16,12 @@ For example:
 SLASH = /
 
 OAUTH2_CALLBACK_URL = wunderkammer:$(SLASH)/oauth2
+
+ENABLE_NFC_SCANNING = YES
+
+ENABLE_BLUETOOTH_SCANNING = YES
+
+ENABLE_BLUETOOTH_BROADCASTING = YES
 
 ENABLE_SFOMUSEUM = YES
 
