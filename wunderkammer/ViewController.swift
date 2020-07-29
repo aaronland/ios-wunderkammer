@@ -109,27 +109,13 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         super.viewDidLoad()
         
-        // why is this necessary? why don't the little show/hide buttons in
-        // Main.storyboard controls work? (20200618/thisisaaronland)
-        
-        scanning_indicator.isHidden = true // TO DO: RENAME ME TO WAITING INDICATOR OR SOMETHING
-        
         if scan_button.imageView != nil {
             scan_button.imageView!.transform = CGAffineTransform(scaleX: -1, y: 1)
         }
         
-        scan_button.isEnabled = false
-        scan_button.isHidden = true
-        
-        random_button.isEnabled = false
-        random_button.isHidden = true
-        
-        share_button.isHidden = true
-        save_button.isHidden = true
-        
         let ble_scanning = Bundle.main.object(forInfoDictionaryKey: "EnableBluetoothScanning") as? String
         self.enable_ble_scanning = ble_scanning != nil && ble_scanning == "YES"
- 
+        
         let ble_broadcasting = Bundle.main.object(forInfoDictionaryKey: "EnableBluetoothBroadcasting") as? String
         self.enable_ble_broadcasting = ble_broadcasting != nil && ble_broadcasting == "YES"
         
@@ -311,6 +297,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         // read this from config file
         self.app.logger.logLevel = .debug
         
+        self.scanning_indicator.isHidden = true
         self.updateScanButtonVisibility()
     }
     
@@ -334,7 +321,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         if let popOver = activityViewController.popoverPresentationController {
             popOver.sourceView = self.view
-            // popOver.sourceRect = self.share_button.frame
             popOver.sourceRect = self.share_button.bounds
         }
     }
@@ -364,7 +350,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 
                 self.updateButtonsVisibility()
                 self.stopSpinner()
-
+                
                 DispatchQueue.main.async {
                     
                     self.showAlert(label:"There was problem generating the URL for a random image", message: error.localizedDescription)
@@ -557,7 +543,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             optionMenu.addAction(nfc_action)
             optionMenu.addAction(ble_action)
             optionMenu.addAction(cancel_action)
-
+            
             optionMenu.popoverPresentationController?.sourceView = self.view
             
             optionMenu.popoverPresentationController?.sourceView = self.view
@@ -726,34 +712,34 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         self.ble_scanning  = true
         
         self.updateButtonsVisibility()
-
-        /*
-        if self.ble_known_peripherals.count >= 1 {
-            
-            let known = self.ble_manager.retrievePeripherals(withIdentifiers: self.ble_known_peripherals)
-            
-            // Choose peripheral? Probably, imagine a space with multiple
-            // wunderkammer devices...
-            
-            switch known.count {
-            case 0:
-                self.app.logger.debug("No known peripherals")
-            case 1:
-                
-                self.app.logger.debug("Found peripheral, reconnecting to \(known[0].identifier).")
-
-                self.stopBLEScanning()
-                self.connectBLEPeripheral(peripheral: known[0])
-                return
-                
-            default:
-                self.stopBLEScanning()
-                self.chooseBLEPeripheral(peripherals: known)
-                return
-            }
         
-        }
-        */
+        /*
+         if self.ble_known_peripherals.count >= 1 {
+         
+         let known = self.ble_manager.retrievePeripherals(withIdentifiers: self.ble_known_peripherals)
+         
+         // Choose peripheral? Probably, imagine a space with multiple
+         // wunderkammer devices...
+         
+         switch known.count {
+         case 0:
+         self.app.logger.debug("No known peripherals")
+         case 1:
+         
+         self.app.logger.debug("Found peripheral, reconnecting to \(known[0].identifier).")
+         
+         self.stopBLEScanning()
+         self.connectBLEPeripheral(peripheral: known[0])
+         return
+         
+         default:
+         self.stopBLEScanning()
+         self.chooseBLEPeripheral(peripherals: known)
+         return
+         }
+         
+         }
+         */
         
         self.ble_candidate_peripherals = [CBPeripheral]()
         
@@ -767,10 +753,10 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             self.app.logger.debug("BLE scanning timeout")
             self.stopBLEScanning()
-             
+            
             switch self.ble_candidate_peripherals.count {
             case 0:
-                            
+                
                 DispatchQueue.main.async {
                     self.showAlert(label: "There was a problem finding any tags.", message: "Unable to find any devices to connect to.")
                 }
@@ -809,7 +795,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             })
             optionMenu.addAction(action)
         }
-      
+        
         let action = UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
             return
         })
@@ -820,7 +806,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         optionMenu.popoverPresentationController?.sourceRect = self.scan_button.bounds
         optionMenu.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.left
         
-        // optionMenu.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 50, width: 1.0, height: 1.0)
         self.present(optionMenu, animated: true, completion: nil)
         return
     }
@@ -992,7 +977,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             
             return
         }
-                
+        
         if let services = peripheral.services as [CBService]?{
             
             for service in services{
@@ -1052,7 +1037,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             self.app.logger.warning("Lost connection to \(s.uuid)")
         }
         
-        // This is probably not as subtle as it should be
+        // This is probably not as sophisticated a check as it should be
         
         self.disconnectBLEPeripheral()
         
@@ -1138,7 +1123,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.app.logger.debug("NFC reader session is ended")
         self.nfc_scanning = false
-
+        
         // Check the invalidation reason from the returned error.
         if let readerError = error as? NFCReaderError {
             // Show an alert when the invalidation reason is not because of a
@@ -1280,16 +1265,16 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         if possible_urls.count == 0 {
-                        
+            
             if self.ble_listening {
-     
+                
                 self.app.logger.debug("Disconnect BLE peripheral")
                 self.disconnectBLEPeripheral()
                 
                 DispatchQueue.main.async {
                     self.showAlert(label:"Failed to read tag, no possible URLs", message:"Unrecognized tag. Disconnecting Bluetooth connection.")
                 }
-
+                
             } else {
                 
                 DispatchQueue.main.async {
@@ -1354,10 +1339,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.app.logger.debug("Fetch OEmbed URL \(url.absoluteString)")
         
-        DispatchQueue.main.async {
-            self.startSpinner()
-        }
-        
         DispatchQueue.global().async { [weak self] in
             
             let result = current_collection.GetOEmbed(url: url)
@@ -1368,9 +1349,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 self?.random_polling = false
                 
                 self?.updateButtonsVisibility()
-                self?.stopSpinner()
-                
-                // self?.resetCurrent()
                 
                 DispatchQueue.main.async {
                     self?.showAlert(label:"Unable to load OEmbed information", message: error.localizedDescription)
@@ -1432,8 +1410,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 
                 self?.random_polling = false
                 self?.updateButtonsVisibility()
-                self?.stopSpinner()
-
+                
                 DispatchQueue.main.async {
                     self?.showAlert(label:"Unable to retrieve object image", message: error.localizedDescription)
                 }
@@ -1445,7 +1422,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 
                 self?.random_polling = false
                 self?.updateButtonsVisibility()
-                self?.stopSpinner()
                 
                 DispatchQueue.main.async {
                     self?.showAlert(label:"Unable to load object image", message: "")
@@ -1470,12 +1446,11 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 
                 self?.scanned_image.image = resized
                 self?.scanned_image.isHidden = false
-
+                
                 // self?.scanned_image.enableZoom()
                 
                 self?.random_polling = false
                 self?.updateButtonsVisibility()
-                self?.stopSpinner()
             }
         }
     }
@@ -1534,6 +1509,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         
         self.updateShareButtonVisibility()
         self.updateSaveButtonVisibility()
+        
+        self.updatePollingIndicator()
     }
     
     func updateScanButtonVisibility() {
@@ -1581,12 +1558,12 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         DispatchQueue.main.async {
             
             self.scan_button.isEnabled = true
-                            
+            
             if self.ble_scanning || self.ble_listening || self.nfc_scanning {
-                    self.scan_button.tintColor = .red
-                } else {
-                    self.scan_button.tintColor = .systemBlue
-                }
+                self.scan_button.tintColor = .red
+            } else {
+                self.scan_button.tintColor = .systemBlue
+            }
         }
         
         return
@@ -1751,6 +1728,15 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             }
         }
         
+    }
+    
+    func updatePollingIndicator() {
+        
+        if self.random_polling {
+            self.scanning_indicator.isHidden = false
+        } else {
+            self.scanning_indicator.isHidden = true
+        }
     }
     
     // These are poorly named and are really "waiting for an image to load"
