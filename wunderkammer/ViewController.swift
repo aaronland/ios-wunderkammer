@@ -297,7 +297,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         // read this from config file
         self.app.logger.logLevel = .debug
         
-        self.scanning_indicator.isHidden = true
+        // self.scanning_indicator.isHidden = true
         self.updateScanButtonVisibility()
     }
     
@@ -675,7 +675,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
         }
         
         self.app.logger.debug("Starting NFC session")
-        
+        self.clear()
         
         session = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
         session?.alertMessage = "Hold your iPhone near the item to learn more about it."
@@ -699,6 +699,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
             return
         }
         
+        self.clear()
         // Needs an NFC style popover dialog with a cancel button
         
         self.startBLEScanning()
@@ -1732,10 +1733,12 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     
     func updatePollingIndicator() {
         
-        if self.random_polling {
-            self.scanning_indicator.isHidden = false
-        } else {
-            self.scanning_indicator.isHidden = true
+        DispatchQueue.main.async {
+            if self.random_polling || self.ble_scanning {
+                self.scanning_indicator.isHidden = false
+            } else {
+                self.scanning_indicator.isHidden = true
+            }
         }
     }
     
