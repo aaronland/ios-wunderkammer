@@ -87,7 +87,6 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     var broadcasting = false
     
     var nfc_scanning = false
-    
     var random_polling = false
     
     @IBOutlet weak var scan_button: UIButton!
