@@ -6,7 +6,8 @@ This is work in progress and documentation will follow. In the meantime you shou
 
 * [bring your own pen device](https://www.aaronland.info/weblog/2020/06/16/revisiting/#pen)
 * [everyone gets a wunderkammer!](https://www.aaronland.info/weblog/2020/07/07/action/#wunderkammer)
-* [so that it may be remembered](https://www.aaronland.info/weblog/2020/07/13/experience/#remembered) blog posts.
+* [so that it may be remembered](https://www.aaronland.info/weblog/2020/07/13/experience/#remembered)
+* [to good effect](https://www.aaronland.info/weblog/2020/07/30/broadcast/#effect)
 
 ## Config.xcconfig
 
