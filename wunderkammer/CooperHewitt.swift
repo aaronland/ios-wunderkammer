@@ -199,6 +199,8 @@ public class CooperHewittCollection: Collection {
                 credentials = creds
             }
             
+            var cancel = false
+            
             let api = CooperHewittAPI(access_token: credentials!.oauthToken)
             
             let method = "cooperhewitt.objects.getRandom"
@@ -206,7 +208,12 @@ public class CooperHewittCollection: Collection {
             params["has_image"] = "1"
             
             func api_completion(api_result: Result<CooperHewittAPIResponse, Error>) {
-                                
+                    
+                if cancel {
+                    print("CANCELED")
+                    return
+                }
+                
                 switch api_result {
                 case .failure(let error):
                     completion(.failure(error))
@@ -241,6 +248,39 @@ public class CooperHewittCollection: Collection {
                 }
                 
             }
+            
+            
+             
+             // To do: Display a popover with a cancel button during the
+             // OAuth2 dance (20200817/thisisaaronland)
+             
+             // Investigate (very possibly overkill):
+             // https://github.com/slackhq/PanModal
+             // https://github.com/martinnormark/HalfModalPresentationController
+             
+             // https://stackoverflow.com/questions/52197588/how-to-present-partial-height-modal-view-controller-from-bottom-to-top
+             
+             let alertController = UIAlertController(title: nil, message: "Alert message.", preferredStyle: .actionSheet)
+
+             let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: { (alert: UIAlertAction!) -> Void in
+                cancel = true
+               })
+             
+             alertController.addAction(cancelAction)
+               
+               if let popoverController = alertController.popoverPresentationController {
+                    // popoverController.barButtonItem = sender
+               }
+
+            // https://stackoverflow.com/questions/38144019/how-to-create-uialertcontroller-in-global-swift
+               // self.present(alertController, animated: true, completion: nil)
+             
+            if let controller = UIApplication.shared.keyWindow?.rootViewController?.presentedViewController {
+                    controller.present(alertController, animated: true, completion: nil)
+                }
+                else{
+                    UIApplication.shared.delegate?.window!!.rootViewController?.present(alertController, animated: true, completion: nil)
+                }
             
                 api.ExecuteMethod(method: method, params: params, completion:api_completion)
         }
