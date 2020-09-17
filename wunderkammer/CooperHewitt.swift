@@ -6,6 +6,12 @@
 //  Copyright © 2020 Aaronland. All rights reserved.
 //
 
+// This code will no longer work because the cooperhewitt.objects.getRandom
+// method has been disabled. It is left here (for now) for historical purposes
+// (20200916/straup)
+
+// https://www.aaronland.info/weblog/2020/09/08/coattails/#purpose
+
 import Foundation
 import CoreNFC
 import UIKit
@@ -92,6 +98,10 @@ public class CooperHewittCollection: Collection {
     var oauth2_wrapper: OAuth2Wrapper
     
     public init?(oauth2_wrapper: OAuth2Wrapper) {
+        
+        // see above
+        return nil
+        
         self.oauth2_wrapper = oauth2_wrapper
     }
     
