@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A29C538251A5CA900AC3469 /* Wunderkammer in Frameworks */ = {isa = PBXBuildFile; productRef = 4A29C537251A5CA900AC3469 /* Wunderkammer */; };
 		4A4D15692497D8F100622E86 /* CooperHewittAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 4A4D15682497D8F100622E86 /* CooperHewittAPI */; };
 		4A533A6C24944EF30048C0A6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4A533A6B24944EF30048C0A6 /* Config.xcconfig */; };
 		4A5424D724ABD22D00911252 /* URITemplate in Frameworks */ = {isa = PBXBuildFile; productRef = 4A5424D624ABD22D00911252 /* URITemplate */; };
@@ -65,6 +66,7 @@
 			files = (
 				4AAF05D62496765F006BE255 /* Logging in Frameworks */,
 				4ADC5A6C24A51082005B6360 /* OAuth2Wrapper in Frameworks */,
+				4A29C538251A5CA900AC3469 /* Wunderkammer in Frameworks */,
 				4AAF05DD2496A9FA006BE255 /* FMDB in Frameworks */,
 				4A4D15692497D8F100622E86 /* CooperHewittAPI in Frameworks */,
 				4A5424D724ABD22D00911252 /* URITemplate in Frameworks */,
@@ -140,6 +142,7 @@
 				4A4D15682497D8F100622E86 /* CooperHewittAPI */,
 				4ADC5A6B24A51082005B6360 /* OAuth2Wrapper */,
 				4A5424D624ABD22D00911252 /* URITemplate */,
+				4A29C537251A5CA900AC3469 /* Wunderkammer */,
 			);
 			productName = shoebox;
 			productReference = 4ACA4EC724905FB500E9E695 /* wunderkammer.app */;
@@ -175,6 +178,7 @@
 				4A4D15672497D8F100622E86 /* XCRemoteSwiftPackageReference "swift-cooperhewitt-api" */,
 				4ADC5A6A24A51082005B6360 /* XCRemoteSwiftPackageReference "swift-oauth2-wrapper" */,
 				4A5424D524ABD22D00911252 /* XCRemoteSwiftPackageReference "URITemplate" */,
+				4A29C536251A5CA900AC3469 /* XCRemoteSwiftPackageReference "swift-wunderkammer" */,
 			);
 			productRefGroup = 4ACA4EC824905FB500E9E695 /* Products */;
 			projectDirPath = "";
@@ -428,6 +432,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4A29C536251A5CA900AC3469 /* XCRemoteSwiftPackageReference "swift-wunderkammer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aaronland/swift-wunderkammer";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		4A4D15672497D8F100622E86 /* XCRemoteSwiftPackageReference "swift-cooperhewitt-api" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/aaronland/swift-cooperhewitt-api";
@@ -471,6 +483,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4A29C537251A5CA900AC3469 /* Wunderkammer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4A29C536251A5CA900AC3469 /* XCRemoteSwiftPackageReference "swift-wunderkammer" */;
+			productName = Wunderkammer;
+		};
 		4A4D15682497D8F100622E86 /* CooperHewittAPI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4A4D15672497D8F100622E86 /* XCRemoteSwiftPackageReference "swift-cooperhewitt-api" */;

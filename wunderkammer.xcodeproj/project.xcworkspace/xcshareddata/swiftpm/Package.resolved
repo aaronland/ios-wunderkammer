@@ -101,6 +101,15 @@
         }
       },
       {
+        "package": "Wunderkammer",
+        "repositoryURL": "https://github.com/aaronland/swift-wunderkammer",
+        "state": {
+          "branch": "master",
+          "revision": "a5cade9355f16f902bbd8b9b2a559f150f0ff514",
+          "version": null
+        }
+      },
+      {
         "package": "Swifter",
         "repositoryURL": "https://github.com/httpswift/swifter.git",
         "state": {
